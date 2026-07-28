@@ -35,7 +35,7 @@ export default function TeamPage() {
   const isAdmin = membership?.role === "admin";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
         <SectionHeader
           title="Team members"
           description="Manage who has access to your Qlimwelt workspace."

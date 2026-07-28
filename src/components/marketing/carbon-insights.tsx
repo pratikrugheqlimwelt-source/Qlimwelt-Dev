@@ -166,7 +166,7 @@ export function CarbonFootprintSection() {
         </FadeUpStagger>
 
         <FadeUp delay={0.1}>
-          <div className="section-content-gap relative min-h-[260px] overflow-hidden border border-border bg-neutral-900">
+          <div className="section-content-gap relative min-h-[220px] overflow-hidden border border-border bg-neutral-900">
             <EditorialImage
               src="https://images.unsplash.com/photo-1542601906990-159416042fc3?auto=format&fit=crop&w=1600&q=80"
               alt="Forest aerial view representing natural carbon sinks and climate impact"
@@ -175,7 +175,7 @@ export function CarbonFootprintSection() {
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
             <div className="relative grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
               {footprintFacts.map((fact) => (
-                <div key={fact.label} className="bg-black/40 p-6 backdrop-blur-sm sm:p-8">
+                <div key={fact.label} className="bg-black/40 p-5 backdrop-blur-sm sm:p-6">
                   <p className="font-serif text-3xl font-bold tabular-nums text-brand">{fact.value}</p>
                   <p className="mt-2 text-sm font-medium text-white">{fact.label}</p>
                   <MetaLabel className="mt-2 text-white/50">{fact.sub}</MetaLabel>
@@ -219,7 +219,7 @@ export function InsightsNewsSection() {
             aria-label={`${featured.title} (opens in new tab)`}
             className="group section-content-gap block overflow-hidden border border-white/10 bg-[#0a0a0a]"
           >
-            <div className="relative min-h-[340px] overflow-hidden lg:min-h-[460px]">
+            <div className="relative min-h-[280px] overflow-hidden lg:min-h-[360px]">
               <EditorialImage
                 src={featured.image}
                 alt={featured.imageAlt}
@@ -227,7 +227,7 @@ export function InsightsNewsSection() {
                 fill
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/20" />
-              <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-12">
+              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-10">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="bg-brand px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-black">
                     {featured.category}
@@ -332,7 +332,7 @@ export function InsightsNewsSection() {
         </FadeUp>
 
         <FadeUp delay={0.2}>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="mt-8 flex flex-wrap items-center gap-4">
             <EditorialCta href="/whats-new" className="border-white/30 text-white hover:bg-white hover:text-black">
               View all insights
             </EditorialCta>

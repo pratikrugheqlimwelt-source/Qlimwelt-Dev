@@ -152,7 +152,7 @@ export function StepRow({
   active?: boolean;
 }) {
   return (
-    <div className="group relative border-b border-border py-10 last:border-b-0 sm:py-12">
+    <div className="group relative border-b border-border py-7 last:border-b-0 sm:py-8">
       {active && <div className="absolute left-0 top-0 h-full w-px bg-brand-dark" />}
       <div className="grid gap-6 pl-5 sm:grid-cols-[4rem_minmax(0,1fr)_2rem] sm:items-start sm:gap-10 sm:pl-6">
         <div>

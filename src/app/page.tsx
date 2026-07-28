@@ -47,7 +47,7 @@ function QuoteCarousel() {
   }, []);
 
   return (
-    <div className="border border-border px-6 py-14 text-center sm:px-10">
+    <div className="border border-border px-5 py-10 text-center sm:px-8">
       <MetaLabel>INSIGHT // {String(index + 1).padStart(2, "0")}</MetaLabel>
       <AnimatePresence mode="wait">
         <motion.p
@@ -88,13 +88,13 @@ export default function HomePage() {
   return (
     <MarketingLayout navVariant="home">
       {/* ── 01 HERO ── */}
-      <Section className="py-20 lg:py-24">
+      <Section className="py-14 lg:py-16">
         <SectionNumberWrap n="01" />
         <SectionContainer>
           <FadeUp>
             <StatusBar />
           </FadeUp>
-          <div className="section-content-gap grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="section-content-gap grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
             <FadeUp delay={0.1}>
               <EditorialHeadline
                 as="h1"
@@ -103,12 +103,12 @@ export default function HomePage() {
                   { text: "Before Audit.", accent: true },
                 ]}
               />
-              <AnimatedRule className="mt-8 max-w-xs" />
-              <p className="mt-8 max-w-lg text-sm leading-relaxed text-muted-foreground">
+              <AnimatedRule className="mt-6 max-w-xs" />
+              <p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground">
                 The world&apos;s first autonomous AI carbon intelligence platform for European enterprises.{" "}
                 <em className="text-foreground">500k+ emission factors.</em> Real-time Scope 1–3. Zero guesswork.
               </p>
-              <div className="mt-10 flex flex-wrap items-center gap-4">
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <EditorialCta href="#contact">Request a Demo</EditorialCta>
                 <Link
                   href="/login"
@@ -181,7 +181,7 @@ export default function HomePage() {
               ]}
             />
           </FadeUp>
-          <div className="section-content-gap grid gap-12 sm:grid-cols-2 sm:gap-16 lg:gap-24">
+          <div className="section-content-gap grid gap-8 sm:grid-cols-2 sm:gap-10 lg:gap-12">
             <FadeUp delay={0.1}>
               <MetricDark
                 index="METRIC_01"
@@ -217,7 +217,7 @@ export default function HomePage() {
               ]}
             />
           </FadeUp>
-          <FadeUpStagger className="section-content-gap grid gap-12 sm:grid-cols-3 sm:gap-8 lg:gap-12">
+          <FadeUpStagger className="section-content-gap grid gap-8 sm:grid-cols-3 sm:gap-6 lg:gap-8">
             <FadeUpItem>
               <StatColumn
                 value="3 hrs"
@@ -256,7 +256,7 @@ export default function HomePage() {
       {/* ── MISSION / VISION / VALUES ── */}
       <Section>
         <SectionContainer>
-          <div className="grid gap-12 lg:grid-cols-3 lg:gap-16">
+          <div className="grid gap-8 lg:grid-cols-3 lg:gap-10">
             {[
               { title: brand.mission.title, items: brand.mission.statements },
               { title: brand.vision.title, items: brand.vision.statements },
@@ -295,7 +295,7 @@ export default function HomePage() {
           <div className="section-content-gap divide-y divide-border">
             {platformFeatures.map((f, i) => (
               <FadeUp key={f.num} delay={i * 0.05}>
-                <div className="grid gap-4 py-10 sm:grid-cols-[4rem_minmax(0,1fr)] sm:items-start sm:gap-10">
+                <div className="grid gap-4 py-7 sm:grid-cols-[4rem_minmax(0,1fr)] sm:items-start sm:gap-8 sm:py-8">
                   <p className="font-serif text-4xl font-bold tabular-nums text-foreground/20">{f.num}</p>
                   <div className="min-w-0">
                     <h3 className="font-serif text-xl font-bold">{f.title}</h3>
@@ -311,7 +311,7 @@ export default function HomePage() {
       {/* ── AI SECTION ── */}
       <Section dark className="border-white/10">
         <SectionContainer>
-          <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
             <FadeUp>
               <MetaLabel className="text-brand">AI CARBON INTELLIGENCE</MetaLabel>
               <h2 className="section-headline-gap font-serif text-4xl font-bold text-white sm:text-5xl">
@@ -360,7 +360,7 @@ export default function HomePage() {
           <div className="section-content-gap divide-y divide-border">
             {useCases.map((uc, i) => (
               <FadeUp key={uc.tag} delay={i * 0.08}>
-                <div className="grid gap-4 py-10 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-start sm:gap-10">
+                <div className="grid gap-4 py-7 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-start sm:gap-8 sm:py-8">
                   <MetaLabel className="pt-1">{uc.tag}</MetaLabel>
                   <div className="min-w-0">
                     <h3 className="font-serif text-2xl font-bold">{uc.title}</h3>
@@ -411,7 +411,7 @@ export default function HomePage() {
               ]}
             />
           </FadeUp>
-          <div className="section-content-gap grid gap-12 sm:grid-cols-3">
+          <div className="section-content-gap grid gap-8 sm:grid-cols-3">
             {storyCards.map((card, i) => (
               <FadeUp key={card.label} delay={i * 0.1}>
                 <p className="font-serif text-5xl font-bold tabular-nums">{card.stat}</p>
@@ -421,8 +421,8 @@ export default function HomePage() {
             ))}
           </div>
           <FadeUp delay={0.2}>
-            <div className="section-content-gap border border-border p-8 lg:p-12">
-              <div className="grid items-start gap-10 lg:grid-cols-[8rem_minmax(0,1fr)] lg:items-center lg:gap-12">
+            <div className="section-content-gap border border-border p-6 lg:p-8">
+              <div className="grid items-start gap-8 lg:grid-cols-[8rem_minmax(0,1fr)] lg:items-center lg:gap-10">
                 <div className="flex h-32 w-32 shrink-0 items-center justify-center border border-border font-serif text-4xl font-bold text-brand-dark">
                   PR
                 </div>
@@ -440,9 +440,9 @@ export default function HomePage() {
       </Section>
 
       {/* ── CONTACT ── */}
-      <Section noBorder className="pb-28">
+      <Section noBorder className="pb-16">
         <SectionContainer>
-          <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
             <FadeUp>
               <SectionIntro
                 label="GET STARTED"

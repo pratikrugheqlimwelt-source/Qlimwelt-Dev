@@ -194,7 +194,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-5 lg:px-6 lg:py-6">
+        <main className="flex-1 px-4 py-4 lg:px-6 lg:py-5">
           <div className="mx-auto max-w-[1600px]">{children}</div>
         </main>
       </div>

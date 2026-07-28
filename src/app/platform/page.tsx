@@ -47,7 +47,7 @@ export default function PlatformPage() {
 
   return (
     <MarketingLayout>
-      <Section dark className="border-white/10 py-20 lg:py-24">
+      <Section dark className="border-white/10 py-14 lg:py-16">
         <SectionContainer narrow className="text-center">
           <FadeUp>
             <MetaLabel className="text-brand">PLATFORM INTELLIGENCE // AI-NATIVE</MetaLabel>
@@ -148,7 +148,7 @@ export default function PlatformPage() {
 
       <Section>
         <SectionContainer>
-          <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
             <FadeUp>
               <SectionIntro
                 label="AUTONOMOUS AGENTS"
@@ -255,7 +255,7 @@ export default function PlatformPage() {
         </SectionContainer>
       </Section>
 
-      <Section dark noBorder className="border-white/10 py-20">
+      <Section dark noBorder className="border-white/10 py-14">
         <SectionContainer narrow className="text-center">
           <FadeUp>
             <h2 className="font-serif text-3xl font-bold text-white sm:text-4xl">

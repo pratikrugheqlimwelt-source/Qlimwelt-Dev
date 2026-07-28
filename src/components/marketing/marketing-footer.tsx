@@ -5,8 +5,8 @@ import { MetaLabel } from "@/components/marketing/editorial";
 export function MarketingFooter() {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="section-container py-16">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-16">
+      <div className="section-container py-10 lg:py-12">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
           <div className="sm:col-span-2 lg:col-span-1">
             <Logo size="sm" />
             <p className="mt-6 max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -42,7 +42,7 @@ export function MarketingFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-border pt-8 sm:flex-row sm:items-center">
+        <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
           <MetaLabel>© 2026 QLIMWELT AI · BERLIN, GERMANY</MetaLabel>
           <div className="flex gap-6 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
             <a href="#" className="transition-colors hover:text-foreground">LinkedIn</a>

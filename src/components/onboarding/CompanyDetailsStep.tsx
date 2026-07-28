@@ -33,7 +33,7 @@ export function CompanyDetailsStep({ data, errors, onChange }: CompanyDetailsSte
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Company details</h2>
         <p className="mt-1 text-sm text-muted-foreground">Set up your organisation workspace.</p>

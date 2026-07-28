@@ -26,7 +26,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Reports & exports"
         description="Audit-ready reports for CSRD, GHG Protocol, and internal disclosure. All data labelled as demonstration."

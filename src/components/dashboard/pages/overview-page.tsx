@@ -32,15 +32,15 @@ export function OverviewPage() {
   const total = metrics.scope1 + metrics.scope2 + metrics.scope3;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <WelcomeCard />
       {/* Executive hero banner */}
-      <div className="dash-hero-banner p-6 lg:p-8">
+      <div className="dash-hero-banner p-5 lg:p-6">
         <div className="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA0KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-60" />
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#82D153]/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-teal-500/15 blur-3xl" />
 
-        <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="dash-pill-green"><Leaf className="h-3 w-3" />Carbon Intelligence</span>
@@ -69,7 +69,7 @@ export function OverviewPage() {
           </div>
         </div>
 
-        <div className="relative mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="relative mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             { label: "Target progress", value: `${metrics.targetProgress.toFixed(0)}%`, sub: "2030 SBT" },
             { label: "Verified data", value: `${metrics.verifiedPct.toFixed(0)}%`, sub: "Audit ready" },

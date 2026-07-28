@@ -34,7 +34,7 @@ export default function DataCollectionPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
         <CardHeader><CardTitle className="text-sm">New activity record</CardTitle></CardHeader>
         <CardContent>

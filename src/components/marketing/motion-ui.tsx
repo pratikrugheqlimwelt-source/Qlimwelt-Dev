@@ -175,7 +175,7 @@ export function InteractiveSteps({ steps }: { steps: Step[] }) {
               key={step.step}
               type="button"
               onClick={() => setActive(i)}
-              className="group relative w-full border-b border-border py-10 text-left last:border-b-0 sm:py-12"
+              className="group relative w-full border-b border-border py-7 text-left last:border-b-0 sm:py-8"
               whileTap={reduced ? undefined : { scale: 0.998 }}
             >
               {isActive && (

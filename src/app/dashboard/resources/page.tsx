@@ -22,7 +22,7 @@ export default function ResourcesPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Resources"
         description="Manage facilities, fleet vehicles, and supplier relationships across your value chain."

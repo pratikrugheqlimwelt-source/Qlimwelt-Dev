@@ -21,12 +21,12 @@ export default function LoginPage() {
   return (
     <PublicOnlyRoute>
       <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-6">
           <div className="text-center">
             <div className="flex justify-center">
               <Logo size="md" />
             </div>
-            <h1 className="mt-8 text-2xl font-semibold tracking-tight">Welcome to Qlimwelt</h1>
+            <h1 className="mt-6 text-2xl font-semibold tracking-tight">Welcome to Qlimwelt</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Understand your emissions, identify opportunities, and make confident climate decisions.
             </p>

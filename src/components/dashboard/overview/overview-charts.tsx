@@ -142,7 +142,7 @@ export function OverviewCharts() {
         <TabsTrigger value="data" className="dash-tab-trigger">Data quality</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="trends" className="mt-0 space-y-6">
+      <TabsContent value="trends" className="mt-0 space-y-4">
         <ChartCard title="Emission trend" tip="Monthly emissions with seasonal variation, MoM/YoY context, and comparison overlays." icon={TrendingUp} accent="brand">
           {/* Summary stats */}
           <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
@@ -266,7 +266,7 @@ export function OverviewCharts() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard title="Intensity trend" tip="tCO₂e per €1M revenue over the reporting year." accent="teal">
             <ResponsiveContainer width="100%" height={240}>
               <ComposedChart data={monthlyTrend}>
@@ -319,8 +319,8 @@ export function OverviewCharts() {
         </div>
       </TabsContent>
 
-      <TabsContent value="breakdown" className="mt-0 space-y-6">
-        <div className="grid gap-6 lg:grid-cols-2">
+      <TabsContent value="breakdown" className="mt-0 space-y-4">
+        <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard title="Scope comparison" tip="Scope 1 = direct; Scope 2 = purchased energy; Scope 3 = value chain." icon={PieIcon} accent="brand">
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
@@ -337,7 +337,7 @@ export function OverviewCharts() {
             </ResponsiveContainer>
           </ChartCard>
         </div>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard title="By facility" tip="Emissions allocated to each facility." accent="blue">
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={byFacility} layout="vertical">
@@ -365,8 +365,8 @@ export function OverviewCharts() {
         </div>
       </TabsContent>
 
-      <TabsContent value="analysis" className="mt-0 space-y-6">
-        <div className="grid gap-6 lg:grid-cols-2">
+      <TabsContent value="analysis" className="mt-0 space-y-4">
+        <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard title="Marginal abatement cost curve" tip="Reduction potential vs implementation cost per initiative.">
             <ResponsiveContainer width="100%" height={220}>
               <ScatterChart><CartesianGrid /><XAxis dataKey="reduction" name="tCO₂e/yr" tick={{ fontSize: 10 }} /><YAxis dataKey="cost" name="Cost €" tick={{ fontSize: 10 }} /><ZAxis dataKey="size" range={[40, 400]} /><Tooltip cursor={{ strokeDasharray: "3 3" }} /><Scatter data={macCurve} fill="#82D153" /></ScatterChart>
@@ -413,7 +413,7 @@ export function OverviewCharts() {
         </ChartCard>
       </TabsContent>
 
-      <TabsContent value="data" className="mt-0 space-y-6">
+      <TabsContent value="data" className="mt-0 space-y-4">
         <ChartCard title="Data quality heatmap" tip="Completeness and reliability score by category and month (0–100).">
           <div className="overflow-x-auto">
             <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(13, minmax(36px, 1fr))" }}>
@@ -432,7 +432,7 @@ export function OverviewCharts() {
             </div>
           </div>
         </ChartCard>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard title="Emission factor coverage" tip="Which calculation methods are used across filtered records.">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={factorCoverage}><XAxis dataKey="method" tick={{ fontSize: 9 }} /><YAxis /><Tooltip /><Bar dataKey="count" fill="#5cb832" /></BarChart>

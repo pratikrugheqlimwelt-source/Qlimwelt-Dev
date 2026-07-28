@@ -27,7 +27,7 @@ export default function DataQualityPage() {
   scores.forEach((s) => { byLabel[s.label]++; });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Data quality"
         description="Audit readiness scores across all activity records — weighted by completeness, evidence, and method quality."

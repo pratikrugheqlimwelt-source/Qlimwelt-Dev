@@ -25,7 +25,7 @@ export default function TargetsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Science-based targets"
         description="Track progress toward your SBTi-aligned reduction pathway."

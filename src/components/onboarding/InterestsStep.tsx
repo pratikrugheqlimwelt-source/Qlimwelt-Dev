@@ -23,7 +23,7 @@ export function InterestsStep({ data, errors, onChange }: InterestsStepProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Your goals with Qlimwelt</h2>
         <p className="mt-1 text-sm text-muted-foreground">Tell us what you want to achieve on the platform.</p>

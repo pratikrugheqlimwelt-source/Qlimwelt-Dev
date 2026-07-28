@@ -12,7 +12,7 @@ interface PersonalDetailsStepProps {
 
 export function PersonalDetailsStep({ data, errors, onChange }: PersonalDetailsStepProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Personal details</h2>
         <p className="mt-1 text-sm text-muted-foreground">Tell us about yourself to set up your account.</p>

@@ -23,7 +23,7 @@ import { toast } from "@/hooks/use-toast";
 
 export function OverviewTab() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div className="flex items-center gap-3 border border-amber-200/80 bg-amber-50 px-5 py-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-amber-100">
           <AlertTriangle className="h-4 w-4 text-amber-600" />
@@ -106,7 +106,7 @@ export function EmissionsTab() {
     { name: "Scope 3", value: dashboardKpis.scope3, pct: Math.round((dashboardKpis.scope3 / total) * 100) },
   ];
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-3">
         {scopes.map((s) => (
           <Card key={s.name}>
@@ -175,7 +175,7 @@ export function EmissionsTab() {
 export function SuppliersTab() {
   const riskCounts = { high: 2, medium: 2, low: 2 };
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div className="flex gap-4">
         <Badge variant="destructive">{riskCounts.high} High Risk</Badge>
         <Badge variant="warning">{riskCounts.medium} Medium Risk</Badge>

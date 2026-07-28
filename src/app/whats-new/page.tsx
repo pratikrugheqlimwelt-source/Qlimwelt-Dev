@@ -26,7 +26,7 @@ const differentiators = [
 export default function WhatsNewPage() {
   return (
     <MarketingLayout>
-      <Section dark className="border-white/10 py-20 lg:py-24">
+      <Section dark className="border-white/10 py-14 lg:py-16">
         <SectionContainer narrow className="text-center">
           <FadeUp>
             <MetaLabel className="text-brand">DIFFERENTIATION // 2026</MetaLabel>
@@ -200,7 +200,7 @@ export default function WhatsNewPage() {
         </SectionContainer>
       </Section>
 
-      <Section dark noBorder className="border-white/10 py-20">
+      <Section dark noBorder className="border-white/10 py-14">
         <SectionContainer narrow>
           <FadeUp>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">

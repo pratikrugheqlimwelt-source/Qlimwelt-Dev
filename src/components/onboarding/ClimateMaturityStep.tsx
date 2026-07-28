@@ -71,7 +71,7 @@ export function ClimateMaturityStep({ data, errors, onChange }: ClimateMaturityS
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Climate maturity</h2>
         <p className="mt-1 text-sm text-muted-foreground">Help us understand your current sustainability programme.</p>

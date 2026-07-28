@@ -29,7 +29,7 @@ export default function EmissionsPage() {
   })).filter((c) => c.emissions > 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Emissions inventory"
         description="GHG Protocol-aligned breakdown of Scope 1, 2, and 3 emissions. Click any record to inspect the calculation."

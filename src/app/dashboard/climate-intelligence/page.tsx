@@ -18,7 +18,7 @@ export default function ClimateIntelligencePage() {
   const { climateInsights } = useDashboard();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title="Climate Intelligence"
         description="AI-powered insights from your emissions data — prioritized by impact and confidence."
