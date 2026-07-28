@@ -112,9 +112,9 @@ export default function HomePage() {
                 <EditorialCta href="#contact">Request a Demo</EditorialCta>
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-2 px-2 py-4 font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+                  className="type-nav inline-flex items-center gap-2 px-2 py-4"
                 >
-                  Open Dashboard →
+                  Login for Free →
                 </Link>
               </div>
             </FadeUp>
@@ -333,7 +333,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setChatVisible(true)}
-                className="motion-safe:transition-all mt-10 border border-white/30 px-6 py-3 font-mono text-xs uppercase tracking-[0.15em] text-white hover:bg-white hover:text-black active:scale-[0.98]"
+                className="motion-safe:transition-all type-cta mt-10 border border-white/30 px-6 py-3 text-white hover:bg-white hover:text-black active:scale-[0.98]"
               >
                 Watch Carbon Chat →
               </button>
@@ -440,7 +440,7 @@ export default function HomePage() {
       </Section>
 
       {/* ── CONTACT ── */}
-      <Section noBorder className="pb-16">
+      <Section id="contact" noBorder className="pb-16">
         <SectionContainer>
           <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
             <FadeUp>
@@ -466,32 +466,32 @@ export default function HomePage() {
                 <form onSubmit={handleDemoSubmit} className="section-content-gap space-y-5">
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="firstName" className="font-mono text-[10px] uppercase tracking-wider">
+                      <Label htmlFor="firstName" className="type-label">
                         First name
                       </Label>
                       <Input id="firstName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                     </div>
                     <div>
-                      <Label htmlFor="lastName" className="font-mono text-[10px] uppercase tracking-wider">
+                      <Label htmlFor="lastName" className="type-label">
                         Last name
                       </Label>
                       <Input id="lastName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="email" className="font-mono text-[10px] uppercase tracking-wider">
+                    <Label htmlFor="email" className="type-label">
                       Email
                     </Label>
                     <Input id="email" type="email" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                   </div>
                   <div>
-                    <Label htmlFor="company" className="font-mono text-[10px] uppercase tracking-wider">
+                    <Label htmlFor="company" className="type-label">
                       Company
                     </Label>
                     <Input id="company" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                   </div>
                   <div>
-                    <Label htmlFor="message" className="font-mono text-[10px] uppercase tracking-wider">
+                    <Label htmlFor="message" className="type-label">
                       Message
                     </Label>
                     <textarea
@@ -502,11 +502,11 @@ export default function HomePage() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full border border-foreground py-4 font-mono text-xs uppercase tracking-[0.15em] transition-colors hover:bg-foreground hover:text-background"
+                    className="type-cta w-full border border-foreground py-4 transition-colors hover:bg-foreground hover:text-background"
                   >
                     Request a Demo
                   </button>
-                  <p className="text-center font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <p className="text-center type-label">
                     No spam · Response within one business day
                   </p>
                 </form>

@@ -96,13 +96,13 @@ function ScopeCard({ topic }: { topic: (typeof carbonFootprintTopics)[number] })
           {topic.examples.map((ex) => (
             <span
               key={ex}
-              className="bg-muted/60 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-muted-foreground"
+              className="bg-muted/60 px-2.5 py-1 type-label"
             >
               {ex}
             </span>
           ))}
         </div>
-        <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        <p className="mt-4 type-label">
           {topic.shareLabel}
         </p>
       </div>
@@ -125,7 +125,7 @@ function ArticleBanner({
     <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
       <EditorialImage src={image} alt={imageAlt} priority={priority} fill />
       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/10" />
-      <span className="absolute left-4 top-4 z-10 bg-black/70 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-white backdrop-blur-sm sm:left-5 sm:top-5">
+      <span className="absolute left-4 top-4 z-10 bg-black/70 px-2.5 py-1 type-label text-white backdrop-blur-sm sm:left-5 sm:top-5">
         {category}
       </span>
     </div>
@@ -229,11 +229,11 @@ export function InsightsNewsSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/20" />
               <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-10">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="bg-brand px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-black">
+                  <span className="bg-brand px-2.5 py-1 type-label text-black">
                     {featured.category}
                   </span>
-                  <span className="font-mono text-[10px] text-white/50">{featured.date}</span>
-                  <span className="flex items-center gap-1 font-mono text-[10px] text-white/50">
+                  <span className="type-label text-white/50">{featured.date}</span>
+                  <span className="flex items-center gap-1 type-label text-white/50">
                     <Clock className="h-3 w-3" />
                     {featured.readTime}
                   </span>
@@ -242,7 +242,7 @@ export function InsightsNewsSection() {
                   {featured.title}
                 </h3>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">{featured.excerpt}</p>
-                <span className="mt-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.15em] text-brand transition-colors group-hover:text-white">
+                <span className="type-label mt-6 inline-flex items-center gap-2 text-brand transition-colors group-hover:text-white">
                   Read source article
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                 </span>
@@ -266,7 +266,7 @@ export function InsightsNewsSection() {
                   category={article.category}
                 />
                 <div className="flex flex-1 flex-col p-5 sm:p-6">
-                  <div className="flex items-center gap-2 font-mono text-[10px] text-white/40">
+                  <div className="flex items-center gap-2 type-label text-white/40">
                     <span>{article.date}</span>
                     <span>·</span>
                     <span>{article.readTime}</span>
@@ -277,7 +277,7 @@ export function InsightsNewsSection() {
                   <p className="mt-2 line-clamp-3 flex-1 text-xs leading-relaxed text-white/55 sm:text-sm">
                     {article.excerpt}
                   </p>
-                  <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-white/40 group-hover:text-brand">
+                  <span className="type-label mt-4 inline-flex items-center gap-1 text-white/40 group-hover:text-brand">
                     Read source
                     <ExternalLink className="h-3 w-3" aria-hidden="true" />
                   </span>
@@ -309,10 +309,10 @@ export function InsightsNewsSection() {
                     <EditorialImage src={item.image} alt={item.imageAlt} fill />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-2 p-4">
-                      <span className="bg-brand px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-black">
+                      <span className="bg-brand px-2 py-0.5 type-label text-black">
                         {item.source}
                       </span>
-                      <span className="font-mono text-[9px] text-white/60">{item.date}</span>
+                      <span className="type-label text-white/60">{item.date}</span>
                     </div>
                   </div>
                   <div className="p-5 sm:p-6">
@@ -320,7 +320,7 @@ export function InsightsNewsSection() {
                       {item.headline}
                     </h4>
                     <p className="mt-2 text-xs leading-relaxed text-white/50 sm:text-sm">{item.summary}</p>
-                    <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-white/35 group-hover:text-brand">
+                    <span className="type-label mt-4 inline-flex items-center gap-1 text-white/35 group-hover:text-brand">
                       Open source
                       <ExternalLink className="h-3 w-3" aria-hidden="true" />
                     </span>
@@ -338,12 +338,12 @@ export function InsightsNewsSection() {
             </EditorialCta>
             <Link
               href="#contact"
-              className="font-mono text-xs uppercase tracking-[0.15em] text-white/40 transition-colors hover:text-white"
+              className="type-label text-white/40 transition-colors hover:text-white"
             >
               Subscribe to briefing →
             </Link>
           </div>
-          <p className="mt-6 font-mono text-[9px] uppercase tracking-wider text-white/25">
+          <p className="type-label mt-6 text-white/25">
             Photography via{" "}
             <ExternalResourceLink href="https://unsplash.com/license" className="underline-offset-2 hover:text-white/50 hover:underline">
               Unsplash

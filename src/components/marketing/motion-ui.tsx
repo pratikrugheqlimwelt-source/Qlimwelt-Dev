@@ -43,7 +43,7 @@ export function NavAnchor({
     <a
       href={href}
       className={cn(
-        "group relative font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground",
+        "group relative type-nav",
         className
       )}
     >
@@ -260,7 +260,7 @@ export function SegmentedControl({
               type="button"
               onClick={() => onChange(i)}
               className={cn(
-                "relative border px-4 py-2 font-mono text-[10px] uppercase tracking-wider transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand-dark",
+                "relative border px-4 py-2 type-label transition-colors outline-none focus-visible:ring-2 focus-visible:ring-brand-dark",
                 dark
                   ? isActive
                     ? "border-brand text-white"

@@ -92,7 +92,7 @@ export function SectionNumber({ n, className }: { n: string; className?: string 
 
 export function MetaLabel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <p className={cn("font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground", className)}>
+    <p className={cn("type-label", className)}>
       {children}
     </p>
   );
@@ -323,7 +323,7 @@ export function EditorialCta({
       <Link
         href={href}
         className={cn(
-          "group inline-flex items-center justify-center gap-3 border border-foreground px-8 py-4 font-mono text-xs uppercase tracking-[0.15em] transition-colors duration-300 hover:bg-foreground hover:text-background",
+          "group inline-flex items-center justify-center gap-3 border border-foreground px-8 py-4 type-cta transition-colors duration-300 hover:bg-foreground hover:text-background",
           fullWidth && "w-full",
           className
         )}

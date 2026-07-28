@@ -44,7 +44,7 @@ export function MarketingFooter() {
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
           <MetaLabel>© 2026 QLIMWELT AI · BERLIN, GERMANY</MetaLabel>
-          <div className="flex gap-6 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+          <div className="flex gap-6 type-label">
             <a href="#" className="transition-colors hover:text-foreground">LinkedIn</a>
             <a href="#" className="transition-colors hover:text-foreground">Twitter</a>
           </div>

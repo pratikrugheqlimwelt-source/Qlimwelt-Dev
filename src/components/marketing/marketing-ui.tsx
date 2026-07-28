@@ -96,7 +96,7 @@ export function ScrollingTicker({ items }: { items: string[] }) {
     <div className="overflow-hidden border-y border-border bg-muted/30 py-4">
       <div className="flex animate-marquee gap-10 whitespace-nowrap">
         {doubled.map((item, i) => (
-          <span key={i} className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span key={i} className="flex items-center gap-3 type-label">
             <span className="h-1 w-1 bg-brand-dark" />
             {item}
           </span>
@@ -123,7 +123,7 @@ export function DarkChatUI({
         </div>
         <div>
           <p className="font-serif text-base font-bold text-white">Carbon Chat</p>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-white/40">Powered by Qlimwelt AI</p>
+          <p className="type-label text-white/40">Powered by Qlimwelt AI</p>
         </div>
       </div>
       <div className="max-h-80 flex-1 space-y-3 overflow-y-auto">

@@ -51,7 +51,7 @@ export default function WhatsNewPage() {
             <a
               key={href}
               href={href}
-              className="shrink-0 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-colors hover:text-foreground"
+              className="type-nav shrink-0 transition-colors hover:text-foreground"
             >
               {label}
             </a>
@@ -74,9 +74,9 @@ export default function WhatsNewPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30">
-                  <th className="p-4 text-left font-mono text-[10px] uppercase tracking-wider">Feature</th>
-                  <th className="p-4 text-left font-mono text-[10px] uppercase tracking-wider">Legacy Tools</th>
-                  <th className="p-4 text-left font-mono text-[10px] uppercase tracking-wider text-brand-dark">Qlimwelt AI</th>
+                  <th className="type-label p-4 text-left">Feature</th>
+                  <th className="type-label p-4 text-left">Legacy Tools</th>
+                  <th className="type-label p-4 text-left text-brand-dark">Qlimwelt AI</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,7 +167,7 @@ export default function WhatsNewPage() {
           </div>
           <div className="mt-12 flex flex-wrap justify-center gap-3">
             {["99.9% uptime", "EU Only", "AES-256", "Full AI Transparency"].map((item) => (
-              <Badge key={item} variant="secondary" className="rounded-none px-4 py-2 font-mono text-[10px] uppercase tracking-wider">
+              <Badge key={item} variant="secondary" className="type-label rounded-none px-4 py-2">
                 {item}
               </Badge>
             ))}
@@ -205,7 +205,7 @@ export default function WhatsNewPage() {
           <FadeUp>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <EditorialCta href="/#contact">Request a Demo</EditorialCta>
-              <Link href="/login" className="font-mono text-xs uppercase tracking-[0.15em] text-white/50 hover:text-white">
+              <Link href="/login" className="type-nav text-white/50 hover:text-white">
                 Open Dashboard →
               </Link>
             </div>

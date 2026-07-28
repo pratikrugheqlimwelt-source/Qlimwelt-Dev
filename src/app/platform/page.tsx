@@ -70,11 +70,11 @@ export default function PlatformPage() {
             </div>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <a href="#capabilities">
-                <span className="inline-flex items-center gap-2 border border-white px-6 py-3 font-mono text-xs uppercase tracking-[0.15em] text-white transition-colors hover:bg-white hover:text-black">
+                <span className="type-cta inline-flex items-center gap-2 border border-white px-6 py-3 text-white transition-colors hover:bg-white hover:text-black">
                   Explore Features <ChevronRight className="h-4 w-4" />
                 </span>
               </a>
-              <Link href="/login" className="font-mono text-xs uppercase tracking-[0.15em] text-white/50 transition-colors hover:text-white">
+              <Link href="/login" className="type-nav text-white/50 transition-colors hover:text-white">
                 Open Dashboard →
               </Link>
             </div>
@@ -191,7 +191,7 @@ export default function PlatformPage() {
                     <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{agent.message}</p>
                     <div className="mt-4 flex items-center gap-3">
                       <Progress value={agent.progress} className="h-1 flex-1" />
-                      <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{agent.time}</span>
+                      <span className="type-label shrink-0">{agent.time}</span>
                     </div>
                   </div>
                 </FadeUp>
@@ -236,9 +236,9 @@ export default function PlatformPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/30 text-left">
-                  <th className="p-4 font-mono text-[10px] uppercase tracking-wider">Document</th>
-                  <th className="p-4 font-mono text-[10px] uppercase tracking-wider">Scope</th>
-                  <th className="p-4 font-mono text-[10px] uppercase tracking-wider">Confidence</th>
+                  <th className="type-label p-4">Document</th>
+                  <th className="type-label p-4">Scope</th>
+                  <th className="type-label p-4">Confidence</th>
                 </tr>
               </thead>
               <tbody>
@@ -263,7 +263,7 @@ export default function PlatformPage() {
             </h2>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <EditorialCta href="/#contact">Request a Demo</EditorialCta>
-              <Link href="/dashboard" className="font-mono text-xs uppercase tracking-[0.15em] text-white/50 hover:text-white">
+              <Link href="/dashboard" className="type-nav text-white/50 hover:text-white">
                 Open Dashboard →
               </Link>
             </div>

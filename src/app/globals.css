@@ -83,6 +83,15 @@
   .section-content-gap {
     @apply mt-8 lg:mt-10;
   }
+  .type-label {
+    @apply font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground;
+  }
+  .type-nav {
+    @apply font-sans text-xs font-semibold uppercase tracking-[0.08em] text-foreground/60 transition-colors hover:text-foreground;
+  }
+  .type-cta {
+    @apply font-sans text-xs font-semibold uppercase tracking-[0.08em];
+  }
 }
 
 @layer utilities {
