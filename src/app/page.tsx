@@ -77,12 +77,50 @@ function QuoteCarousel() {
 
 export default function HomePage() {
   const [chatVisible, setChatVisible] = useState(false);
+  const [demoSubmitting, setDemoSubmitting] = useState(false);
   const now = new Date();
   const timestamp = `${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}.${now.getFullYear()} // ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} UTC`;
 
-  const handleDemoSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast({ title: "Demo requested", description: "We'll respond within one business day.", variant: "success" });
+    const form = e.currentTarget;
+    setDemoSubmitting(true);
+
+    const payload = {
+      firstName: (form.elements.namedItem("firstName") as HTMLInputElement).value,
+      lastName: (form.elements.namedItem("lastName") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      company: (form.elements.namedItem("company") as HTMLInputElement).value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+    };
+
+    try {
+      const res = await fetch("/api/demo-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = (await res.json()) as { error?: string };
+
+      if (!res.ok) {
+        throw new Error(data.error ?? "Request failed");
+      }
+
+      toast({
+        title: "Demo requested",
+        description: "Thanks — we'll respond within one business day.",
+        variant: "success",
+      });
+      form.reset();
+    } catch (err) {
+      toast({
+        title: "Could not send request",
+        description: err instanceof Error ? err.message : "Please try again or email us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setDemoSubmitting(false);
+    }
   };
 
   return (
@@ -469,26 +507,26 @@ export default function HomePage() {
                       <Label htmlFor="firstName" className="type-label">
                         First name
                       </Label>
-                      <Input id="firstName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
+                      <Input id="firstName" name="firstName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                     </div>
                     <div>
                       <Label htmlFor="lastName" className="type-label">
                         Last name
                       </Label>
-                      <Input id="lastName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
+                      <Input id="lastName" name="lastName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="email" className="type-label">
                       Email
                     </Label>
-                    <Input id="email" type="email" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
+                    <Input id="email" name="email" type="email" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                   </div>
                   <div>
                     <Label htmlFor="company" className="type-label">
                       Company
                     </Label>
-                    <Input id="company" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
+                    <Input id="company" name="company" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                   </div>
                   <div>
                     <Label htmlFor="message" className="type-label">
@@ -496,15 +534,17 @@ export default function HomePage() {
                     </Label>
                     <textarea
                       id="message"
+                      name="message"
                       rows={4}
                       className="mt-2 flex w-full resize-none border-x-0 border-b border-t-0 border-input bg-transparent px-0 py-2 text-sm focus:outline-none"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="type-cta w-full border border-foreground py-4 transition-colors hover:bg-foreground hover:text-background"
+                    disabled={demoSubmitting}
+                    className="type-cta w-full border border-foreground py-4 transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Request a Demo
+                    {demoSubmitting ? "Sending…" : "Request a Demo"}
                   </button>
                   <p className="text-center type-label">
                     No spam · Response within one business day
