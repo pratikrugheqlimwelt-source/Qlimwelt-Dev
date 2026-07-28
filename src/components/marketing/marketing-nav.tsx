@@ -34,11 +34,11 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
           {isHome ? (
             <>
               {[
+                ["#carbon-footprint", "Learn"],
                 ["#platform", "Platform"],
                 ["#how-it-works", "Process"],
-                ["#use-cases", "Solutions"],
+                ["#insights", "Insights"],
                 ["#pricing", "Pricing"],
-                ["#about", "Company"],
               ].map(([href, label]) => (
                 <NavAnchor key={href} href={href}>
                   {label}

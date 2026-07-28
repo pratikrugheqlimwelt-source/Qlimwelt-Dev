@@ -1,0 +1,357 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Clock, ExternalLink, Newspaper } from "lucide-react";
+import {
+  Section,
+  SectionContainer,
+  SectionNumberWrap,
+  SectionIntro,
+  MetaLabel,
+  ThinRule,
+  FadeUp,
+  FadeUpStagger,
+  FadeUpItem,
+  EditorialCta,
+} from "@/components/marketing/editorial";
+import { ExternalResourceLink } from "@/components/marketing/external-link";
+import {
+  carbonFootprintTopics,
+  footprintFacts,
+  insightArticles,
+  industryNews,
+} from "@/data/marketing-data";
+import { cn } from "@/lib/utils";
+
+const IMAGE_FALLBACK =
+  "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80";
+
+/** Unsplash photos — native img avoids Next.js optimizer config issues on deploy */
+function EditorialImage({
+  src,
+  alt,
+  className,
+  priority,
+  fill,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  priority?: boolean;
+  /** Position image absolute inside a relative parent (for hero banners) */
+  fill?: boolean;
+}) {
+  const [resolvedSrc, setResolvedSrc] = useState(src);
+
+  const img = (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={resolvedSrc}
+      alt={alt}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+      referrerPolicy="no-referrer"
+      onError={() => {
+        if (resolvedSrc !== IMAGE_FALLBACK) setResolvedSrc(IMAGE_FALLBACK);
+      }}
+      className={cn(
+        "object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]",
+        fill ? "absolute inset-0 h-full w-full" : "h-full w-full",
+        className
+      )}
+    />
+  );
+
+  if (fill) return img;
+
+  return <div className={cn("overflow-hidden bg-neutral-900", className)}>{img}</div>;
+}
+
+function ScopeCard({ topic }: { topic: (typeof carbonFootprintTopics)[number] }) {
+  return (
+    <article className="group flex h-full flex-col overflow-hidden border border-border bg-background shadow-sm transition-shadow hover:shadow-md">
+      <div className="relative aspect-[5/4] overflow-hidden bg-neutral-900">
+        <EditorialImage src={topic.image} alt={topic.imageAlt} fill />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+          <MetaLabel className="text-white/70">{topic.tag}</MetaLabel>
+          <div className="mt-2 flex items-end justify-between gap-4">
+            <h3 className="max-w-[70%] font-serif text-xl font-bold leading-tight text-white sm:text-2xl">
+              {topic.title}
+            </h3>
+            <span
+              className="font-serif text-3xl font-bold tabular-nums sm:text-4xl"
+              style={{ color: topic.accent === "#334155" ? "#e2e8f0" : topic.accent }}
+            >
+              {topic.share}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-6 sm:p-7">
+        <p className="flex-1 text-sm leading-relaxed text-muted-foreground">{topic.description}</p>
+        <ThinRule className="my-5" />
+        <div className="flex flex-wrap gap-2">
+          {topic.examples.map((ex) => (
+            <span
+              key={ex}
+              className="bg-muted/60 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-muted-foreground"
+            >
+              {ex}
+            </span>
+          ))}
+        </div>
+        <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+          {topic.shareLabel}
+        </p>
+      </div>
+    </article>
+  );
+}
+
+function ArticleBanner({
+  image,
+  imageAlt,
+  category,
+  priority,
+}: {
+  image: string;
+  imageAlt: string;
+  category: string;
+  priority?: boolean;
+}) {
+  return (
+    <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
+      <EditorialImage src={image} alt={imageAlt} priority={priority} fill />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/10" />
+      <span className="absolute left-4 top-4 z-10 bg-black/70 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-white backdrop-blur-sm sm:left-5 sm:top-5">
+        {category}
+      </span>
+    </div>
+  );
+}
+
+export function CarbonFootprintSection() {
+  return (
+    <Section id="carbon-footprint">
+      <SectionNumberWrap n="03" />
+      <SectionContainer>
+        <FadeUp>
+          <SectionIntro
+            label="EDUCATION // GHG PROTOCOL"
+            lines={[
+              { text: "Understanding", italic: true },
+              { text: "Your Carbon Footprint." },
+            ]}
+          />
+          <p className="section-headline-gap max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            A corporate carbon footprint measures greenhouse gas emissions across three scopes defined by the{" "}
+            <ExternalResourceLink
+              href="https://ghgprotocol.org/corporate-standard"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              GHG Protocol
+            </ExternalResourceLink>
+            {" "}— the global standard used for CSRD, SBTi, and CDP reporting.
+          </p>
+        </FadeUp>
+
+        <FadeUpStagger className="section-content-gap grid gap-6 lg:grid-cols-3 lg:gap-8">
+          {carbonFootprintTopics.map((topic) => (
+            <FadeUpItem key={topic.id}>
+              <ScopeCard topic={topic} />
+            </FadeUpItem>
+          ))}
+        </FadeUpStagger>
+
+        <FadeUp delay={0.1}>
+          <div className="section-content-gap relative min-h-[260px] overflow-hidden border border-border bg-neutral-900">
+            <EditorialImage
+              src="https://images.unsplash.com/photo-1542601906990-159416042fc3?auto=format&fit=crop&w=1600&q=80"
+              alt="Forest aerial view representing natural carbon sinks and climate impact"
+              fill
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
+            <div className="relative grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+              {footprintFacts.map((fact) => (
+                <div key={fact.label} className="bg-black/40 p-6 backdrop-blur-sm sm:p-8">
+                  <p className="font-serif text-3xl font-bold tabular-nums text-brand">{fact.value}</p>
+                  <p className="mt-2 text-sm font-medium text-white">{fact.label}</p>
+                  <MetaLabel className="mt-2 text-white/50">{fact.sub}</MetaLabel>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeUp>
+      </SectionContainer>
+    </Section>
+  );
+}
+
+export function InsightsNewsSection() {
+  const featured = insightArticles.find((a) => a.featured)!;
+  const rest = insightArticles.filter((a) => !a.featured);
+
+  return (
+    <Section id="insights" dark className="border-white/10">
+      <SectionNumberWrap n="05" align="left" className="text-white/[0.04]" />
+      <SectionContainer>
+        <FadeUp>
+          <SectionIntro
+            dark
+            label="INSIGHTS // BLOG & NEWS"
+            lines={[
+              { text: "Carbon Intelligence", italic: true },
+              { text: "Briefing Room." },
+            ]}
+          />
+          <p className="section-headline-gap max-w-2xl text-sm leading-relaxed text-white/50">
+            Regulatory updates, methodology guides, and reduction strategies for sustainability teams navigating
+            CSRD and decarbonisation.
+          </p>
+        </FadeUp>
+
+        {/* Featured hero with full banner */}
+        <FadeUp delay={0.05}>
+          <ExternalResourceLink
+            href={featured.externalUrl}
+            aria-label={`${featured.title} (opens in new tab)`}
+            className="group section-content-gap block overflow-hidden border border-white/10 bg-[#0a0a0a]"
+          >
+            <div className="relative min-h-[340px] overflow-hidden lg:min-h-[460px]">
+              <EditorialImage
+                src={featured.image}
+                alt={featured.imageAlt}
+                priority
+                fill
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/20" />
+              <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-12">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="bg-brand px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-black">
+                    {featured.category}
+                  </span>
+                  <span className="font-mono text-[10px] text-white/50">{featured.date}</span>
+                  <span className="flex items-center gap-1 font-mono text-[10px] text-white/50">
+                    <Clock className="h-3 w-3" />
+                    {featured.readTime}
+                  </span>
+                </div>
+                <h3 className="mt-5 max-w-3xl font-serif text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+                  {featured.title}
+                </h3>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">{featured.excerpt}</p>
+                <span className="mt-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.15em] text-brand transition-colors group-hover:text-white">
+                  Read source article
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+              </div>
+            </div>
+          </ExternalResourceLink>
+        </FadeUp>
+
+        {/* Article grid — each with banner */}
+        <FadeUpStagger className="section-content-gap grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {rest.map((article) => (
+            <FadeUpItem key={article.slug}>
+              <ExternalResourceLink
+                href={article.externalUrl}
+                aria-label={`${article.title} (opens in new tab)`}
+                className="group flex h-full flex-col overflow-hidden border border-white/10 bg-[#0a0a0a] transition-colors hover:border-white/20"
+              >
+                <ArticleBanner
+                  image={article.image}
+                  imageAlt={article.imageAlt}
+                  category={article.category}
+                />
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <div className="flex items-center gap-2 font-mono text-[10px] text-white/40">
+                    <span>{article.date}</span>
+                    <span>·</span>
+                    <span>{article.readTime}</span>
+                  </div>
+                  <h4 className="mt-3 font-serif text-lg font-bold leading-snug text-white group-hover:text-brand">
+                    {article.title}
+                  </h4>
+                  <p className="mt-2 line-clamp-3 flex-1 text-xs leading-relaxed text-white/55 sm:text-sm">
+                    {article.excerpt}
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-white/40 group-hover:text-brand">
+                    Read source
+                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  </span>
+                </div>
+              </ExternalResourceLink>
+            </FadeUpItem>
+          ))}
+        </FadeUpStagger>
+
+        {/* Industry pulse — banner on every item */}
+        <FadeUp delay={0.15}>
+          <div className="section-content-gap">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Newspaper className="h-5 w-5 text-brand" />
+                <MetaLabel className="text-white/40">INDUSTRY PULSE // LIVE FEED</MetaLabel>
+              </div>
+              <MetaLabel className="text-white/25">UPDATED WEEKLY</MetaLabel>
+            </div>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2">
+              {industryNews.map((item) => (
+                <ExternalResourceLink
+                  key={item.headline}
+                  href={item.externalUrl}
+                  aria-label={`${item.headline} (opens in new tab)`}
+                  className="group block overflow-hidden border border-white/10 bg-[#0a0a0a] transition-colors hover:border-white/20"
+                >
+                  <div className="relative aspect-[16/9] overflow-hidden bg-neutral-900">
+                    <EditorialImage src={item.image} alt={item.imageAlt} fill />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-2 p-4">
+                      <span className="bg-brand px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-black">
+                        {item.source}
+                      </span>
+                      <span className="font-mono text-[9px] text-white/60">{item.date}</span>
+                    </div>
+                  </div>
+                  <div className="p-5 sm:p-6">
+                    <h4 className="font-serif text-base font-bold leading-snug text-white group-hover:text-brand sm:text-lg">
+                      {item.headline}
+                    </h4>
+                    <p className="mt-2 text-xs leading-relaxed text-white/50 sm:text-sm">{item.summary}</p>
+                    <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-white/35 group-hover:text-brand">
+                      Open source
+                      <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                    </span>
+                  </div>
+                </ExternalResourceLink>
+              ))}
+            </div>
+          </div>
+        </FadeUp>
+
+        <FadeUp delay={0.2}>
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <EditorialCta href="/whats-new" className="border-white/30 text-white hover:bg-white hover:text-black">
+              View all insights
+            </EditorialCta>
+            <Link
+              href="#contact"
+              className="font-mono text-xs uppercase tracking-[0.15em] text-white/40 transition-colors hover:text-white"
+            >
+              Subscribe to briefing →
+            </Link>
+          </div>
+          <p className="mt-6 font-mono text-[9px] uppercase tracking-wider text-white/25">
+            Photography via{" "}
+            <ExternalResourceLink href="https://unsplash.com/license" className="underline-offset-2 hover:text-white/50 hover:underline">
+              Unsplash
+            </ExternalResourceLink>
+            {" "}— free to use under the Unsplash License
+          </p>
+        </FadeUp>
+      </SectionContainer>
+    </Section>
+  );
+}

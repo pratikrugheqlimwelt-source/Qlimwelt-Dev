@@ -24,6 +24,7 @@ import {
   SectionIntro,
 } from "@/components/marketing/editorial";
 import { AnimatedRule, PricingSelector, InteractiveSteps } from "@/components/marketing/motion-ui";
+import { CarbonFootprintSection, InsightsNewsSection } from "@/components/marketing/carbon-insights";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
@@ -164,6 +165,9 @@ export default function HomePage() {
         </SectionContainer>
       </Section>
 
+      {/* ── 03 CARBON FOOTPRINTING ── */}
+      <CarbonFootprintSection />
+
       {/* ── 04 DARK METRICS ── */}
       <Section dark>
         <SectionNumberWrap n="04" align="left" className="text-white/[0.04]" />
@@ -197,6 +201,9 @@ export default function HomePage() {
           </div>
         </SectionContainer>
       </Section>
+
+      {/* ── 05 INSIGHTS & NEWS ── */}
+      <InsightsNewsSection />
 
       {/* ── 07 SPEED ── */}
       <Section>

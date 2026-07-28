@@ -201,3 +201,148 @@ export const carbonChatDemo = [
   { role: "user" as const, content: "Draft a supplier outreach email to ChemBase AG requesting primary emissions data." },
   { role: "assistant" as const, content: "Subject: Request for Primary Emissions Data — CSRD Compliance\n\nDear ChemBase AG Sustainability Team,\n\nAs part of our CSRD reporting obligations under ESRS E1, we are requesting primary greenhouse gas emissions data for the goods and services supplied to Nordic Manufacturing Group during FY2024..." },
 ];
+
+export const carbonFootprintTopics = [
+  {
+    id: "scope-1",
+    tag: "SCOPE 1 // DIRECT",
+    title: "Direct emissions you control",
+    description:
+      "Combustion in boilers, company vehicles, refrigerant leaks, and on-site industrial processes. These are emissions from sources your organisation owns or operates.",
+    share: "9%",
+    shareLabel: "Typical mid-market share",
+    accent: "#334155",
+    examples: ["Fleet diesel & petrol", "Natural gas heating", "F-gas refrigerants", "Process & fugitive emissions"],
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Industrial facility with emissions monitoring equipment",
+  },
+  {
+    id: "scope-2",
+    tag: "SCOPE 2 // ENERGY",
+    title: "Purchased electricity & heat",
+    description:
+      "Indirect emissions from electricity, steam, heating, and cooling bought for your operations. Location-based and market-based methods both matter for CSRD.",
+    share: "16%",
+    shareLabel: "Typical mid-market share",
+    accent: "#22c55e",
+    examples: ["Grid electricity", "District heating", "Renewable PPAs", "Steam for production"],
+    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Solar panels generating renewable electricity",
+  },
+  {
+    id: "scope-3",
+    tag: "SCOPE 3 // VALUE CHAIN",
+    title: "Everything upstream & downstream",
+    description:
+      "The full value chain — purchased goods, freight, business travel, employee commuting, product use, and end-of-life. Often 60–90% of a company's total footprint.",
+    share: "75%",
+    shareLabel: "Typical mid-market share",
+    accent: "#059669",
+    examples: ["Purchased materials", "Upstream logistics", "Business travel", "Product lifecycle"],
+    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Global logistics and freight containers at port",
+  },
+];
+
+export const footprintFacts = [
+  { value: "50+", label: "GHG Protocol categories mapped", sub: "Scope 3 Cat. 1–15" },
+  { value: "500k+", label: "Emission factors in library", sub: "DEFRA · EPA · ecoinvent" },
+  { value: "1.5°C", label: "SBTi-aligned pathways", sub: "Science-based targets" },
+  { value: "ESRS E1", label: "CSRD climate disclosure", sub: "Audit-ready narratives" },
+];
+
+export const insightArticles = [
+  {
+    slug: "csrd-2026-mid-market",
+    category: "REGULATION",
+    date: "28 Jul 2026",
+    title: "CSRD 2026: What mid-market manufacturers must prepare now",
+    excerpt:
+      "Wave 2 companies face ESRS E1 disclosure in 2026. Here is a practical 90-day readiness plan — from double materiality to Scope 3 data gaps.",
+    readTime: "7 min read",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1600&q=80",
+    imageAlt: "Sustainability team reviewing CSRD compliance documents",
+    externalUrl:
+      "https://finance.ec.europa.eu/capital-markets-union-and-financial-markets/company-reporting-and-auditing/company-reporting/corporate-sustainability-reporting_en",
+  },
+  {
+    slug: "scope-3-primary-data",
+    category: "METHODOLOGY",
+    date: "21 Jul 2026",
+    title: "Moving from spend-based to primary supplier data",
+    excerpt:
+      "Spend-based estimates get you started, but auditors and investors expect activity-based factors. A step-by-step migration playbook for Category 1.",
+    readTime: "5 min read",
+    featured: false,
+    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Supply chain cargo containers representing Scope 3 emissions",
+    externalUrl: "https://ghgprotocol.org/standards/scope-3-standard",
+  },
+  {
+    slug: "cbam-eu-manufacturers",
+    category: "POLICY",
+    date: "14 Jul 2026",
+    title: "CBAM and carbon pricing: impact on EU importers",
+    excerpt:
+      "The Carbon Border Adjustment Mechanism changes cost structures for steel, aluminium, and cement supply chains. How to model exposure in your footprint.",
+    readTime: "6 min read",
+    featured: false,
+    image: "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Industrial manufacturing plant at dusk",
+    externalUrl: "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
+  },
+  {
+    slug: "renewable-ppa-roi",
+    category: "REDUCTION",
+    date: "7 Jul 2026",
+    title: "Renewable PPAs: the highest-ROI Scope 2 lever in 2026",
+    excerpt:
+      "Analysis of 140 European mid-market sites shows PPAs deliver 2.4-year payback on average — with immediate CSRD readiness gains.",
+    readTime: "4 min read",
+    featured: false,
+    image: "https://images.unsplash.com/photo-1532601224470-5fc387274683?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Wind turbines at sunset — renewable energy for Scope 2 reduction",
+    externalUrl: "https://sciencebasedtargets.org/",
+  },
+];
+
+export const industryNews = [
+  {
+    source: "EU COMMISSION",
+    date: "Jul 2026",
+    headline: "ESRS Set 1 reporting standards enter mandatory phase for large undertakings",
+    summary: "First sustainability statements under CSRD must include ESRS E1 climate metrics with limited assurance.",
+    image: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=600&q=80",
+    imageAlt: "European parliament building representing EU regulation",
+    externalUrl:
+      "https://www.efrag.org/en/sustainability-reporting/esrs",
+  },
+  {
+    source: "SBTi",
+    date: "Jun 2026",
+    headline: "Near-term target validation timelines reduced to 8 weeks for SMEs",
+    summary: "Streamlined pathway for companies under 500 employees submitting 1.5°C-aligned targets.",
+    image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=600&q=80",
+    imageAlt: "Sunlight through forest canopy — science-based climate targets",
+    externalUrl: "https://sciencebasedtargets.org/companies-taking-action",
+  },
+  {
+    source: "GHG PROTOCOL",
+    date: "May 2026",
+    headline: "Scope 3 guidance update: improved Category 11 use-phase calculations",
+    summary: "New factors for product energy consumption over lifetime — relevant for equipment manufacturers.",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80",
+    imageAlt: "Data analytics dashboard for emissions tracking",
+    externalUrl: "https://ghgprotocol.org/standards/scope-3-standard",
+  },
+  {
+    source: "TÜV SÜD",
+    date: "Apr 2026",
+    headline: "Limited assurance expectations for FY2025 CSRD first reports published",
+    summary: "Auditors outline minimum evidence requirements for emission factor selection and data lineage.",
+    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=600&q=80",
+    imageAlt: "Professional reviewing audit and compliance paperwork",
+    externalUrl: "https://www.tuvsud.com/en/topics/sustainability",
+  },
+];

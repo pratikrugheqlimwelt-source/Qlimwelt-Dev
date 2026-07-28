@@ -17,8 +17,9 @@ export function MarketingFooter() {
             <MetaLabel>Platform</MetaLabel>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               <li><Link href="/platform" className="transition-colors hover:text-foreground">Features</Link></li>
+              <li><Link href="/#carbon-footprint" className="transition-colors hover:text-foreground">Carbon Footprint Guide</Link></li>
+              <li><Link href="/#insights" className="transition-colors hover:text-foreground">Insights & News</Link></li>
               <li><Link href="/#pricing" className="transition-colors hover:text-foreground">Pricing</Link></li>
-              <li><Link href="/whats-new" className="transition-colors hover:text-foreground">What&apos;s New</Link></li>
               <li><Link href="/login" className="transition-colors hover:text-foreground">Dashboard</Link></li>
             </ul>
           </div>
@@ -26,7 +27,7 @@ export function MarketingFooter() {
             <MetaLabel>Company</MetaLabel>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               <li><Link href="/#about" className="transition-colors hover:text-foreground">About</Link></li>
-              <li><a href="#" className="transition-colors hover:text-foreground">Blog</a></li>
+              <li><Link href="/#insights" className="transition-colors hover:text-foreground">Blog</Link></li>
               <li><a href="#" className="transition-colors hover:text-foreground">Careers</a></li>
               <li><a href="#" className="transition-colors hover:text-foreground">Press</a></li>
             </ul>
