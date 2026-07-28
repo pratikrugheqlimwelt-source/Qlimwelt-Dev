@@ -89,12 +89,12 @@ export default function HomePage() {
     <MarketingLayout navVariant="home">
       {/* ── 01 HERO ── */}
       <Section className="py-14 lg:py-16">
-        <SectionNumberWrap n="01" />
+        <SectionNumberWrap n="01" className="text-foreground/[0.025] lg:text-foreground/[0.03]" />
         <SectionContainer>
           <FadeUp>
             <StatusBar />
           </FadeUp>
-          <div className="section-content-gap grid items-center gap-8 lg:grid-cols-2 lg:gap-10">
+          <div className="section-content-gap grid items-center gap-8 lg:grid-cols-2 lg:items-start lg:gap-10">
             <FadeUp delay={0.1}>
               <EditorialHeadline
                 as="h1"
@@ -118,7 +118,7 @@ export default function HomePage() {
                 </Link>
               </div>
             </FadeUp>
-            <FadeUp delay={0.2} className="w-full">
+            <FadeUp delay={0.2} className="w-full min-w-0 lg:pt-2">
               <EmissionsNetworkViz />
             </FadeUp>
           </div>

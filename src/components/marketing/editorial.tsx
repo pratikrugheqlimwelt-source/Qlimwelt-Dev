@@ -223,72 +223,7 @@ export function StatColumn({
   );
 }
 
-/** Emissions network visualization — reference-style technical graphic */
-export function EmissionsNetworkViz() {
-  const reduced = useReducedMotion();
-  const nodes = [
-    { id: "SCOPE_1", x: 18, y: 22, alert: false },
-    { id: "SCOPE_2", x: 48, y: 15, alert: true, sub: "ANOMALY" },
-    { id: "SCOPE_3", x: 78, y: 28, alert: false },
-    { id: "SUPPLIER_A", x: 32, y: 55, alert: false },
-    { id: "SUPPLIER_B", x: 62, y: 62, alert: false },
-    { id: "CSRD", x: 50, y: 82, alert: false, highlight: true },
-  ];
-
-  return (
-    <div className="relative mx-auto aspect-square w-full max-w-md lg:max-w-lg lg:ml-auto">
-      <div className="absolute inset-0 dot-grid opacity-40" />
-      <div className="absolute left-0 top-0 h-8 w-8 border-l border-t border-border" />
-      <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-border" />
-      <div className="absolute bottom-0 left-0 h-8 w-8 border-b border-l border-border" />
-      <div className="absolute bottom-0 right-0 h-8 w-8 border-b border-r border-border" />
-      <svg viewBox="0 0 100 100" className="absolute inset-8 h-[calc(100%-4rem)] w-[calc(100%-4rem)]">
-        <line x1="18" y1="22" x2="48" y2="15" stroke="currentColor" strokeWidth="0.3" className="text-border" />
-        <line x1="48" y1="15" x2="78" y2="28" stroke="currentColor" strokeWidth="0.3" className="text-border" />
-        <line x1="18" y1="22" x2="32" y2="55" stroke="currentColor" strokeWidth="0.3" className="text-border" />
-        <line x1="48" y1="15" x2="62" y2="62" stroke="currentColor" strokeWidth="0.3" className="text-border" />
-        <line x1="32" y1="55" x2="50" y2="82" stroke="currentColor" strokeWidth="0.3" className="text-border" />
-        <line x1="62" y1="62" x2="50" y2="82" stroke="currentColor" strokeWidth="0.3" className="text-border" />
-        {nodes.map((n) => (
-          <g key={n.id}>
-            {n.alert && !reduced ? (
-              <motion.circle
-                cx={n.x}
-                cy={n.y}
-                r={2.2}
-                fill="#ef4444"
-                stroke="#ef4444"
-                strokeWidth="0.5"
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-              />
-            ) : (
-              <circle
-                cx={n.x}
-                cy={n.y}
-                r={n.alert || n.highlight ? 2.2 : 1.5}
-                fill={n.alert ? "#ef4444" : n.highlight ? "hsl(98 70% 45%)" : "none"}
-                stroke={n.alert ? "#ef4444" : n.highlight ? "hsl(98 70% 45%)" : "currentColor"}
-                strokeWidth="0.5"
-                className={!n.alert && !n.highlight ? "text-foreground/30" : ""}
-              />
-            )}
-          </g>
-        ))}
-      </svg>
-      <div className="absolute inset-x-8 bottom-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-wrap gap-x-4 gap-y-1">
-          {nodes.filter((n) => n.alert).map((n) => (
-            <MetaLabel key={n.id} className="text-red-500">
-              {n.id}{" // "}{n.sub}
-            </MetaLabel>
-          ))}
-        </div>
-        <MetaLabel className="shrink-0 text-muted-foreground/60">FIG. 01 — EMISSIONS MESH</MetaLabel>
-      </div>
-    </div>
-  );
-}
+export { EmissionsNetworkViz } from "@/components/marketing/carbon-footprint-viz";
 
 export function FadeUp({
   children,
