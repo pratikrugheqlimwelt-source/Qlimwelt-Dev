@@ -184,20 +184,20 @@ export default function DataCollectionPage() {
   };
 
   return (
-    <div className="relative space-y-6">
+    <div className="relative space-y-4">
       <PageHeader
         title="Data collection"
         description="Pick an activity type, confirm the factor, then enter measured or estimated values — calculations update live."
         tip="tCO₂e = activity value × emission factor ÷ 1000. Live preview updates as you type; save adds the record to inventory (and optional evidence). Facilities, vehicles, and suppliers under Resources appear as linked inputs."
       />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Activity type cards */}
-        <section className="dash-card space-y-4 p-5 sm:p-6">
+        <section className="dash-card space-y-3 p-4 sm:p-5">
           <div>
             <p className="dash-label">Activity type</p>
-            <h3 className="mt-1 text-base font-semibold tracking-tight">What are you recording?</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h3 className="mt-0.5 text-sm font-semibold tracking-tight">What are you recording?</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
               Choose a template — scope, category, unit, and factor fill in automatically.
             </p>
           </div>
@@ -208,13 +208,13 @@ export default function DataCollectionPage() {
           />
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:items-start">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(240px,280px)] lg:items-start">
           {/* Main form */}
-          <div className="space-y-6">
-            <section className="dash-card space-y-5 p-5 sm:p-6">
+          <div className="space-y-4">
+            <section className="dash-card space-y-4 p-4 sm:p-5">
               <div>
                 <p className="dash-label">Emission factor</p>
-                <h3 className="mt-1 text-base font-semibold tracking-tight">Library or manual</h3>
+                <h3 className="mt-0.5 text-sm font-semibold tracking-tight">Library or manual</h3>
               </div>
               <FactorPicker
                 factors={emissionFactors}
@@ -223,10 +223,10 @@ export default function DataCollectionPage() {
               />
             </section>
 
-            <section className="dash-card space-y-5 p-5 sm:p-6">
+            <section className="dash-card space-y-4 p-4 sm:p-5">
               <div>
                 <p className="dash-label">Activity details</p>
-                <h3 className="mt-1 text-base font-semibold tracking-tight">Values & allocation</h3>
+                <h3 className="mt-0.5 text-sm font-semibold tracking-tight">Values & allocation</h3>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
@@ -425,7 +425,7 @@ export default function DataCollectionPage() {
 
           {/* Live preview panel */}
           <aside className="lg:sticky lg:top-20">
-            <div className="dash-card space-y-4 p-5">
+            <div className="dash-card space-y-3 p-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/15 text-brand-dark ring-1 ring-brand/20">
                   <PresetIcon className="h-5 w-5" strokeWidth={1.75} />
