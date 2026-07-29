@@ -53,6 +53,37 @@ export default function OnboardingPage() {
     }
   }, [loading, user, profile, router]);
 
+  // If a pending team invite exists for this email, accept it instead of creating a new company
+  useEffect(() => {
+    if (!user || profile?.onboarding_completed) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/team/invites/accept", { method: "POST", credentials: "include" });
+        if (!res.ok) return;
+        const data = (await res.json()) as { accepted?: boolean; reason?: string };
+        if (cancelled) return;
+        if (data.accepted) {
+          await refreshProfile();
+          await refreshCompany();
+          clearDraft();
+          router.replace("/dashboard/overview");
+          return;
+        }
+        if (data.reason === "already_member_elsewhere") {
+          setSubmitError(
+            "This email already belongs to another workspace. Sign out and use a different account, or ask an admin to remove the old membership."
+          );
+        }
+      } catch {
+        // RPC may be unavailable until migration 003
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, profile?.onboarding_completed, refreshProfile, refreshCompany, clearDraft, router]);
+
   useEffect(() => {
     if (user?.email && !form.personal.workEmail) {
       updateSection("personal", {

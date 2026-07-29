@@ -23,6 +23,7 @@ import {
   industryNews,
 } from "@/data/marketing-data";
 import { cn } from "@/lib/utils";
+import { MetricFigure } from "@/components/ui/metric-figure";
 
 const IMAGE_FALLBACK =
   "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80";
@@ -80,12 +81,13 @@ function ScopeCard({ topic }: { topic: (typeof carbonFootprintTopics)[number] })
             <h3 className="max-w-[70%] font-serif text-xl font-bold leading-tight text-white sm:text-2xl">
               {topic.title}
             </h3>
-            <span
-              className="font-serif text-3xl font-bold tabular-nums sm:text-4xl"
+            <MetricFigure
+              size="xl"
+              className="sm:text-4xl"
               style={{ color: topic.accent === "#334155" ? "#e2e8f0" : topic.accent }}
             >
               {topic.share}
-            </span>
+            </MetricFigure>
           </div>
         </div>
       </div>
@@ -176,7 +178,9 @@ export function CarbonFootprintSection() {
             <div className="relative grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
               {footprintFacts.map((fact) => (
                 <div key={fact.label} className="bg-black/40 p-5 backdrop-blur-sm sm:p-6">
-                  <p className="font-serif text-3xl font-bold tabular-nums text-brand">{fact.value}</p>
+                  <MetricFigure size="xl" className="text-brand">
+                    {fact.value}
+                  </MetricFigure>
                   <p className="mt-2 text-sm font-medium text-white">{fact.label}</p>
                   <MetaLabel className="mt-2 text-white/50">{fact.sub}</MetaLabel>
                 </div>

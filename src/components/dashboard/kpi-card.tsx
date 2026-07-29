@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { LucideIcon, TrendingDown, TrendingUp } from "lucide-react";
 import { cn, formatCO2, formatNumber, formatPercent } from "@/lib/utils";
+import { MetricFigure } from "@/components/ui/metric-figure";
 
 interface KpiCardProps {
   title: string;
@@ -46,9 +47,9 @@ export function KpiCard({
           <div className="min-w-0 space-y-2">
             <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{title}</p>
             <div className="flex items-baseline gap-1">
-              <span className="font-serif text-2xl font-bold tabular-nums tracking-tight">{formattedValue}</span>
+              <MetricFigure size="lg">{String(formattedValue)}</MetricFigure>
               {unit && format !== "co2" && (
-                <span className="text-sm text-muted-foreground">{unit}</span>
+                <span className="metric-figure-unit text-sm opacity-55">{unit}</span>
               )}
             </div>
             {change !== undefined && (

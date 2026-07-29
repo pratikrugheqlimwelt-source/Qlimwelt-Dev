@@ -23,7 +23,7 @@ export const company: Company = {
   unitsProduced: 2_450_000,
   carbonPricePerTonne: 85,
   discountRate: 0.08,
-  isDemo: true,
+  isDemo: false,
 };
 
 export const businessUnits: BusinessUnit[] = [
@@ -99,9 +99,9 @@ export const climateInsights: ClimateInsight[] = [
 ];
 
 export const emissionFactors: EmissionFactor[] = [
-  { id: "ef-ng", name: "Natural gas combustion", category: "Stationary combustion", subcategory: "Natural gas", country: "Germany", region: "DE", year: 2024, value: 0.202, numeratorUnit: "kgCO2e", denominatorUnit: "kWh", ghgCoverage: ["CO2", "CH4"], source: "UBA (demo)", validFrom: "2024-01-01", validUntil: "2024-12-31", method: "activity_specific", uncertaintyPct: 5, isDemo: true },
-  { id: "ef-grid-de", name: "German grid electricity", category: "Purchased electricity", subcategory: "Grid mix", country: "Germany", region: "DE", year: 2024, value: 0.385, numeratorUnit: "kgCO2e", denominatorUnit: "kWh", ghgCoverage: ["CO2"], source: "UBA (demo)", validFrom: "2024-01-01", validUntil: "2024-12-31", method: "location_based", uncertaintyPct: 8, isDemo: true },
-  { id: "ef-diesel", name: "Diesel road fuel", category: "Mobile combustion", subcategory: "Diesel", country: "EU", region: "EU", year: 2024, value: 2.68, numeratorUnit: "kgCO2e", denominatorUnit: "litre", ghgCoverage: ["CO2"], source: "DEFRA (demo)", validFrom: "2024-01-01", validUntil: "2024-12-31", method: "fuel_based", uncertaintyPct: 6, isDemo: true },
+  { id: "ef-ng", name: "Natural gas combustion", category: "Stationary combustion", subcategory: "Natural gas", country: "Germany", region: "DE", year: 2024, value: 0.202, numeratorUnit: "kgCO2e", denominatorUnit: "kWh", ghgCoverage: ["CO2", "CH4"], source: "UBA", validFrom: "2024-01-01", validUntil: "2024-12-31", method: "activity_specific", uncertaintyPct: 5, isDemo: false },
+  { id: "ef-grid-de", name: "German grid electricity", category: "Purchased electricity", subcategory: "Grid mix", country: "Germany", region: "DE", year: 2024, value: 0.385, numeratorUnit: "kgCO2e", denominatorUnit: "kWh", ghgCoverage: ["CO2"], source: "UBA", validFrom: "2024-01-01", validUntil: "2024-12-31", method: "location_based", uncertaintyPct: 8, isDemo: false },
+  { id: "ef-diesel", name: "Diesel road fuel", category: "Mobile combustion", subcategory: "Diesel", country: "EU", region: "EU", year: 2024, value: 2.68, numeratorUnit: "kgCO2e", denominatorUnit: "litre", ghgCoverage: ["CO2"], source: "DEFRA", validFrom: "2024-01-01", validUntil: "2024-12-31", method: "fuel_based", uncertaintyPct: 6, isDemo: false },
 ];
 
 const MONTHS = ["2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12"];
@@ -135,10 +135,10 @@ function act(
     source,
     activityValue: value,
     activityUnit: unit,
-    emissionFactorId: "ef-demo",
+    emissionFactorId: "ef-lib",
     emissionFactorValue: factor,
     emissionFactorUnit: `kgCO2e/${unit}`,
-    emissionFactorSource: "Demo factor library",
+    emissionFactorSource: "Factor library",
     emissionFactorYear: 2024,
     conversionFactor: 1,
     ghg: "CO2",

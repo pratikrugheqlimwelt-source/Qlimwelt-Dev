@@ -8,6 +8,7 @@ import { ChartCard } from "@/components/dashboard/shared/chart-card";
 import { ScopeBadge } from "@/components/dashboard/shared/scope-badge";
 import { DataTable, DataTableBody, DataTableCell, DataTableHead, DataTableHeader, DataTableRow } from "@/components/dashboard/shared/data-table";
 import { Badge } from "@/components/ui/badge";
+import { HelpCorner } from "@/components/ui/tooltip";
 import { ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export default function DataQualityPage() {
@@ -31,10 +32,17 @@ export default function DataQualityPage() {
       <PageHeader
         title="Data quality"
         description="Audit readiness scores across all activity records — weighted by completeness, evidence, and method quality."
+        tip="Scores each activity record for audit readiness using completeness, factor quality, method, evidence, and verification."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <MetricCard accent="brand" icon={ShieldCheck} label="Average score" value={`${avg.toFixed(0)}%`} />
+        <MetricCard
+          accent="brand"
+          icon={ShieldCheck}
+          label="Average score"
+          value={`${avg.toFixed(0)}%`}
+          tooltip="Weighted average data-quality score across filtered activity records (completeness, evidence, method, and verification)."
+        />
         {Object.entries(byLabel).map(([label, count]) => (
           <MetricCard
             key={label}
@@ -42,6 +50,7 @@ export default function DataQualityPage() {
             label={`${label} quality`}
             value={String(count)}
             sub="records"
+            tooltip={`Number of activity records currently scored as “${label}” quality under the audit readiness formula.`}
           />
         ))}
       </div>
@@ -64,7 +73,7 @@ export default function DataQualityPage() {
                   <DataTableCell className="font-medium">{a.source}</DataTableCell>
                   <DataTableCell><ScopeBadge scope={a.scope} /></DataTableCell>
                   <DataTableCell className="capitalize">{a.method.replace(/_/g, " ")}</DataTableCell>
-                  <DataTableCell className="font-semibold tabular-nums">{scores[i]?.score.toFixed(0)}%</DataTableCell>
+                  <DataTableCell className="dash-num">{scores[i]?.score.toFixed(0)}%</DataTableCell>
                   <DataTableCell>
                     <Badge variant={scores[i]?.label === "high" || scores[i]?.label === "good" ? "success" : "warning"} className="capitalize text-[10px]">
                       {scores[i]?.label}
@@ -79,10 +88,11 @@ export default function DataQualityPage() {
         </DataTable>
       </ChartCard>
 
-      <div className="dash-card flex items-start gap-3 p-5">
+      <div className="dash-card relative flex items-start gap-3 p-5 pr-12">
+        <HelpCorner content="This formula shows how each activity record’s audit-readiness score is calculated. Weights can be configured per assurance framework." />
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
         <div className="text-sm">
-          <p className="font-semibold">Scoring formula (demonstration)</p>
+          <p className="font-semibold">Scoring formula</p>
           <p className="mt-1 font-mono text-xs text-muted-foreground">
             score = completeness×0.25 + recency×0.15 + factorQuality×0.20 + methodQuality×0.15 + evidence×0.15 + verification×0.10
           </p>

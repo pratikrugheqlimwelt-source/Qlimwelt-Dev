@@ -28,25 +28,25 @@ export function MarketingFooter() {
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               <li><Link href="/#about" className="transition-colors hover:text-foreground">About</Link></li>
               <li><Link href="/#insights" className="transition-colors hover:text-foreground">Blog</Link></li>
-              <li><a href="#" className="transition-colors hover:text-foreground">Careers</a></li>
-              <li><a href="#" className="transition-colors hover:text-foreground">Press</a></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Careers</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Press</Link></li>
             </ul>
           </div>
           <div>
             <MetaLabel>Legal</MetaLabel>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <li><a href="#" className="transition-colors hover:text-foreground">Privacy Policy</a></li>
-              <li><a href="#" className="transition-colors hover:text-foreground">Terms of Service</a></li>
-              <li><a href="#" className="transition-colors hover:text-foreground">GDPR</a></li>
-              <li><a href="#" className="transition-colors hover:text-foreground">Cookie Policy</a></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Privacy Policy</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Terms of Service</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">GDPR</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Cookie Policy</Link></li>
             </ul>
           </div>
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
           <MetaLabel>© 2026 QLIMWELT AI · BERLIN, GERMANY</MetaLabel>
           <div className="flex gap-6 type-label">
-            <a href="#" className="transition-colors hover:text-foreground">LinkedIn</a>
-            <a href="#" className="transition-colors hover:text-foreground">Twitter</a>
+            <Link href="/#contact" className="transition-colors hover:text-foreground">LinkedIn</Link>
+            <Link href="/#contact" className="transition-colors hover:text-foreground">Twitter</Link>
           </div>
         </div>
       </div>

@@ -1,22 +1,32 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, useCallback } from "react";
-import type { DashboardFilters, EmissionActivity, Company as DashboardCompany } from "@/types/carbon";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import type {
+  DashboardFilters,
+  EmissionActivity,
+  Company as DashboardCompany,
+  Facility,
+  Vehicle,
+  Supplier,
+  ReductionInitiative,
+  ClimateTarget,
+  ClimateInsight,
+  EmissionFactor,
+} from "@/types/carbon";
 import { DEFAULT_FILTERS } from "@/types/carbon";
 import { useAuth } from "@/hooks/useAuth";
-import type { Company as AuthCompany } from "@/types/company";
 import {
-  allActivities,
-  company as demoCompany,
-  facilities,
   businessUnits,
-  vehicles,
-  suppliers,
-  reductionInitiatives,
-  climateTarget,
-  climateInsights,
-  emissionFactors,
+  emissionFactors as demoFactors,
   PERIODS,
+  company as demoCompany,
 } from "@/data/carbon";
 import {
   activityToCalculation,
@@ -30,6 +40,29 @@ import {
   absoluteTargetEmissions,
   carbonCost,
 } from "@/lib/calculations/engine";
+import { deriveClimateInsights } from "@/lib/climate-insights";
+import {
+  loadDashboardBundle,
+  insertActivity,
+  deleteActivity,
+  seedSampleData,
+  upsertInitiative,
+  insertVehicle,
+  insertVehicles,
+  insertFacility,
+  insertSupplier,
+  upsertClimateTarget,
+  updateInitiativeStatus,
+  updateCompanySettings,
+  addCustomFactor,
+  createNotification,
+  markNotificationsRead,
+  createTeamInvite,
+  buildCompanyFromBundle,
+  type DashboardNotification,
+  type CompanySettingsRow,
+} from "@/services/carbon/dashboardService";
+import { toast } from "@/hooks/use-toast";
 
 interface CalculationDetail {
   activity: EmissionActivity;
@@ -39,14 +72,20 @@ interface CalculationDetail {
 
 interface DashboardContextValue {
   company: DashboardCompany;
-  facilities: typeof facilities;
+  facilities: Facility[];
   businessUnits: typeof businessUnits;
-  vehicles: typeof vehicles;
-  suppliers: typeof suppliers;
-  reductionInitiatives: typeof reductionInitiatives;
-  climateTarget: typeof climateTarget;
-  climateInsights: typeof climateInsights;
-  emissionFactors: typeof emissionFactors;
+  vehicles: Vehicle[];
+  suppliers: Supplier[];
+  reductionInitiatives: ReductionInitiative[];
+  climateTarget: ClimateTarget;
+  climateInsights: ClimateInsight[];
+  emissionFactors: EmissionFactor[];
+  activities: EmissionActivity[];
+  notifications: DashboardNotification[];
+  unreadCount: number;
+  loading: boolean;
+  saving: boolean;
+  dataMode: "supabase" | "local" | "demo";
   filters: DashboardFilters;
   setFilters: (patch: Partial<DashboardFilters>) => void;
   filteredActivities: EmissionActivity[];
@@ -70,6 +109,34 @@ interface DashboardContextValue {
   openCalculation: (activity: EmissionActivity) => void;
   calculationDetail: CalculationDetail | null;
   closeCalculation: () => void;
+  refresh: () => Promise<void>;
+  addActivity: (activity: EmissionActivity) => Promise<void>;
+  addFacility: (facility: Facility) => Promise<void>;
+  addSupplier: (supplier: Supplier) => Promise<void>;
+  addVehicle: (vehicle: Vehicle) => Promise<void>;
+  addVehiclesBulk: (vehicles: Vehicle[]) => Promise<void>;
+  logVehicleEmissions: (vehicle: Vehicle, period?: string) => Promise<void>;
+  logSupplierEmissions: (supplier: Supplier, period?: string) => Promise<void>;
+  saveClimateTarget: (target: ClimateTarget) => Promise<void>;
+  setInitiativeStatus: (id: string, status: ReductionInitiative["status"]) => Promise<void>;
+  saveSettings: (patch: Partial<CompanySettingsRow> & {
+    companyName?: string;
+    industry?: string;
+    employeeCount?: number;
+    revenueEUR?: number;
+  }) => Promise<void>;
+  addFactor: (factor: EmissionFactor) => Promise<void>;
+  notify: (input: { title: string; message: string; href?: string }) => Promise<void>;
+  markAllNotificationsRead: () => Promise<void>;
+  inviteTeamMember: (email: string, role?: string) => Promise<void>;
+  actOnInsight: (insight: ClimateInsight) => Promise<string>;
+  loadSampleData: () => Promise<void>;
+  deleteActivityRecord: (id: string) => Promise<void>;
+  saveActivity: (activity: EmissionActivity) => Promise<void>;
+  saveInitiative: (initiative: ReductionInitiative) => Promise<void>;
+  isSampleData: boolean;
+  isEmpty: boolean;
+  gwpValues: Record<string, number>;
 }
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
@@ -83,7 +150,14 @@ function filterActivities(activities: EmissionActivity[], filters: DashboardFilt
     if (filters.scope !== "all" && a.scope !== filters.scope) return false;
     if (filters.category !== "all" && a.category !== filters.category) return false;
     if (filters.dataQuality !== "all") {
-      const label = a.dataQualityScore >= 85 ? "high" : a.dataQualityScore >= 70 ? "good" : a.dataQualityScore >= 40 ? "moderate" : "low";
+      const label =
+        a.dataQualityScore >= 85
+          ? "high"
+          : a.dataQualityScore >= 70
+            ? "good"
+            : a.dataQualityScore >= 40
+              ? "moderate"
+              : "low";
       if (label !== filters.dataQuality) return false;
     }
     if (filters.method !== "all" && a.method !== filters.method) return false;
@@ -91,27 +165,12 @@ function filterActivities(activities: EmissionActivity[], filters: DashboardFilt
   });
 }
 
-function mapAuthCompany(authCompany: AuthCompany): DashboardCompany {
-  return {
-    id: authCompany.id,
-    name: authCompany.name,
-    industry: authCompany.industry ?? "Industrial Manufacturing",
-    currency: authCompany.currency,
-    baselineYear: 2023,
-    reportingYear: 2024,
-    employeeCount: authCompany.employee_count ?? demoCompany.employeeCount,
-    revenueEUR: Number(authCompany.annual_revenue ?? demoCompany.revenueEUR),
-    unitsProduced: demoCompany.unitsProduced,
-    carbonPricePerTonne: demoCompany.carbonPricePerTonne,
-    discountRate: demoCompany.discountRate,
-    isDemo: false,
-  };
-}
-
 function computeMetrics(
   activities: EmissionActivity[],
   prevActivities: EmissionActivity[],
-  activeCompany: DashboardCompany
+  activeCompany: DashboardCompany,
+  target: ClimateTarget,
+  initiatives: ReductionInitiative[]
 ) {
   const total = sumEmissionsTCO2e(activities);
   const prevTotal = sumEmissionsTCO2e(prevActivities);
@@ -120,11 +179,15 @@ function computeMetrics(
   const estimated = activities.filter((a) => a.isEstimated).length;
   const totalRecords = activities.length || 1;
 
-  const targetEmissions = absoluteTargetEmissions(climateTarget.baselineEmissionsTCO2e, climateTarget.targetReductionPct);
-  const progress = targetProgressPct(climateTarget.baselineEmissionsTCO2e, total * (12 / Math.max(activities.length / 10, 1)), targetEmissions);
+  const targetEmissions = absoluteTargetEmissions(target.baselineEmissionsTCO2e, target.targetReductionPct);
+  const progress = targetProgressPct(
+    target.baselineEmissionsTCO2e,
+    total * (12 / Math.max(activities.length / 10, 1)),
+    targetEmissions
+  );
 
-  const reductionOpp = reductionInitiatives.reduce((s, i) => s + i.annualEmissionReductionTCO2e, 0);
-  const financialSaving = reductionInitiatives.reduce((s, i) => s + i.annualFinancialSaving, 0);
+  const reductionOpp = initiatives.reduce((s, i) => s + i.annualEmissionReductionTCO2e, 0);
+  const financialSaving = initiatives.reduce((s, i) => s + i.annualFinancialSaving, 0);
 
   return {
     totalTCO2e: total,
@@ -146,19 +209,39 @@ function computeMetrics(
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-function buildMonthlyTrend(filters: DashboardFilters, activeCompany: DashboardCompany) {
+function priorYearPeriod(period: string): string | null {
+  const m = /^(\d{4})-(\d{2})$/.exec(period);
+  if (!m) return null;
+  return `${Number(m[1]) - 1}-${m[2]}`;
+}
+
+function buildMonthlyTrend(
+  allActs: EmissionActivity[],
+  filters: DashboardFilters,
+  activeCompany: DashboardCompany,
+  target: ClimateTarget
+) {
   const months = PERIODS.filter((p) => p !== "all");
+  const availablePeriods = new Set(allActs.map((a) => a.period));
   const points = months.map((month, i) => {
-    const monthActs = filterActivities(allActivities, { ...filters, period: month });
+    const monthActs = filterActivities(allActs, { ...filters, period: month });
     const scopes = sumByScope(monthActs);
     const total = scopes.scope1 + scopes.scope2 + scopes.scope3;
-    const baseline = climateTarget.baselineEmissionsTCO2e / 12;
-    const target = absoluteTargetEmissions(climateTarget.baselineEmissionsTCO2e, climateTarget.targetReductionPct) / 12;
+    const baseline = target.baselineEmissionsTCO2e / 12;
+    const targetMonthly =
+      absoluteTargetEmissions(target.baselineEmissionsTCO2e, target.targetReductionPct) / 12;
     const yearProgress = i / 11;
-    const pathway = baseline - (baseline - target) * yearProgress;
-    // Prior year was ~8–12% higher with less efficiency; add month-specific noise
-    const yoyFactor = 1.1 + Math.sin(i * 0.9) * 0.03;
-    const previousYear = total * yoyFactor;
+    const pathway = baseline - (baseline - targetMonthly) * yearProgress;
+
+    const priorPeriod = priorYearPeriod(month);
+    let previousYear = 0;
+    if (priorPeriod && availablePeriods.has(priorPeriod)) {
+      const priorActs = filterActivities(allActs, { ...filters, period: priorPeriod });
+      previousYear = sumEmissionsTCO2e(priorActs);
+    } else if (total > 0) {
+      previousYear = total * 1.05;
+    }
+
     const revenueM = activeCompany.revenueEUR / 1_000_000;
     const intensity = revenueM > 0 ? total / revenueM : 0;
     return {
@@ -178,7 +261,6 @@ function buildMonthlyTrend(filters: DashboardFilters, activeCompany: DashboardCo
     };
   });
 
-  // Compute MoM and 3-month rolling average
   return points.map((p, i) => {
     const prev = i > 0 ? points[i - 1].total : p.total;
     const momChange = prev > 0 ? ((p.total - prev) / prev) * 100 : 0;
@@ -188,35 +270,108 @@ function buildMonthlyTrend(filters: DashboardFilters, activeCompany: DashboardCo
   });
 }
 
+const DEFAULT_GWP: Record<string, number> = {
+  CO2: 1, CH4: 27.9, N2O: 273, HFCs: 1430, PFCs: 6630, SF6: 25200, NF3: 17400,
+};
+
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const { company: authCompany } = useAuth();
-  const activeCompany = useMemo(
-    () => (authCompany ? mapAuthCompany(authCompany) : demoCompany),
-    [authCompany]
-  );
+  const companyId = authCompany?.id ?? demoCompany.id;
 
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [dataMode, setDataMode] = useState<"supabase" | "local" | "demo">("demo");
+  const [settings, setSettings] = useState<CompanySettingsRow | null>(null);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [activities, setActivities] = useState<EmissionActivity[]>([]);
+  const [initiatives, setInitiatives] = useState<ReductionInitiative[]>([]);
+  const [climateTarget, setClimateTarget] = useState<ClimateTarget>({
+    id: "tgt-1",
+    name: "Science-Based Target 2030",
+    baselineYear: 2023,
+    targetYear: 2030,
+    baselineEmissionsTCO2e: 14200,
+    targetReductionPct: 42,
+    type: "absolute",
+  });
+  const [emissionFactors, setEmissionFactors] = useState<EmissionFactor[]>(demoFactors);
+  const [notifications, setNotifications] = useState<DashboardNotification[]>([]);
   const [filters, setFiltersState] = useState<DashboardFilters>(DEFAULT_FILTERS);
   const [calculationDetail, setCalculationDetail] = useState<CalculationDetail | null>(null);
+
+  const activeCompany = useMemo(
+    () => buildCompanyFromBundle(authCompany, settings),
+    [authCompany, settings]
+  );
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const bundle = await loadDashboardBundle(companyId);
+      setDataMode(bundle.mode);
+      setSettings(bundle.settings);
+      setFacilities(bundle.facilities);
+      setVehicles(bundle.vehicles);
+      setSuppliers(bundle.suppliers);
+      setActivities(bundle.activities);
+      setInitiatives(bundle.initiatives);
+      if (bundle.climateTarget) setClimateTarget(bundle.climateTarget);
+      setNotifications(bundle.notifications);
+      const factors = bundle.settings?.customFactors?.length
+        ? [...bundle.settings.customFactors, ...demoFactors]
+        : demoFactors;
+      setEmissionFactors(factors);
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Could not load dashboard data",
+        description: err instanceof Error ? err.message : "Using local workspace storage.",
+        variant: "destructive",
+      });
+      setDataMode("local");
+    } finally {
+      setLoading(false);
+    }
+  }, [companyId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   const setFilters = useCallback((patch: Partial<DashboardFilters>) => {
     setFiltersState((f) => ({ ...f, ...patch }));
   }, []);
 
-  const filteredActivities = useMemo(() => filterActivities(allActivities, filters), [filters]);
-
-  const previousPeriodActivities = useMemo(() => {
-    if (filters.period === "all") return filterActivities(allActivities, { ...filters, period: "2023-12" });
-    const idx = PERIODS.indexOf(filters.period);
-    const prev = idx > 1 ? PERIODS[idx - 1] : "2024-01";
-    return filterActivities(allActivities, { ...filters, period: prev });
-  }, [filters]);
-
-  const metrics = useMemo(
-    () => computeMetrics(filteredActivities, previousPeriodActivities, activeCompany),
-    [filteredActivities, previousPeriodActivities, activeCompany]
+  const filteredActivities = useMemo(
+    () => filterActivities(activities, filters),
+    [activities, filters]
   );
 
-  const monthlyTrend = useMemo(() => buildMonthlyTrend(filters, activeCompany), [filters, activeCompany]);
+  const previousPeriodActivities = useMemo(() => {
+    if (filters.period === "all") return filterActivities(activities, { ...filters, period: "2023-12" });
+    const idx = PERIODS.indexOf(filters.period);
+    const prev = idx > 1 ? PERIODS[idx - 1] : "2024-01";
+    return filterActivities(activities, { ...filters, period: prev });
+  }, [activities, filters]);
+
+  const metrics = useMemo(
+    () =>
+      computeMetrics(
+        filteredActivities,
+        previousPeriodActivities,
+        activeCompany,
+        climateTarget,
+        initiatives
+      ),
+    [filteredActivities, previousPeriodActivities, activeCompany, climateTarget, initiatives]
+  );
+
+  const monthlyTrend = useMemo(
+    () => buildMonthlyTrend(activities, filters, activeCompany, climateTarget),
+    [activities, filters, activeCompany, climateTarget]
+  );
 
   const openCalculation = useCallback((activity: EmissionActivity) => {
     const calc = activityToCalculation(activity);
@@ -229,6 +384,306 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const closeCalculation = useCallback(() => setCalculationDetail(null), []);
 
+  const withSaving = useCallback(async (fn: () => Promise<void>, success?: string) => {
+    setSaving(true);
+    try {
+      await fn();
+      if (success) toast({ title: success, variant: "success" });
+    } catch (err) {
+      toast({
+        title: "Action failed",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+      throw err;
+    } finally {
+      setSaving(false);
+    }
+  }, []);
+
+  const addActivity = useCallback(
+    async (activity: EmissionActivity) => {
+      await withSaving(async () => {
+        await insertActivity(companyId, activity);
+        setActivities((prev) => [activity, ...prev]);
+        await createNotification(companyId, {
+          title: "Activity saved",
+          message: `${activity.source} · ${activity.period} added to inventory.`,
+          href: "/dashboard/emissions",
+        });
+        await refresh();
+      }, "Activity record saved");
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const addFacility = useCallback(
+    async (facility: Facility) => {
+      await withSaving(async () => {
+        await insertFacility(companyId, facility);
+        setFacilities((prev) => [facility, ...prev]);
+        await refresh();
+      }, "Facility added");
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const addSupplier = useCallback(
+    async (supplier: Supplier) => {
+      await withSaving(async () => {
+        await insertSupplier(companyId, supplier);
+        setSuppliers((prev) => [supplier, ...prev]);
+        await refresh();
+      }, "Supplier added");
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const addVehicle = useCallback(
+    async (vehicle: Vehicle) => {
+      await withSaving(async () => {
+        await insertVehicle(companyId, vehicle);
+        setVehicles((prev) => [vehicle, ...prev]);
+        await refresh();
+      }, "Vehicle added");
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const addVehiclesBulk = useCallback(
+    async (list: Vehicle[]) => {
+      await withSaving(async () => {
+        await insertVehicles(companyId, list);
+        await refresh();
+      }, `${list.length} vehicles imported`);
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const logVehicleEmissions = useCallback(
+    async (vehicle: Vehicle, period = "2024-12") => {
+      const isEv = vehicle.fuelType.toLowerCase().includes("electric") && vehicle.fuelLitres <= 0;
+      const activity: EmissionActivity = {
+        id: `a-veh-${vehicle.id}-${Date.now()}`,
+        period,
+        facilityId: vehicle.facilityId,
+        country: vehicle.country || "Germany",
+        businessUnitId: "bu-ops",
+        scope: isEv ? "scope2" : "scope1",
+        category: isEv ? "Purchased electricity" : "Mobile combustion",
+        subcategory: `${vehicle.manufacturer} ${vehicle.model}`,
+        source: `Fleet · ${vehicle.registration}`,
+        activityValue: isEv ? vehicle.electricityKwh : vehicle.fuelLitres,
+        activityUnit: isEv ? "kWh" : "litre",
+        emissionFactorId: `ef-veh-${vehicle.id}`,
+        emissionFactorValue: isEv ? 0.000385 : vehicle.emissionFactor || 2.68,
+        emissionFactorUnit: isEv ? "kgCO2e/kWh" : "kgCO2e/litre",
+        emissionFactorSource: "Vehicle master data",
+        emissionFactorYear: activeCompany.reportingYear,
+        conversionFactor: 1,
+        ghg: "CO2",
+        gwp: 1,
+        method: isEv ? "location_based" : "fuel_based",
+        dataQualityScore: 75,
+        uncertaintyPct: 12,
+        evidenceStatus: "uploaded",
+        resourceId: vehicle.id,
+        isEstimated: false,
+      };
+      await addActivity(activity);
+    },
+    [activeCompany, addActivity]
+  );
+
+  const logSupplierEmissions = useCallback(
+    async (supplier: Supplier, period = "2024-12") => {
+      const facility = facilities[0];
+      const activity: EmissionActivity = {
+        id: `a-sup-${supplier.id}-${Date.now()}`,
+        period,
+        facilityId: facility?.id ?? "fac-mun",
+        country: supplier.country || facility?.country || "Germany",
+        businessUnitId: facility?.businessUnitId ?? "bu-ops",
+        scope: "scope3",
+        category: "Category 1",
+        subcategory: supplier.category,
+        source: `Supplier · ${supplier.name}`,
+        activityValue: supplier.scope3TCO2e,
+        activityUnit: "tCO2e",
+        emissionFactorId: `ef-sup-${supplier.id}`,
+        emissionFactorValue: 1000,
+        emissionFactorUnit: "kgCO2e/tCO2e",
+        emissionFactorSource: "Supplier-reported",
+        emissionFactorYear: activeCompany.reportingYear,
+        conversionFactor: 1,
+        ghg: "CO2",
+        gwp: 1,
+        method: "supplier_specific",
+        dataQualityScore: supplier.dataQualityScore,
+        uncertaintyPct: Math.max(5, 100 - supplier.dataQualityScore),
+        evidenceStatus: "uploaded",
+        resourceId: supplier.id,
+        isEstimated: supplier.dataQualityScore < 70,
+      };
+      await addActivity(activity);
+    },
+    [activeCompany, addActivity, facilities]
+  );
+
+  const saveClimateTarget = useCallback(
+    async (target: ClimateTarget) => {
+      await withSaving(async () => {
+        await upsertClimateTarget(companyId, target);
+        setClimateTarget(target);
+      }, "Climate target saved");
+    },
+    [companyId, withSaving]
+  );
+
+  const setInitiativeStatus = useCallback(
+    async (id: string, status: ReductionInitiative["status"]) => {
+      await withSaving(async () => {
+        await updateInitiativeStatus(companyId, id, status);
+        setInitiatives((prev) => prev.map((i) => (i.id === id ? { ...i, status } : i)));
+      }, `Initiative marked ${status.replace(/_/g, " ")}`);
+    },
+    [companyId, withSaving]
+  );
+
+  const saveSettings = useCallback(
+    async (patch: Partial<CompanySettingsRow> & {
+      companyName?: string;
+      industry?: string;
+      employeeCount?: number;
+      revenueEUR?: number;
+    }) => {
+      await withSaving(async () => {
+        await updateCompanySettings(companyId, patch);
+        await refresh();
+      }, "Settings saved");
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const addFactor = useCallback(
+    async (factor: EmissionFactor) => {
+      await withSaving(async () => {
+        const next = await addCustomFactor(companyId, factor);
+        setEmissionFactors([...next, ...demoFactors]);
+      }, "Emission factor added");
+    },
+    [companyId, withSaving]
+  );
+
+  const notify = useCallback(
+    async (input: { title: string; message: string; href?: string }) => {
+      const n = await createNotification(companyId, input);
+      setNotifications((prev) => [n, ...prev]);
+    },
+    [companyId]
+  );
+
+  const markAllNotificationsRead = useCallback(async () => {
+    await markNotificationsRead(companyId);
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  }, [companyId]);
+
+  const inviteTeamMember = useCallback(
+    async (email: string, role = "member") => {
+      await withSaving(async () => {
+        await createTeamInvite(companyId, email, role);
+        await refresh();
+      }, `Invite recorded for ${email}`);
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const loadSampleData = useCallback(async () => {
+    await withSaving(async () => {
+      await seedSampleData(companyId);
+      await refresh();
+    }, "Inventory loaded");
+  }, [companyId, refresh, withSaving]);
+
+  const deleteActivityRecord = useCallback(
+    async (id: string) => {
+      await withSaving(async () => {
+        await deleteActivity(companyId, id);
+        setActivities((prev) => prev.filter((a) => a.id !== id));
+        await refresh();
+      }, "Activity deleted");
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const saveActivity = useCallback(
+    async (activity: EmissionActivity) => {
+      await addActivity(activity);
+    },
+    [addActivity]
+  );
+
+  const saveInitiative = useCallback(
+    async (initiative: ReductionInitiative) => {
+      await withSaving(async () => {
+        await upsertInitiative(companyId, initiative);
+        setInitiatives((prev) => {
+          const idx = prev.findIndex((i) => i.id === initiative.id);
+          if (idx >= 0) {
+            const next = [...prev];
+            next[idx] = initiative;
+            return next;
+          }
+          return [initiative, ...prev];
+        });
+        await refresh();
+      }, "Initiative saved");
+    },
+    [companyId, refresh, withSaving]
+  );
+
+  const actOnInsight = useCallback(
+    async (insight: ClimateInsight) => {
+      const match = initiatives.find((i) => {
+        const action = insight.action.toLowerCase();
+        const name = i.name.toLowerCase();
+        if (action.includes("ppa") && name.includes("ppa")) return true;
+        if (action.includes("fleet") && name.includes("fleet")) return true;
+        if (action.includes("supplier") && name.includes("supplier")) return true;
+        return false;
+      });
+      if (match && match.status === "planned") {
+        await setInitiativeStatus(match.id, "in_progress");
+      }
+      await notify({
+        title: `Acting on: ${insight.title}`,
+        message: insight.action,
+        href: "/dashboard/reduction-planner",
+      });
+      return "/dashboard/reduction-planner";
+    },
+    [initiatives, notify, setInitiativeStatus]
+  );
+
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read).length,
+    [notifications]
+  );
+
+  const climateInsights = useMemo(
+    () =>
+      deriveClimateInsights(
+        filteredActivities,
+        initiatives,
+        activeCompany.carbonPricePerTonne
+      ),
+    [filteredActivities, initiatives, activeCompany.carbonPricePerTonne]
+  );
+
+  const isSampleData = Boolean(settings?.seededAt);
+  const isEmpty = activities.length === 0 && !settings?.seededAt;
+  const gwpValues = settings?.gwpValues ?? DEFAULT_GWP;
+
   const value = useMemo(
     () => ({
       company: activeCompany,
@@ -236,10 +691,16 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       businessUnits,
       vehicles,
       suppliers,
-      reductionInitiatives,
+      reductionInitiatives: initiatives,
       climateTarget,
       climateInsights,
       emissionFactors,
+      activities,
+      notifications,
+      unreadCount,
+      loading,
+      saving,
+      dataMode,
       filters,
       setFilters,
       filteredActivities,
@@ -249,8 +710,78 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       openCalculation,
       calculationDetail,
       closeCalculation,
+      refresh,
+      addActivity,
+      addFacility,
+      addSupplier,
+      addVehicle,
+      addVehiclesBulk,
+      logVehicleEmissions,
+      logSupplierEmissions,
+      saveClimateTarget,
+      setInitiativeStatus,
+      saveSettings,
+      addFactor,
+      notify,
+      markAllNotificationsRead,
+      inviteTeamMember,
+      actOnInsight,
+      loadSampleData,
+      deleteActivityRecord,
+      saveActivity,
+      saveInitiative,
+      isSampleData,
+      isEmpty,
+      gwpValues,
     }),
-    [filters, filteredActivities, previousPeriodActivities, metrics, monthlyTrend, activeCompany, openCalculation, calculationDetail, closeCalculation, setFilters]
+    [
+      activeCompany,
+      facilities,
+      vehicles,
+      suppliers,
+      initiatives,
+      climateTarget,
+      climateInsights,
+      emissionFactors,
+      activities,
+      notifications,
+      unreadCount,
+      loading,
+      saving,
+      dataMode,
+      filters,
+      setFilters,
+      filteredActivities,
+      previousPeriodActivities,
+      metrics,
+      monthlyTrend,
+      openCalculation,
+      calculationDetail,
+      closeCalculation,
+      refresh,
+      addActivity,
+      addFacility,
+      addSupplier,
+      addVehicle,
+      addVehiclesBulk,
+      logVehicleEmissions,
+      logSupplierEmissions,
+      saveClimateTarget,
+      setInitiativeStatus,
+      saveSettings,
+      addFactor,
+      notify,
+      markAllNotificationsRead,
+      inviteTeamMember,
+      actOnInsight,
+      loadSampleData,
+      deleteActivityRecord,
+      saveActivity,
+      saveInitiative,
+      isSampleData,
+      isEmpty,
+      gwpValues,
+    ]
   );
 
   return <DashboardContext.Provider value={value}>{children}</DashboardContext.Provider>;

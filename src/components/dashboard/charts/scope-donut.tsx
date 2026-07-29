@@ -84,7 +84,7 @@ export function ScopeDonut({
               return (
                 <div className="rounded-lg border bg-white px-3 py-2 text-xs shadow-lg">
                   <p className="font-semibold">{d.name}</p>
-                  <p className="tabular-nums">{formatCO2(d.raw)} · {d.pct.toFixed(1)}%</p>
+                  <p className="dash-num">{formatCO2(d.raw)} · {d.pct.toFixed(1)}%</p>
                 </div>
               );
             }}
@@ -98,7 +98,7 @@ export function ScopeDonut({
         <div className="flex min-w-0 max-w-full flex-col items-center justify-center gap-[0.15em] text-center">
           <span
             className={cn(
-              "max-w-full truncate font-bold leading-none tabular-nums tracking-tight",
+              "metric-figure max-w-full truncate leading-none",
               dark ? "text-white" : "text-foreground"
             )}
             style={{ fontSize: valueFontSize }}
@@ -143,7 +143,7 @@ export function ScopeLegend({ scope1, scope2, scope3, total }: ScopeLegendProps)
               <span className="h-2.5 w-2.5 rounded-full ring-1 ring-white/20" style={{ backgroundColor: item.color }} />
               <span className="font-medium text-white/90">{item.label}</span>
             </div>
-            <span className="tabular-nums text-white/60">{formatCO2(item.value)} · {item.pct.toFixed(0)}%</span>
+            <span className="dash-num text-white/60">{formatCO2(item.value)} · {item.pct.toFixed(0)}%</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
             <div

@@ -33,7 +33,7 @@ export const howItWorksSteps = [
 export const platformFeatures = [
   { num: "01", title: "Automated Carbon Accounting", description: "Ingest invoices, ERP exports, and utility bills. AI classifies and calculates emissions with zero manual data entry." },
   { num: "02", title: "CSRD & GRI Reports in Hours", description: "Generate audit-ready ESRS disclosures, GRI Standards reports, and EU Taxonomy alignment documents in a single click." },
-  { num: "03", title: "Conversational Carbon Intelligence", description: "Ask your emissions data anything in plain language. Carbon Chat understands Scope 3 drivers, compliance gaps, and reduction scenarios." },
+  { num: "03", title: "Conversational Climate Intelligence", description: "Ask your emissions data anything in plain language. Qlim AI understands Scope 3 drivers, compliance gaps, and reduction scenarios." },
   { num: "04", title: "Supplier Emissions Tracking", description: "Request, collect, and score supplier primary data. Identify high-risk suppliers before they impact your CSRD disclosure." },
   { num: "05", title: "Regulatory Deadline Monitoring", description: "Never miss a CSRD, CBAM, or EU Taxonomy deadline. Autonomous agents track regulatory changes and alert your team proactively." },
   { num: "06", title: "Reduction Scenario Modelling", description: "Model fleet electrification, renewable PPAs, and supplier engagement programmes with financial ROI and tCO₂e impact projections." },
@@ -78,7 +78,7 @@ export const pricingPlans = [
     price: "€799",
     period: "/mo",
     description: "For mid-market teams under CSRD obligations",
-    features: ["Up to 15 users", "Scope 1, 2 & 3 tracking", "Full ESRS CSRD reports", "AI Carbon Chat access", "Supplier data requests", "Priority support"],
+    features: ["Up to 15 users", "Scope 1, 2 & 3 tracking", "Full ESRS CSRD reports", "Qlim AI access", "Supplier data requests", "Priority support"],
     cta: "Start Free Trial",
     highlighted: true,
     badge: "MOST POPULAR",
@@ -174,7 +174,7 @@ export const aiArchitectureSteps = [
   { step: "01", title: "Ingestion & Normalization Layer", description: "Multi-format ingestion from ERP, PDF, CSV, and API sources. Automatic deduplication and unit normalisation." },
   { step: "02", title: "Emission Factor Intelligence Engine", description: "80,000+ curated factors with ML-powered matching. Confidence scoring on every calculation." },
   { step: "03", title: "Anomaly Detection & Quality Assurance", description: "ML layer flags outliers, missing data, and inconsistencies before they reach your report." },
-  { step: "04", title: "Conversational Carbon Intelligence", description: "LLM layer with RAG over your emissions data. Ask anything, get auditable answers." },
+  { step: "04", title: "Qlim AI Climate Intelligence", description: "LLM layer with RAG over your emissions data. Ask anything, get auditable answers." },
   { step: "05", title: "CSRD Report Drafting", description: "NLP generation aligned to ESRS E1, S1, and EU Taxonomy requirements. Human-in-the-loop review." },
 ];
 
@@ -188,19 +188,14 @@ export const safetyCards = [
 ];
 
 export const changelog = [
-  { date: "May 2025", title: "AI Carbon Chat launched", description: "Natural language interface to your emissions data. Ask anything about Scope 1, 2, 3, suppliers, and compliance." },
+  { date: "May 2025", title: "Qlim AI launched", description: "Climate Intelligence for your emissions data. Ask anything about Scope 1, 2, 3, suppliers, and compliance." },
   { date: "April 2025", title: "Scenario Modeler v2 with Monte Carlo", description: "Probabilistic forecasting for reduction initiatives with confidence intervals and financial risk modelling." },
   { date: "March 2025", title: "ESRS E1 Auto-Drafting", description: "One-click generation of CSRD climate change narrative aligned to ESRS E1 requirements." },
   { date: "February 2025", title: "Supplier Portal with primary data collection", description: "Self-service portal for suppliers to submit primary emissions data with automated validation." },
   { date: "January 2025", title: "Platform launch (beta)", description: "Initial release with automated carbon accounting, CSRD reporting, and AI document intelligence." },
 ];
 
-export const carbonChatDemo = [
-  { role: "user" as const, content: "Why did our Scope 3 emissions increase 8% this quarter?" },
-  { role: "assistant" as const, content: "Your Scope 3 increase is primarily driven by ChemBase AG (+18% vs Q3). They account for 13% of your Category 1 purchased goods emissions.\n\nSecondary factor: LogiCargo EU freight volumes increased 12% following the Rotterdam expansion." },
-  { role: "user" as const, content: "Draft a supplier outreach email to ChemBase AG requesting primary emissions data." },
-  { role: "assistant" as const, content: "Subject: Request for Primary Emissions Data — CSRD Compliance\n\nDear ChemBase AG Sustainability Team,\n\nAs part of our CSRD reporting obligations under ESRS E1, we are requesting primary greenhouse gas emissions data for the goods and services supplied to Nordic Manufacturing Group during FY2024..." },
-];
+export { qlimAiDemo as carbonChatDemo, qlimAiDemo } from "@/data/qlim-ai-data";
 
 export const carbonFootprintTopics = [
   {

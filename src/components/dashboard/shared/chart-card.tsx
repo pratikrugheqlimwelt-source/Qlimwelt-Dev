@@ -1,6 +1,6 @@
 "use client";
 
-import { InfoTip } from "@/components/ui/tooltip";
+import { HelpCorner } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -26,6 +26,7 @@ const STRIPE_ACCENTS: Record<AccentColor, string> = {
 
 interface ChartCardProps {
   title: string;
+  /** Explains this chart/component on "?" hover (upper-right) */
   tip?: string;
   description?: string;
   icon?: LucideIcon;
@@ -48,9 +49,9 @@ export function ChartCard({
   noPadding,
 }: ChartCardProps) {
   return (
-    <div className={cn("dash-card overflow-hidden", className)}>
+    <div className={cn("dash-card relative overflow-hidden", className)}>
       <div className={cn("h-1 w-full bg-gradient-to-r", STRIPE_ACCENTS[accent])} />
-      <div className="flex items-start justify-between gap-4 border-b border-border/30 bg-gradient-to-r from-muted/20 to-transparent px-5 py-4">
+      <div className="relative flex items-start justify-between gap-4 border-b border-border/30 bg-gradient-to-r from-muted/20 to-transparent px-5 py-4 pr-12">
         <div className="flex min-w-0 items-start gap-3">
           {Icon && (
             <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 shadow-sm", ICON_ACCENTS[accent])}>
@@ -58,14 +59,12 @@ export function ChartCard({
             </div>
           )}
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold tracking-tight">{title}</h3>
-              {tip && <InfoTip content={tip} />}
-            </div>
+            <h3 className="text-base font-semibold tracking-tight text-foreground">{title}</h3>
             {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
           </div>
         </div>
-        {action}
+        {action && <div className="mr-1 shrink-0">{action}</div>}
+        {tip && <HelpCorner content={tip} className="right-3 top-3" />}
       </div>
       <div className={cn(noPadding ? "" : "p-5")}>{children}</div>
     </div>

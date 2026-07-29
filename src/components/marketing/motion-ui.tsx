@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import { Check } from "lucide-react";
 import { MetaLabel, ThinRule, EditorialCta } from "@/components/marketing/editorial";
+import { MetricFigure } from "@/components/ui/metric-figure";
 import { cn } from "@/lib/utils";
 import { EASE_OUT, springSnappy } from "@/lib/motion";
 
@@ -64,9 +65,8 @@ export function AnimatedRule({
 
   return (
     <motion.hr
-      initial={reduced ? false : { scaleX: 0, opacity: 0 }}
-      whileInView={reduced ? undefined : { scaleX: 1, opacity: 1 }}
-      viewport={{ once: true, margin: "-40px" }}
+      initial={reduced ? false : { scaleX: 0 }}
+      animate={reduced ? undefined : { scaleX: 1 }}
       transition={{ duration: 0.7, ease: EASE_OUT }}
       className={cn(
         "origin-left border-0 border-t",
@@ -127,9 +127,13 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
                   <MetaLabel className="mb-4 text-brand-dark">{plan.badge.toUpperCase()}</MetaLabel>
                 )}
                 <MetaLabel>{plan.name}</MetaLabel>
-                <p className="mt-4 font-serif text-5xl font-bold tabular-nums">
-                  {plan.price}
-                  <span className="text-lg font-normal text-muted-foreground">{plan.period}</span>
+                <p className="mt-4">
+                  <MetricFigure size="hero">{plan.price}</MetricFigure>
+                  {plan.period ? (
+                    <span className="ml-1 align-baseline font-sans text-lg font-medium text-muted-foreground">
+                      {plan.period}
+                    </span>
+                  ) : null}
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{plan.description}</p>
                 <ThinRule className="my-8" />

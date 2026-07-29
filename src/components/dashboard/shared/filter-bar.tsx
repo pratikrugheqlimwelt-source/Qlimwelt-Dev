@@ -6,6 +6,7 @@ import { useDashboard } from "@/components/dashboard/providers/dashboard-provide
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { HelpCorner } from "@/components/ui/tooltip";
 import { DEFAULT_FILTERS } from "@/types/carbon";
 import { PERIODS, COUNTRIES, SCOPES } from "@/data/carbon";
 import { cn } from "@/lib/utils";
@@ -22,8 +23,12 @@ export function FilterBar() {
   const activeCount = Object.entries(filters).filter(([k, v]) => k !== "period" && v !== "all").length;
 
   return (
-    <div className="dash-card overflow-hidden">
-      <div className="flex items-center justify-between gap-4 border-b border-border/40 px-5 py-3.5">
+    <div className="dash-card relative overflow-hidden">
+      <HelpCorner
+        content="Filter all dashboard metrics and charts by period, facility, country, business unit, scope, category, data quality, and calculation method. Changes apply instantly across the page."
+        className="right-3 top-3"
+      />
+      <div className="flex items-center justify-between gap-4 border-b border-border/40 px-5 py-3.5 pr-12">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand-dark">
             <SlidersHorizontal className="h-4 w-4" />

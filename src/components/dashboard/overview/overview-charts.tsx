@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Fragment, useMemo, useState } from "react";
 import { TrendingUp, PieChart as PieIcon, Brain, Database } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MetricFigure } from "@/components/ui/metric-figure";
 
 export function OverviewCharts() {
   const { filteredActivities, monthlyTrend, metrics, facilities, openCalculation, company } = useDashboard();
@@ -161,8 +162,13 @@ export function OverviewCharts() {
             ].map((stat) => (
               <div key={stat.label} className="rounded-xl border border-border/50 bg-gradient-to-br from-muted/30 to-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</p>
-                <p className={cn("mt-0.5 text-lg font-bold tabular-nums", "positive" in stat ? (stat.positive ? "text-green-600" : "text-red-600") : "text-foreground")}>
-                  {stat.value}
+                <p className={cn(
+                  "mt-0.5",
+                  "positive" in stat ? (stat.positive ? "text-green-600" : "text-red-600") : "text-foreground"
+                )}>
+                  <MetricFigure size="md" className={cn("positive" in stat ? (stat.positive ? "text-green-600" : "text-red-600") : "text-foreground")}>
+                    {String(stat.value)}
+                  </MetricFigure>
                 </p>
                 <p className="text-[10px] text-muted-foreground">{stat.sub}</p>
               </div>
@@ -455,7 +461,7 @@ export function OverviewCharts() {
                       <DataTableCell>{a.period}</DataTableCell>
                       <DataTableCell>{a.source}</DataTableCell>
                       <DataTableCell className="capitalize">{a.scope}</DataTableCell>
-                      <DataTableCell className="tabular-nums font-medium">{activityToCalculation(a).emissionsTCO2e.toFixed(3)}</DataTableCell>
+                      <DataTableCell className="dash-num">{activityToCalculation(a).emissionsTCO2e.toFixed(3)}</DataTableCell>
                       <DataTableCell className="capitalize">{a.method.replace(/_/g, " ")}</DataTableCell>
                       <DataTableCell>{a.dataQualityScore}%</DataTableCell>
                     </DataTableRow>

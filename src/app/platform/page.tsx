@@ -14,6 +14,7 @@ import {
   EditorialCta,
   MetaLabel,
 } from "@/components/marketing/editorial";
+import { MetricFigure } from "@/components/ui/metric-figure";
 import { SegmentedControl } from "@/components/marketing/motion-ui";
 import { springSnappy } from "@/lib/motion";
 import { Badge } from "@/components/ui/badge";
@@ -108,12 +109,11 @@ export default function PlatformPage() {
         </SectionContainer>
       </Section>
 
-      <Section dark className="border-white/10">
+      <Section>
         <SectionContainer>
           <FadeUp>
             <SectionIntro
-              dark
-              label="AI COPILOT // EXAMPLES"
+              label="QLIM AI // EXAMPLES"
               lines={[
                 { text: "Real Conversations.", italic: true },
                 { text: "Real Answers." },
@@ -122,7 +122,6 @@ export default function PlatformPage() {
           </FadeUp>
           <div className="section-content-gap">
             <SegmentedControl
-              dark
               items={copilotExamples.map((_, i) => `Example ${String(i + 1).padStart(2, "0")}`)}
               active={activeExample}
               onChange={setActiveExample}
@@ -169,7 +168,7 @@ export default function PlatformPage() {
                 ].map((row) => (
                   <div key={row.label} className="flex items-center justify-between py-4 text-sm">
                     <span className="text-muted-foreground">{row.label}</span>
-                    <span className="font-serif text-lg font-bold tabular-nums">{row.value}</span>
+                    <MetricFigure size="md">{row.value}</MetricFigure>
                   </div>
                 ))}
               </div>

@@ -26,7 +26,7 @@ export function ChartTooltip({ active, payload, label, unit = "tCO₂e", formatt
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color ?? "#82D153" }} />
                 <span className="text-xs text-muted-foreground">{entry.name ?? entry.dataKey}</span>
               </div>
-              <span className="text-xs font-semibold tabular-nums">{display}</span>
+              <span className="dash-num text-xs">{display}</span>
             </div>
           );
         })}

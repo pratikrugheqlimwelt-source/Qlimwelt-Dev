@@ -16,7 +16,9 @@ export default function LoginPage() {
       ? "Authentication failed. Please try signing in again."
       : error === "session"
         ? "Your session expired. Please sign in again."
-        : null;
+        : error === "config"
+          ? "Sign-in is not configured. Add Supabase environment variables and try again."
+          : null;
 
   return (
     <PublicOnlyRoute>

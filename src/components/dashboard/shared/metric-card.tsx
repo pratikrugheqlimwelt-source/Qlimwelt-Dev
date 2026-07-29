@@ -1,6 +1,7 @@
 "use client";
 
-import { InfoTip } from "@/components/ui/tooltip";
+import { HelpCorner } from "@/components/ui/tooltip";
+import { MetricFigure } from "@/components/ui/metric-figure";
 import { Sparkline } from "@/components/dashboard/charts/sparkline";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -84,6 +85,7 @@ interface MetricCardProps {
   label: string;
   value: string;
   sub?: string;
+  /** Explains this KPI on "?" hover (upper-right) */
   tooltip?: string;
   trend?: number;
   icon?: LucideIcon;
@@ -126,31 +128,35 @@ export function MetricCard({
     >
       <div className={cn("pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br opacity-80 blur-2xl", styles.glow)} />
       <div className={cn("absolute left-0 top-0 h-full w-1", styles.bar)} />
+      {tooltip && <HelpCorner content={tooltip} className="right-2.5 top-2.5" />}
 
-      <div className="relative pl-4">
+      <div className="relative pl-4 pr-8">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-              {tooltip && <InfoTip content={tooltip} />}
-            </div>
-            <p className={cn("mt-2 font-bold tabular-nums tracking-tight", size === "hero" ? "text-3xl" : "text-2xl")}>
+            <p className="dash-label">{label}</p>
+            <MetricFigure
+              size={size === "hero" ? "xl" : "lg"}
+              className="mt-2 text-foreground"
+            >
               {value}
-            </p>
-            {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
+            </MetricFigure>
+            {sub && <p className="mt-1.5 text-xs leading-snug text-muted-foreground">{sub}</p>}
             {trend !== undefined && (
               <div className={cn(
                 "mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
                 trend <= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
               )}>
                 {trend <= 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
-                {Math.abs(trend).toFixed(1)}% vs prior
+                <MetricFigure size="sm" className="!inline-flex text-[11px]">
+                  {`${Math.abs(trend).toFixed(1)} %`}
+                </MetricFigure>
+                <span>vs prior</span>
               </div>
             )}
           </div>
           {Icon && (
             <div className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-110",
+              "mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-110",
               styles.icon
             )}>
               <Icon className="h-5 w-5" />
@@ -162,7 +168,7 @@ export function MetricCard({
           <div className="mt-4">
             <div className="mb-1 flex justify-between text-[10px] font-medium text-muted-foreground">
               <span>Progress</span>
-              <span>{progress.toFixed(0)}%</span>
+              <span className="dash-num text-[10px]">{progress.toFixed(0)}%</span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-black/5">
               <div

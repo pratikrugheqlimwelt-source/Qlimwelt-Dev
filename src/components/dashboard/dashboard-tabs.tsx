@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   dashboardKpis, monthlyEmissions, departmentEmissions, scopeBreakdown, aiChips,
   topEmissionSources, renewableMix, carbonCostTrend, dashboardSuppliers,
-  dashboardReports, csrdChecklist, aiRecommendations, carbonChatMessages,
+  dashboardReports, csrdChecklist, aiRecommendations, qlimAiMessages,
 } from "@/data/dashboard-data";
 import { formatCO2, formatCurrency } from "@/lib/utils";
 import { Cloud, Factory, Zap, Truck, Award, Euro, ShieldCheck, Target } from "lucide-react";
@@ -42,7 +42,7 @@ export function OverviewTab() {
       </div>
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader className="pb-2"><CardTitle className="font-serif text-lg font-bold">Monthly Emissions Trend</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-lg font-semibold tracking-tight">Monthly Emissions Trend</CardTitle></CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -293,8 +293,8 @@ export function InsightsTab() {
   );
 }
 
-export function ChatTab() {
-  const [messages, setMessages] = useState(carbonChatMessages);
+export function QlimAiTab() {
+  const [messages, setMessages] = useState(qlimAiMessages);
   const [input, setInput] = useState("");
 
   const send = () => {
@@ -308,7 +308,7 @@ export function ChatTab() {
 
   return (
     <Card className="flex h-[calc(100vh-10rem)] flex-col">
-      <CardHeader><CardTitle>Carbon Chat</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Qlim AI</CardTitle></CardHeader>
       <CardContent className="flex flex-1 flex-col">
         <div className="flex-1 space-y-4 overflow-y-auto">
           {messages.map((msg, i) => (

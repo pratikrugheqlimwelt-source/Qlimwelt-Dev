@@ -101,10 +101,7 @@ export const aiChips = [
   "CSRD ESRS E1 draft ready for review",
 ];
 
-export const carbonChatMessages = [
-  { role: "user" as const, content: "What would happen if we switched to 100% renewable electricity across all facilities?" },
-  { role: "assistant" as const, content: "Based on your current energy mix (28% renewable), switching to 100% would reduce Scope 2 emissions by 2,964 tCO₂e annually — a 72% reduction in your Scope 2 footprint.\n\nFinancial impact:\n• Estimated PPA cost: €340k/year\n• Carbon cost avoidance: €148k/year (at €50/tCO₂e)\n• Net payback period: 2.4 years\n\nESG Score impact: +6 points (74 → 80)\nCSRD Readiness: +8% (76% → 84%)" },
-];
+export { qlimAiMessages as carbonChatMessages, qlimAiMessages } from "@/data/qlim-ai-data";
 
 export const scopeBreakdown = [
   { name: "Scope 1", value: 2840, color: "#1e293b" },

@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
+import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/marketing/logo";
 import { NavAnchor, ScrollProgress } from "@/components/marketing/motion-ui";
 import { EASE_OUT } from "@/lib/motion";
@@ -17,6 +19,15 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
   const pathname = usePathname();
   const isHome = variant === "home" || pathname === "/";
   const reduced = useReducedMotion();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const homeAnchors: [string, string][] = [
+    ["#carbon-footprint", "Learn"],
+    ["#platform", "Platform"],
+    ["#how-it-works", "Process"],
+    ["#insights", "Insights"],
+    ["#pricing", "Pricing"],
+  ];
 
   return (
     <motion.header
@@ -32,13 +43,7 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
         <nav className="hidden items-center gap-7 lg:flex">
           {isHome ? (
             <>
-              {[
-                ["#carbon-footprint", "Learn"],
-                ["#platform", "Platform"],
-                ["#how-it-works", "Process"],
-                ["#insights", "Insights"],
-                ["#pricing", "Pricing"],
-              ].map(([href, label]) => (
+              {homeAnchors.map(([href, label]) => (
                 <NavAnchor key={href} href={href}>
                   {label}
                 </NavAnchor>
@@ -66,8 +71,53 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
               Get Started
             </Link>
           </motion.div>
+          <button
+            type="button"
+            className="rounded-md p-2 text-foreground lg:hidden"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
+
+      {mobileOpen && (
+        <div className="border-t border-border bg-background px-4 py-4 lg:hidden">
+          <nav className="flex flex-col gap-3">
+            {isHome ? (
+              homeAnchors.map(([href, label]) => (
+                <a
+                  key={href}
+                  href={href}
+                  className={navLinkClass}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {label}
+                </a>
+              ))
+            ) : (
+              <Link href="/" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                Home
+              </Link>
+            )}
+            <Link href="/platform" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+              AI Features
+            </Link>
+            <Link href="/whats-new" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+              What&apos;s New
+            </Link>
+            <Link
+              href="/login"
+              className="type-cta mt-2 inline-block border border-foreground px-4 py-2.5 text-center text-foreground"
+              onClick={() => setMobileOpen(false)}
+            >
+              Get Started
+            </Link>
+          </nav>
+        </div>
+      )}
     </motion.header>
   );
 }

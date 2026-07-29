@@ -1,14 +1,18 @@
+import { HelpCorner } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface DataTableProps {
   children: React.ReactNode;
   className?: string;
+  /** Explains this table on "?" hover (upper-right) */
+  tip?: string;
 }
 
-export function DataTable({ children, className }: DataTableProps) {
+export function DataTable({ children, className, tip }: DataTableProps) {
   return (
-    <div className={cn("dash-card overflow-hidden", className)}>
-      <div className="overflow-x-auto">{children}</div>
+    <div className={cn("dash-card relative overflow-hidden", className)}>
+      {tip && <HelpCorner content={tip} />}
+      <div className={cn("overflow-x-auto", tip && "pt-2")}>{children}</div>
     </div>
   );
 }
@@ -36,9 +40,8 @@ export function DataTableRow({
   onClick?: () => void;
   className?: string;
 }) {
-  const Comp = onClick ? "tr" : "tr";
   return (
-    <Comp
+    <tr
       onClick={onClick}
       className={cn(
         "text-sm transition-colors",
@@ -47,12 +50,12 @@ export function DataTableRow({
       )}
     >
       {children}
-    </Comp>
+    </tr>
   );
 }
 
 export function DataTableCell({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={cn("px-4 py-3 align-middle", className)}>{children}</td>;
+  return <td className={cn("px-4 py-3 align-middle font-sans text-sm", className)}>{children}</td>;
 }
 
 export function DataTableHead({ children, className }: { children: React.ReactNode; className?: string }) {

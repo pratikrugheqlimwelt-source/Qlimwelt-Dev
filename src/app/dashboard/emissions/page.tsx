@@ -10,8 +10,9 @@ import { useDashboard } from "@/components/dashboard/providers/dashboard-provide
 import { activityToCalculation } from "@/lib/calculations/engine";
 import { CHART, CHART_AXIS, CHART_GRID } from "@/lib/chart-theme";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, CartesianGrid } from "recharts";
-import { Factory, Zap, Cloud, BarChart3 } from "lucide-react";
+import { Factory, Zap, Cloud, BarChart3, Trash2 } from "lucide-react";
 import { formatCO2 } from "@/lib/utils";
 
 const SCOPE3_CATS = [
@@ -21,7 +22,13 @@ const SCOPE3_CATS = [
 ];
 
 export default function EmissionsPage() {
-  const { filteredActivities, metrics, openCalculation } = useDashboard();
+  const { filteredActivities, metrics, openCalculation, deleteActivityRecord, saving } = useDashboard();
+
+  const handleDelete = async (id: string, source: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm(`Delete activity “${source}”? This cannot be undone.`)) return;
+    await deleteActivityRecord(id);
+  };
 
   const byCategory = SCOPE3_CATS.map((cat) => ({
     category: cat,
@@ -33,6 +40,7 @@ export default function EmissionsPage() {
       <PageHeader
         title="Emissions inventory"
         description="GHG Protocol-aligned breakdown of Scope 1, 2, and 3 emissions. Click any record to inspect the calculation."
+        tip="View Scope 1–3 totals, category charts, and activity-level records. Click a row to open the calculation drawer with full data lineage."
       />
 
       <FilterBar />
@@ -78,6 +86,7 @@ export default function EmissionsPage() {
               <DataTableHead>Activity</DataTableHead>
               <DataTableHead>tCO₂e</DataTableHead>
               <DataTableHead>Method</DataTableHead>
+              <DataTableHead className="w-[72px]">Actions</DataTableHead>
             </DataTableHeader>
             <DataTableBody>
               {filteredActivities.map((a) => (
@@ -87,8 +96,21 @@ export default function EmissionsPage() {
                   <DataTableCell className="text-muted-foreground">{a.subcategory}</DataTableCell>
                   <DataTableCell className="font-medium">{a.source}</DataTableCell>
                   <DataTableCell>{a.activityValue} {a.activityUnit}</DataTableCell>
-                  <DataTableCell className="tabular-nums font-semibold">{activityToCalculation(a).emissionsTCO2e.toFixed(3)}</DataTableCell>
+                  <DataTableCell className="dash-num">{activityToCalculation(a).emissionsTCO2e.toFixed(3)}</DataTableCell>
                   <DataTableCell><Badge variant="secondary" className="text-[10px]">{a.method.replace(/_/g, " ")}</Badge></DataTableCell>
+                  <DataTableCell>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 px-2 text-xs text-destructive hover:text-destructive"
+                      disabled={saving}
+                      onClick={(e) => void handleDelete(a.id, a.source, e)}
+                    >
+                      <Trash2 className="mr-1 h-3.5 w-3.5" />
+                      Delete
+                    </Button>
+                  </DataTableCell>
                 </DataTableRow>
               ))}
             </DataTableBody>

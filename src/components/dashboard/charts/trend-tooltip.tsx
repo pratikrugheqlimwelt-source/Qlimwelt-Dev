@@ -36,7 +36,7 @@ export function TrendTooltip({ active, payload, label, unit = "tCO₂e", row }: 
             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color ?? "#82D153" }} />
             <span className="text-xs text-muted-foreground">{entry.name ?? entry.dataKey}</span>
           </div>
-          <span className="text-xs font-semibold tabular-nums">
+          <span className="dash-num text-xs">
             {(entry.value ?? 0).toFixed(2)} {unit}
           </span>
         </div>
@@ -46,13 +46,13 @@ export function TrendTooltip({ active, payload, label, unit = "tCO₂e", row }: 
           {row.total !== undefined && (
             <div className="flex justify-between">
               <span className="font-medium text-foreground">Total</span>
-              <span className="font-bold tabular-nums">{row.total.toFixed(2)} {unit}</span>
+              <span className="dash-num">{row.total.toFixed(2)} {unit}</span>
             </div>
           )}
           {row.momChange !== undefined && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">MoM change</span>
-              <span className={cn("font-semibold tabular-nums", row.momChange <= 0 ? "text-green-600" : "text-red-600")}>
+              <span className={cn("dash-num", row.momChange <= 0 ? "text-green-600" : "text-red-600")}>
                 {row.momChange >= 0 ? "+" : ""}{row.momChange.toFixed(1)}%
               </span>
             </div>
@@ -60,7 +60,7 @@ export function TrendTooltip({ active, payload, label, unit = "tCO₂e", row }: 
           {row.yoyChange !== undefined && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">vs prior year</span>
-              <span className={cn("font-semibold tabular-nums", row.yoyChange <= 0 ? "text-green-600" : "text-red-600")}>
+              <span className={cn("dash-num", row.yoyChange <= 0 ? "text-green-600" : "text-red-600")}>
                 {row.yoyChange >= 0 ? "+" : ""}{row.yoyChange.toFixed(1)}%
               </span>
             </div>
@@ -68,7 +68,7 @@ export function TrendTooltip({ active, payload, label, unit = "tCO₂e", row }: 
           {row.rollingAvg !== undefined && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">3-mo avg</span>
-              <span className="font-semibold tabular-nums">{row.rollingAvg.toFixed(2)} {unit}</span>
+              <span className="dash-num">{row.rollingAvg.toFixed(2)} {unit}</span>
             </div>
           )}
         </div>

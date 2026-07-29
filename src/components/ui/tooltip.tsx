@@ -13,12 +13,12 @@ const TooltipTrigger = TooltipPrimitive.Trigger;
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
+>(({ className, sideOffset = 6, ...props }, ref) => (
   <TooltipPrimitive.Content
     ref={ref}
     sideOffset={sideOffset}
     className={cn(
-      "z-50 max-w-xs rounded-md border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+      "z-50 max-w-xs rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs leading-relaxed text-foreground shadow-lg animate-in fade-in-0 zoom-in-95",
       className
     )}
     {...props}
@@ -26,19 +26,54 @@ const TooltipContent = React.forwardRef<
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
-function InfoTip({ content, children }: { content: string; children?: React.ReactNode }) {
+/** Circular "?" help button — use beside titles or via HelpCorner */
+function InfoTip({
+  content,
+  children,
+  className,
+  side = "top",
+}: {
+  content: string;
+  children?: React.ReactNode;
+  className?: string;
+  side?: "top" | "bottom" | "left" | "right";
+}) {
   return (
-    <Tooltip>
+    <Tooltip delayDuration={150}>
       <TooltipTrigger asChild>
         {children ?? (
-          <button type="button" className="inline-flex h-4 w-4 items-center justify-center rounded-full border text-[10px] text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            aria-label="Help"
+            className={cn(
+              "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-background text-[11px] font-semibold text-muted-foreground shadow-sm transition-colors hover:border-brand/40 hover:bg-brand-light hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40",
+              className
+            )}
+          >
             ?
           </button>
         )}
       </TooltipTrigger>
-      <TooltipContent>{content}</TooltipContent>
+      <TooltipContent side={side}>{content}</TooltipContent>
     </Tooltip>
   );
 }
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, InfoTip };
+/** Absolutely positions a "?" in the upper-right of a relative parent */
+function HelpCorner({
+  content,
+  className,
+  side = "left",
+}: {
+  content: string;
+  className?: string;
+  side?: "top" | "bottom" | "left" | "right";
+}) {
+  return (
+    <div className={cn("absolute right-3 top-3 z-10", className)}>
+      <InfoTip content={content} side={side} />
+    </div>
+  );
+}
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, InfoTip, HelpCorner };

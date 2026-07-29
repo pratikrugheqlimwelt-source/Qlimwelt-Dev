@@ -5,6 +5,7 @@ import { useDashboard } from "@/components/dashboard/providers/dashboard-provide
 import { Badge } from "@/components/ui/badge";
 import { ScopeBadge } from "@/components/dashboard/shared/scope-badge";
 import { Calculator, FileCheck2 } from "lucide-react";
+import { MetricFigure } from "@/components/ui/metric-figure";
 
 export function CalculationDrawer() {
   const { calculationDetail, closeCalculation } = useDashboard();
@@ -47,9 +48,8 @@ export function CalculationDrawer() {
             </p>
             <p className="font-mono text-xs text-muted-foreground">emissions = activity × factor × conversion</p>
             <p className="mt-2 font-mono text-xs leading-relaxed">{formula}</p>
-            <div className="mt-4 flex items-baseline gap-2 border-t border-border/40 pt-4">
-              <span className="text-2xl font-semibold tabular-nums">{resultTCO2e.toFixed(4)}</span>
-              <span className="text-sm text-muted-foreground">tCO₂e</span>
+            <div className="mt-4 border-t border-border/40 pt-4">
+              <MetricFigure size="lg" value={resultTCO2e.toFixed(4)} unit="tCO₂e" />
             </div>
           </div>
 
@@ -62,10 +62,6 @@ export function CalculationDrawer() {
             <Badge variant={activity.isEstimated ? "warning" : "success"}>{activity.isEstimated ? "Estimated" : "Calculated"}</Badge>
             <Badge variant="secondary">DQ: {activity.dataQualityScore}%</Badge>
           </div>
-
-          <p className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
-            Demonstration calculation using sample data. Factors are not official verified values.
-          </p>
         </div>
       </SheetContent>
     </Sheet>

@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { EASE_OUT } from "@/lib/motion";
+import { MetricFigure } from "@/components/ui/metric-figure";
 
 /* ── Layout primitives ── */
 
@@ -190,7 +191,9 @@ export function MetricDark({
   return (
     <div className="flex h-full flex-col">
       <MetaLabel className="text-white/40">{index}</MetaLabel>
-      <p className="mt-4 font-serif text-5xl font-bold tabular-nums text-white sm:text-6xl lg:text-7xl">{value}</p>
+      <MetricFigure size="hero" className="mt-4 text-white" unitClassName="opacity-50">
+        {value}
+      </MetricFigure>
       <ThinRule className="mt-6 border-white/10" />
       <p className="mt-4 font-serif text-lg italic text-white/80">{label}</p>
       <div className="mt-auto space-y-1 pt-6">
@@ -215,7 +218,7 @@ export function StatColumn({
 }) {
   return (
     <div className="flex h-full flex-col">
-      <p className="font-serif text-4xl font-bold tabular-nums sm:text-5xl">{value}</p>
+      <MetricFigure size="hero">{value}</MetricFigure>
       <ThinRule className="mt-4 w-full" />
       <MetaLabel className="mt-4">{label}</MetaLabel>
       <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
@@ -238,10 +241,9 @@ export function FadeUp({
 
   return (
     <motion.div
-      initial={reduced ? false : { opacity: 0, y: 32 }}
-      whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.65, delay, ease: EASE_OUT }}
+      initial={reduced ? false : { y: 20 }}
+      animate={reduced ? undefined : { y: 0 }}
+      transition={{ duration: 0.55, delay, ease: EASE_OUT }}
       className={className}
     >
       {children}
@@ -260,9 +262,8 @@ export function FadeUpStagger({
 
   return (
     <motion.div
-      initial={reduced ? false : "hidden"}
-      whileInView={reduced ? undefined : "visible"}
-      viewport={{ once: true, margin: "-60px" }}
+      initial={false}
+      animate={reduced ? undefined : "visible"}
       variants={{
         hidden: {},
         visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
@@ -289,8 +290,8 @@ export function FadeUpItem({
         reduced
           ? undefined
           : {
-              hidden: { opacity: 0, y: 24 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE_OUT } },
+              hidden: { y: 16 },
+              visible: { y: 0, transition: { duration: 0.55, ease: EASE_OUT } },
             }
       }
       className={className}

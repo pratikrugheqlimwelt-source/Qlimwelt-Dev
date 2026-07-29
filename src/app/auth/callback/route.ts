@@ -70,6 +70,22 @@ export async function GET(request: Request) {
     profile = upserted;
   }
 
-  const destination = profile?.onboarding_completed ? redirect : "/onboarding";
+  // Full platform C: accept pending team invite (joins company, skips onboarding)
+  let inviteAccepted = false;
+  try {
+    const { data: inviteResult } = await supabase.rpc("accept_team_invite");
+    const result = inviteResult as { accepted?: boolean } | null;
+    inviteAccepted = Boolean(result?.accepted);
+    if (inviteAccepted) {
+      profile = { onboarding_completed: true };
+    }
+  } catch {
+    // Migration 003 not applied yet — ignore
+  }
+
+  const destination =
+    profile?.onboarding_completed || inviteAccepted
+      ? redirect
+      : "/onboarding";
   return NextResponse.redirect(`${origin}${destination}`);
 }

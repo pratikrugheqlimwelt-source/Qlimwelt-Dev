@@ -5,7 +5,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { MarketingLayout } from "@/components/marketing/marketing-layout";
-import { DarkChatUI } from "@/components/marketing/marketing-ui";
+import { QlimAiChat } from "@/components/qlim-ai/qlim-ai-chat";
+import { QlimAiOverlay } from "@/components/qlim-ai/qlim-ai-overlay";
 import {
   Section,
   SectionContainer,
@@ -25,6 +26,7 @@ import {
 } from "@/components/marketing/editorial";
 import { AnimatedRule, PricingSelector, InteractiveSteps } from "@/components/marketing/motion-ui";
 import { CarbonFootprintSection, InsightsNewsSection } from "@/components/marketing/carbon-insights";
+import { MetricFigure } from "@/components/ui/metric-figure";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
@@ -36,7 +38,7 @@ import {
   useCases,
   pricingPlans,
   storyCards,
-  carbonChatDemo,
+  qlimAiDemo,
 } from "@/data/marketing-data";
 
 function QuoteCarousel() {
@@ -76,7 +78,7 @@ function QuoteCarousel() {
 }
 
 export default function HomePage() {
-  const [chatVisible, setChatVisible] = useState(false);
+  const [qlimAiOpen, setQlimAiOpen] = useState(false);
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const now = new Date();
   const timestamp = `${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}.${now.getFullYear()} // ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} UTC`;
@@ -347,37 +349,48 @@ export default function HomePage() {
       </Section>
 
       {/* ── AI SECTION ── */}
-      <Section dark className="border-white/10">
+      <Section>
         <SectionContainer>
           <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
             <FadeUp>
-              <MetaLabel className="text-brand">AI CARBON INTELLIGENCE</MetaLabel>
-              <h2 className="section-headline-gap font-serif text-4xl font-bold text-white sm:text-5xl">
-                Meet your AI <span className="font-normal italic">sustainability analyst.</span>
+              <MetaLabel className="text-brand-dark">QLIM AI // CLIMATE INTELLIGENCE</MetaLabel>
+              <h2 className="section-headline-gap font-serif text-4xl font-bold text-foreground sm:text-5xl">
+                Your AI layer for <span className="font-normal italic">climate decisions.</span>
               </h2>
-              <ThinRule className="mt-8 border-white/10" />
-              <ul className="mt-8 space-y-4">
+              <ThinRule className="mt-8" />
+              <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+                We are always working on AI research in climate change. Qlim AI tracks every data point through
+                ingest, lineage, and reasoning — so you get answers you can audit and act on.
+              </p>
+              <ul className="mt-6 space-y-4">
                 {[
                   "Reads any data format — PDFs, CSVs, ERP exports, bank statements",
                   "Every calculation is auditable with full data lineage",
                   "EU-only hosting. Your data never leaves Frankfurt or Dublin.",
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-white/60">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                  <li key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-dark" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <button
                 type="button"
-                onClick={() => setChatVisible(true)}
-                className="motion-safe:transition-all type-cta mt-10 border border-white/30 px-6 py-3 text-white hover:bg-white hover:text-black active:scale-[0.98]"
+                onClick={() => setQlimAiOpen(true)}
+                className="motion-safe:transition-all type-cta mt-10 border border-foreground px-6 py-3 text-foreground hover:bg-foreground hover:text-background active:scale-[0.98]"
               >
-                Watch Carbon Chat →
+                Open Qlim AI →
               </button>
             </FadeUp>
             <FadeUp delay={0.15} className="lg:pt-2">
-              <DarkChatUI messages={chatVisible ? carbonChatDemo : carbonChatDemo.slice(0, 2)} animateLast={chatVisible} />
+              <button
+                type="button"
+                onClick={() => setQlimAiOpen(true)}
+                className="block w-full text-left shadow-sm"
+                aria-label="Open Qlim AI Climate Intelligence"
+              >
+                <QlimAiChat messages={qlimAiDemo.slice(0, 2)} animateLast={false} />
+              </button>
             </FadeUp>
           </div>
         </SectionContainer>
@@ -452,7 +465,7 @@ export default function HomePage() {
           <div className="section-content-gap grid gap-8 sm:grid-cols-3">
             {storyCards.map((card, i) => (
               <FadeUp key={card.label} delay={i * 0.1}>
-                <p className="font-serif text-5xl font-bold tabular-nums">{card.stat}</p>
+                <MetricFigure size="hero">{card.stat}</MetricFigure>
                 <MetaLabel className="mt-3">{card.label}</MetaLabel>
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{card.text}</p>
               </FadeUp>
@@ -555,6 +568,7 @@ export default function HomePage() {
           </div>
         </SectionContainer>
       </Section>
+      <QlimAiOverlay open={qlimAiOpen} onClose={() => setQlimAiOpen(false)} chatExpanded />
     </MarketingLayout>
   );
 }

@@ -1,4 +1,4 @@
-/** Qlimwelt Carbon Intelligence — core domain types (demonstration data) */
+/** Qlimwelt Carbon Intelligence — core domain types */
 
 export type Scope = "scope1" | "scope2" | "scope3";
 export type GHG =
@@ -86,7 +86,7 @@ export interface EmissionFactor {
   validUntil: string;
   method: CalculationMethod;
   uncertaintyPct: number;
-  isDemo: true;
+  isDemo: boolean;
 }
 
 export interface EmissionActivity {

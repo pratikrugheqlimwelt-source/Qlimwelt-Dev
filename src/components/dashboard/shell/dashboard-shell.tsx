@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LayoutDashboard, Cloud, Database, Boxes, Brain, Target, Flag,
   FileText, ShieldCheck, Settings, ChevronLeft, ChevronRight, Menu, X,
@@ -11,11 +11,11 @@ import {
 import { Logo } from "@/components/marketing/logo";
 import { cn } from "@/lib/utils";
 import { CalculationDrawer } from "@/components/dashboard/shared/calculation-drawer";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { AccountMenu } from "@/components/dashboard/AccountMenu";
+import { PERIODS } from "@/data/carbon";
 
 const NAV_GROUPS = [
   {
@@ -53,13 +53,70 @@ const NAV_GROUPS = [
 
 const ALL_NAV = NAV_GROUPS.flatMap((g) => g.items);
 
+const MONTH_LABEL: Record<string, string> = {
+  all: "FY 2024",
+  "2024-01": "Jan 2024",
+  "2024-02": "Feb 2024",
+  "2024-03": "Mar 2024",
+  "2024-04": "Apr 2024",
+  "2024-05": "May 2024",
+  "2024-06": "Jun 2024",
+  "2024-07": "Jul 2024",
+  "2024-08": "Aug 2024",
+  "2024-09": "Sep 2024",
+  "2024-10": "Oct 2024",
+  "2024-11": "Nov 2024",
+  "2024-12": "Dec 2024",
+};
+
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { company } = useDashboard();
+  const router = useRouter();
+  const {
+    company,
+    filters,
+    setFilters,
+    notifications,
+    unreadCount,
+    markAllNotificationsRead,
+    activities,
+    openCalculation,
+    dataMode,
+  } = useDashboard();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [periodOpen, setPeriodOpen] = useState(false);
+  const [bellOpen, setBellOpen] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const periodRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLDivElement>(null);
 
   const pageTitle = ALL_NAV.find((n) => n.href === pathname)?.label ?? "Dashboard";
+
+  const searchResults = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return { nav: [] as typeof ALL_NAV, activities: [] as typeof activities };
+    const nav = ALL_NAV.filter((n) => n.label.toLowerCase().includes(q));
+    const acts = activities
+      .filter((a) =>
+        `${a.source} ${a.category} ${a.period} ${a.scope}`.toLowerCase().includes(q)
+      )
+      .slice(0, 8);
+    return { nav, activities: acts };
+  }, [search, activities]);
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (searchRef.current && !searchRef.current.contains(t)) setSearchOpen(false);
+      if (periodRef.current && !periodRef.current.contains(t)) setPeriodOpen(false);
+      if (bellRef.current && !bellRef.current.contains(t)) setBellOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
 
   return (
     <div className="dash-root min-h-screen">
@@ -96,16 +153,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         {!collapsed && (
           <div className="border-b border-border/40 px-4 py-3">
-            <button type="button" className="flex w-full items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-left text-sm transition-colors hover:bg-muted/50">
+            <Link
+              href="/dashboard/settings"
+              onClick={() => setMobileOpen(false)}
+              className="flex w-full items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-left text-sm transition-colors hover:bg-muted/50"
+            >
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand/15 text-xs font-bold text-brand-dark">
                 {company.name.slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-semibold">{company.name}</p>
-                <p className="truncate text-[10px] text-muted-foreground">FY 2024 · Demo</p>
+                <p className="truncate text-[10px] text-muted-foreground">
+                  {MONTH_LABEL[filters.period] ?? filters.period} · Live
+                </p>
               </div>
-              <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            </button>
+              <Settings className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            </Link>
           </div>
         )}
 
@@ -113,7 +176,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {NAV_GROUPS.map((group) => (
             <div key={group.label}>
               {!collapsed && (
-                <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+                <p className="dash-label mb-1.5 px-3 text-muted-foreground/70">
                   {group.label}
                 </p>
               )}
@@ -168,33 +231,173 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <h1 className="truncate text-lg font-semibold tracking-tight">{pageTitle}</h1>
             </div>
 
-            <div className="hidden items-center gap-2 md:flex">
-              <div className="relative">
+            <div className="flex items-center gap-2">
+              <div className="relative hidden md:block" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Search records…" className="h-9 w-52 border-border/60 bg-muted/30 pl-9 text-xs shadow-none" />
+                <Input
+                  placeholder="Search pages & activities…"
+                  className="h-9 w-52 border-border/60 bg-muted/30 pl-9 text-xs shadow-none lg:w-64"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setSearchOpen(true);
+                  }}
+                  onFocus={() => setSearchOpen(true)}
+                />
+                {searchOpen && search.trim() && (
+                  <div className="absolute right-0 top-full z-50 mt-1 w-80 overflow-hidden rounded-xl border border-border bg-background shadow-lg">
+                    {searchResults.nav.length === 0 && searchResults.activities.length === 0 ? (
+                      <p className="px-3 py-4 text-xs text-muted-foreground">No matches</p>
+                    ) : (
+                      <>
+                        {searchResults.nav.length > 0 && (
+                          <div className="border-b border-border/50 p-2">
+                            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Pages</p>
+                            {searchResults.nav.map((n) => (
+                              <button
+                                key={n.href}
+                                type="button"
+                                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm hover:bg-muted"
+                                onClick={() => {
+                                  router.push(n.href);
+                                  setSearch("");
+                                  setSearchOpen(false);
+                                }}
+                              >
+                                <n.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                                {n.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {searchResults.activities.length > 0 && (
+                          <div className="p-2">
+                            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Activities</p>
+                            {searchResults.activities.map((a) => (
+                              <button
+                                key={a.id}
+                                type="button"
+                                className="flex w-full flex-col rounded-lg px-2 py-2 text-left hover:bg-muted"
+                                onClick={() => {
+                                  openCalculation(a);
+                                  setSearch("");
+                                  setSearchOpen(false);
+                                  if (pathname !== "/dashboard/emissions") router.push("/dashboard/emissions");
+                                }}
+                              >
+                                <span className="text-sm font-medium">{a.source}</span>
+                                <span className="text-[11px] text-muted-foreground">{a.category} · {a.period}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
-              <Button variant="outline" size="sm" className="h-9 gap-1.5 border-border/60 text-xs">
-                <Calendar className="h-3.5 w-3.5" />
-                FY 2024
-              </Button>
+
+              <div className="relative" ref={periodRef}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 gap-1.5 border-border/60 px-2 text-xs sm:px-3"
+                  onClick={() => setPeriodOpen((v) => !v)}
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span className="max-w-[5.5rem] truncate sm:max-w-none">
+                    {MONTH_LABEL[filters.period] ?? filters.period}
+                  </span>
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </Button>
+                {periodOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-1 max-h-64 w-40 overflow-auto rounded-xl border border-border bg-background p-1 shadow-lg">
+                    {PERIODS.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        className={cn(
+                          "flex w-full rounded-lg px-3 py-2 text-left text-xs hover:bg-muted",
+                          filters.period === p && "bg-muted font-semibold"
+                        )}
+                        onClick={() => {
+                          setFilters({ period: p });
+                          setPeriodOpen(false);
+                        }}
+                      >
+                        {MONTH_LABEL[p] ?? p}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-1">
-              {company.isDemo && (
-                <Badge variant="secondary" className="hidden font-mono text-[10px] uppercase sm:inline-flex">
-                  Demo data
-                </Badge>
-              )}
-              <Button variant="ghost" size="icon" className="relative h-9 w-9">
-                <Bell className="h-4 w-4" />
-                <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-brand" />
-              </Button>
+              <div className="relative" ref={bellRef}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative h-9 w-9"
+                  onClick={() => setBellOpen((v) => !v)}
+                >
+                  <Bell className="h-4 w-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[9px] font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Button>
+                {bellOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-1 w-80 overflow-hidden rounded-xl border border-border bg-background shadow-lg">
+                    <div className="flex items-center justify-between border-b border-border/50 px-3 py-2">
+                      <p className="text-xs font-semibold">Notifications</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-[10px]"
+                        onClick={() => void markAllNotificationsRead()}
+                      >
+                        Mark all read
+                      </Button>
+                    </div>
+                    <div className="max-h-72 overflow-auto">
+                      {notifications.length === 0 ? (
+                        <p className="px-3 py-6 text-center text-xs text-muted-foreground">No notifications yet</p>
+                      ) : (
+                        notifications.slice(0, 20).map((n) => (
+                          <button
+                            key={n.id}
+                            type="button"
+                            className={cn(
+                              "flex w-full flex-col gap-0.5 border-b border-border/40 px-3 py-2.5 text-left hover:bg-muted/50",
+                              !n.read && "bg-brand/5"
+                            )}
+                            onClick={() => {
+                              setBellOpen(false);
+                              if (n.href) router.push(n.href);
+                            }}
+                          >
+                            <span className="text-sm font-medium">{n.title}</span>
+                            <span className="text-[11px] text-muted-foreground">{n.message}</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <AccountMenu />
             </div>
           </div>
         </header>
 
         <main className="flex-1 px-4 py-4 lg:px-6 lg:py-5">
+          {dataMode === "local" && (
+            <div className="mx-auto mb-4 max-w-[1600px] rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-900">
+              Working offline (local storage) — apply migration 002 for cloud sync
+            </div>
+          )}
           <div className="mx-auto max-w-[1600px]">{children}</div>
         </main>
       </div>

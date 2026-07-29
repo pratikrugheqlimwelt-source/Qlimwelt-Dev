@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Bot, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Bot, AlertTriangle, CheckCircle2, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export function HeroDashboardCard() {
   return (
@@ -109,40 +110,55 @@ export function ScrollingTicker({ items }: { items: string[] }) {
 export function DarkChatUI({
   messages,
   animateLast = false,
+  className,
 }: {
   messages: { role: "user" | "assistant"; content: string }[];
   animateLast?: boolean;
+  className?: string;
 }) {
   const lastAssistantIdx = messages.map((m, i) => (m.role === "assistant" ? i : -1)).filter((i) => i >= 0).pop();
 
   return (
-    <div className="flex h-full flex-col overflow-hidden border border-white/15 bg-white/[0.04] p-5 sm:p-6">
-      <div className="mb-5 flex items-center gap-3 border-b border-white/10 pb-5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-brand/30 bg-brand/10">
-          <Bot className="h-5 w-5 text-brand" />
+    <div className={cn("flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background", className)}>
+      <div className="mb-0 flex items-center gap-3 border-b border-border px-5 py-4 sm:px-6">
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-light ring-1 ring-brand/20">
+          <Bot className="h-[18px] w-[18px] text-brand-dark" strokeWidth={1.75} />
         </div>
         <div>
-          <p className="font-serif text-base font-bold text-white">Carbon Chat</p>
-          <p className="type-label text-white/40">Powered by Qlimwelt AI</p>
+          <p className="text-sm font-semibold tracking-tight text-foreground">Qlim AI</p>
+          <p className="text-xs text-muted-foreground">Climate Intelligence</p>
         </div>
       </div>
-      <div className="max-h-80 flex-1 space-y-3 overflow-y-auto">
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`px-4 py-3 text-sm leading-relaxed ${
-              msg.role === "user"
-                ? "ml-4 border border-white/10 bg-white/[0.06] text-white/90"
-                : "mr-4 border border-brand/25 bg-brand/10 text-white"
-            }`}
-          >
-            {animateLast && i === lastAssistantIdx ? (
-              <TypewriterText text={msg.content} speed={12} />
-            ) : (
-              <span className="whitespace-pre-wrap">{msg.content}</span>
-            )}
-          </div>
-        ))}
+      <div className="max-h-80 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
+        {messages.map((msg, i) => {
+          const isUser = msg.role === "user";
+          return (
+            <div key={i} className={cn("flex gap-3", isUser ? "flex-row-reverse" : "flex-row")}>
+              <div
+                className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
+                  isUser ? "bg-muted text-muted-foreground" : "bg-brand-light text-brand-dark"
+                )}
+              >
+                {isUser ? <User className="h-3.5 w-3.5" strokeWidth={1.75} /> : <Bot className="h-3.5 w-3.5" strokeWidth={1.75} />}
+              </div>
+              <div
+                className={cn(
+                  "max-w-[85%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed",
+                  isUser
+                    ? "rounded-tr-md bg-muted text-foreground"
+                    : "rounded-tl-md border border-brand/20 bg-brand-light text-foreground"
+                )}
+              >
+                {animateLast && i === lastAssistantIdx ? (
+                  <TypewriterText text={msg.content} speed={12} />
+                ) : (
+                  <span className="whitespace-pre-wrap">{msg.content}</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

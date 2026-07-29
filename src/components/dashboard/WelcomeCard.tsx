@@ -54,7 +54,7 @@ export function WelcomeCard({ firstName, companyName }: WelcomeCardProps) {
           <Sparkles className="h-5 w-5" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold">
+          <h3 className="text-base font-semibold tracking-tight">
             Welcome to Qlimwelt{name ? `, ${name}` : ""}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">

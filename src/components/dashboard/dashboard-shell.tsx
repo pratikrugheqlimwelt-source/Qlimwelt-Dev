@@ -45,7 +45,7 @@ const tabs: { id: DashboardTab; label: string; icon: typeof LayoutDashboard }[] 
   { id: "reports", label: "Reports", icon: FileText },
   { id: "csrd", label: "CSRD Status", icon: ShieldCheck },
   { id: "insights", label: "AI Insights", icon: Lightbulb },
-  { id: "chat", label: "Carbon Chat", icon: MessageSquare },
+  { id: "chat", label: "Qlim AI", icon: MessageSquare },
 ];
 
 interface DashboardShellProps {
