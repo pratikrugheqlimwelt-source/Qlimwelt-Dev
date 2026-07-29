@@ -83,7 +83,7 @@ export async function chatCompletion(
   const cfg = getLlmConfig();
   if (!cfg.configured) {
     throw new Error(
-      "LLM is not configured. Locally: run Ollama (qlimwelt-carbon). On Vercel: set GROQ_API_KEY and LLM_PROVIDER=groq."
+      "LLM is not configured. Free options: locally run Ollama (qlimwelt-carbon), or on Vercel set GROQ_API_KEY from the free Groq tier (console.groq.com — no credit card)."
     );
   }
 

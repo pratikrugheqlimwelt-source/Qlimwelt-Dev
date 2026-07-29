@@ -50,10 +50,12 @@ export async function GET() {
     tunedFor: "corporate GHG Scope 1–3 / carbon footprinting",
     hint:
       cfg.provider === "ollama"
-        ? "Create tuned model: ollama create qlimwelt-carbon -f ollama/Modelfile  then set LLM_MODEL=qlimwelt-carbon"
+        ? "Free local Ollama — create tuned model: ollama create qlimwelt-carbon -f ollama/Modelfile"
         : cfg.provider === "groq"
-          ? "Using Groq open model with Qlimwelt carbon system prompt"
-          : "Using OpenAI-compatible endpoint with carbon system prompt",
+          ? "Free Groq tier (no credit card) with Qlimwelt carbon consultant prompt"
+          : cfg.configured
+            ? "OpenAI-compatible endpoint with carbon consultant prompt"
+            : "Add free Groq key (console.groq.com) on Vercel, or run free Ollama locally",
   });
 }
 
@@ -61,7 +63,10 @@ export async function POST(request: NextRequest) {
   const cfg = getLlmConfig();
   if (!cfg.configured) {
     return NextResponse.json(
-      { error: "No LLM configured. Set GROQ_API_KEY or run Ollama locally." },
+      {
+        error:
+          "No free LLM configured. Locally: run Ollama. On Vercel: add GROQ_API_KEY from the free Groq tier (console.groq.com — no credit card).",
+      },
       { status: 503 }
     );
   }
