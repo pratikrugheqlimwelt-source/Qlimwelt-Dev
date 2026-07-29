@@ -1,75 +1,34 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { calculateEmissionsTCO2e } from "@/lib/calculations/engine";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import type { CalculationMethod, EmissionActivity, Scope } from "@/types/carbon";
-import { HelpCorner } from "@/components/ui/tooltip";
-import { formatCO2 } from "@/lib/utils";
+import { cn, formatCO2 } from "@/lib/utils";
 import { MetricFigure } from "@/components/ui/metric-figure";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
+import { ACTIVITY_PRESETS } from "@/lib/carbon/activity-presets";
+import { resolveActivityIcon } from "@/lib/carbon/activity-icons";
+import { ActivityTypeCards } from "@/components/dashboard/data-collection/activity-type-cards";
+import { FactorPicker } from "@/components/dashboard/data-collection/factor-picker";
 
-const PRESETS = [
-  {
-    id: "mobile",
-    label: "Mobile combustion (fuel)",
-    scope: "scope1" as Scope,
-    category: "Mobile combustion",
-    factor: 2.68,
-    unit: "litre",
-    method: "fuel_based" as CalculationMethod,
-  },
-  {
-    id: "electricity",
-    label: "Purchased electricity",
-    scope: "scope2" as Scope,
-    category: "Purchased electricity",
-    factor: 0.000385,
-    unit: "kWh",
-    method: "location_based" as CalculationMethod,
-  },
-  {
-    id: "travel",
-    label: "Business travel",
-    scope: "scope3" as Scope,
-    category: "Category 6",
-    factor: 0.000156,
-    unit: "passenger-km",
-    method: "distance_based" as CalculationMethod,
-  },
-  {
-    id: "goods",
-    label: "Purchased goods (spend)",
-    scope: "scope3" as Scope,
-    category: "Category 1",
-    factor: 0.004,
-    unit: "EUR",
-    method: "spend_based" as CalculationMethod,
-  },
-  {
-    id: "waste",
-    label: "Waste",
-    scope: "scope3" as Scope,
-    category: "Category 5",
-    factor: 0.52,
-    unit: "tonne",
-    method: "average_data" as CalculationMethod,
-  },
-  {
-    id: "custom",
-    label: "Custom input (pick factor or enter manually)",
-    scope: "scope1" as Scope,
-    category: "Custom",
-    factor: 0,
-    unit: "unit",
-    method: "activity_specific" as CalculationMethod,
-  },
-];
+function lastMonthPeriod(ref = new Date()): string {
+  const d = new Date(ref.getFullYear(), ref.getMonth() - 1, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function fyPeriod(reportingYear: number): string {
+  return `${reportingYear}-12`;
+}
+
+function currentMonthPeriod(ref = new Date()): string {
+  return `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, "0")}`;
+}
 
 export default function DataCollectionPage() {
   const {
@@ -90,15 +49,17 @@ export default function DataCollectionPage() {
   const [factorValue, setFactorValue] = useState("0.000385");
   const [activityValue, setActivityValue] = useState("");
   const [source, setSource] = useState("");
-  const [period, setPeriod] = useState("2024-12");
+  const [notes, setNotes] = useState("");
+  const [isEstimated, setIsEstimated] = useState(false);
+  const [period, setPeriod] = useState(() => lastMonthPeriod());
   const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "");
   const [resourceId, setResourceId] = useState<string>("none");
-  const [preview, setPreview] = useState<number | null>(null);
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [evidenceError, setEvidenceError] = useState<string | null>(null);
 
-  const preset = PRESETS.find((c) => c.id === presetId) ?? PRESETS[1];
+  const preset = ACTIVITY_PRESETS.find((c) => c.id === presetId) ?? ACTIVITY_PRESETS[3];
   const selectedFactor = emissionFactors.find((f) => f.id === factorId);
+  const PresetIcon = resolveActivityIcon(`${preset.id} ${preset.label} ${preset.category}`);
 
   useEffect(() => {
     if (!facilityId && facilities[0]) setFacilityId(facilities[0].id);
@@ -129,14 +90,38 @@ export default function DataCollectionPage() {
     [valueNum, factorNum]
   );
 
-  const handlePreview = () => setPreview(livePreview);
+  const periodChips = useMemo(
+    () => [
+      { id: "last", label: "Last month", value: lastMonthPeriod() },
+      { id: "current", label: "This month", value: currentMonthPeriod() },
+      { id: "fy", label: `FY ${company.reportingYear}`, value: fyPeriod(company.reportingYear) },
+    ],
+    [company.reportingYear]
+  );
+
+  const handlePresetChange = (id: string) => {
+    setPresetId(id);
+  };
+
+  const handleFactorChange = (id: string) => {
+    setFactorId(id);
+    if (id) setPresetId("custom");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!valueNum || !source.trim() || !factorNum) return;
 
-    const method: CalculationMethod =
-      selectedFactor?.method ?? preset.method;
+    const method: CalculationMethod = selectedFactor?.method ?? preset.method;
+
+    let dq = selectedFactor ? Math.max(50, 100 - selectedFactor.uncertaintyPct) : 70;
+    if (isEstimated) dq = Math.max(35, dq - 15);
+    else if (evidenceFile) dq = Math.min(100, dq + 5);
+
+    const evidenceNotes = notes.trim();
+    const sourceWithNotes = evidenceNotes
+      ? `${source.trim()} — ${evidenceNotes}`
+      : source.trim();
 
     const activity: EmissionActivity = {
       id: `a-user-${Date.now()}`,
@@ -147,7 +132,7 @@ export default function DataCollectionPage() {
       scope,
       category: category.trim() || "Custom",
       subcategory: selectedFactor?.name ?? preset.label,
-      source: source.trim(),
+      source: sourceWithNotes,
       activityValue: valueNum,
       activityUnit: activityUnit.trim() || "unit",
       emissionFactorId: selectedFactor?.id ?? `ef-${preset.id}`,
@@ -159,11 +144,11 @@ export default function DataCollectionPage() {
       ghg: "CO2",
       gwp: 1,
       method,
-      dataQualityScore: selectedFactor ? Math.max(50, 100 - selectedFactor.uncertaintyPct) : 70,
-      uncertaintyPct: selectedFactor?.uncertaintyPct ?? 15,
+      dataQualityScore: dq,
+      uncertaintyPct: selectedFactor?.uncertaintyPct ?? (isEstimated ? 25 : 15),
       evidenceStatus: evidenceFile ? "uploaded" : "pending",
       resourceId: resourceId !== "none" ? resourceId : undefined,
-      isEstimated: false,
+      isEstimated,
     };
 
     await addActivity(activity);
@@ -173,7 +158,12 @@ export default function DataCollectionPage() {
       const formData = new FormData();
       formData.append("file", evidenceFile);
       formData.append("activityId", activity.id);
-      formData.append("notes", `Evidence for ${activity.source}`);
+      formData.append(
+        "notes",
+        evidenceNotes
+          ? `Evidence for ${source.trim()}. ${evidenceNotes}`
+          : `Evidence for ${source.trim()}`
+      );
       try {
         const res = await fetch("/api/evidence", { method: "POST", body: formData });
         const data = (await res.json()) as { error?: string; hint?: string };
@@ -187,203 +177,309 @@ export default function DataCollectionPage() {
 
     setActivityValue("");
     setSource("");
-    setPreview(null);
+    setNotes("");
+    setIsEstimated(false);
     setResourceId("none");
     setEvidenceFile(null);
   };
 
   return (
-    <div className="relative space-y-4">
+    <div className="relative space-y-6">
       <PageHeader
         title="Data collection"
-        description="Enter activity data — the inputs carbon calculations run on. Choose a preset, library factor, or enter your own factor."
-        tip="tCO₂e = activity value × emission factor ÷ 1000. Facilities, vehicles, and suppliers you add under Resources appear here as allocation / linked inputs."
+        description="Pick an activity type, confirm the factor, then enter measured or estimated values — calculations update live."
+        tip="tCO₂e = activity value × emission factor ÷ 1000. Live preview updates as you type; save adds the record to inventory (and optional evidence). Facilities, vehicles, and suppliers under Resources appear as linked inputs."
       />
 
-      <HelpCorner content="Create a new emission activity. Preview calculates tCO₂e from activity value × factor. Save adds it to your inventory and Emissions page." />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Activity type cards */}
+        <section className="dash-card space-y-4 p-5 sm:p-6">
+          <div>
+            <p className="dash-label">Activity type</p>
+            <h3 className="mt-1 text-base font-semibold tracking-tight">What are you recording?</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Choose a template — scope, category, unit, and factor fill in automatically.
+            </p>
+          </div>
+          <ActivityTypeCards
+            presets={ACTIVITY_PRESETS}
+            value={presetId}
+            onChange={handlePresetChange}
+          />
+        </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">New activity input</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label>Calculation template</Label>
-              <Select value={presetId} onValueChange={setPresetId}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {PRESETS.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Emission factor library</Label>
-              <Select
-                value={factorId || "none"}
-                onValueChange={(v) => {
-                  setFactorId(v === "none" ? "" : v);
-                  if (v !== "none") setPresetId("custom");
-                }}
-              >
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Use template factor" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Use template / manual factor</SelectItem>
-                  {emissionFactors.slice(0, 40).map((f) => (
-                    <SelectItem key={f.id} value={f.id}>
-                      {f.name} · {f.value} kgCO₂e/{f.denominatorUnit}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Add custom factors in Settings — they appear in this list.
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:items-start">
+          {/* Main form */}
+          <div className="space-y-6">
+            <section className="dash-card space-y-5 p-5 sm:p-6">
               <div>
-                <Label>Scope</Label>
-                <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
-                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="scope1">Scope 1</SelectItem>
-                    <SelectItem value="scope2">Scope 2</SelectItem>
-                    <SelectItem value="scope3">Scope 3</SelectItem>
-                  </SelectContent>
-                </Select>
+                <p className="dash-label">Emission factor</p>
+                <h3 className="mt-1 text-base font-semibold tracking-tight">Library or manual</h3>
               </div>
-              <div>
-                <Label>Category</Label>
-                <Input className="mt-1" value={category} onChange={(e) => setCategory(e.target.value)} required />
-              </div>
-              <div>
-                <Label>Activity unit</Label>
-                <Input className="mt-1" value={activityUnit} onChange={(e) => setActivityUnit(e.target.value)} required />
-              </div>
-            </div>
+              <FactorPicker
+                factors={emissionFactors}
+                value={factorId}
+                onChange={handleFactorChange}
+              />
+            </section>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <section className="dash-card space-y-5 p-5 sm:p-6">
               <div>
-                <Label>Activity value ({activityUnit})</Label>
+                <p className="dash-label">Activity details</p>
+                <h3 className="mt-1 text-base font-semibold tracking-tight">Values & allocation</h3>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <Label>Scope</Label>
+                  <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="scope1">Scope 1</SelectItem>
+                      <SelectItem value="scope2">Scope 2</SelectItem>
+                      <SelectItem value="scope3">Scope 3</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <Input
+                    className="mt-1"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Activity unit</Label>
+                  <Input
+                    className="mt-1"
+                    value={activityUnit}
+                    onChange={(e) => setActivityUnit(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label>Activity value ({activityUnit})</Label>
+                  <Input
+                    className="mt-1"
+                    type="number"
+                    step="any"
+                    value={activityValue}
+                    onChange={(e) => setActivityValue(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label>Emission factor (kgCO₂e / {activityUnit})</Label>
+                  <Input
+                    className="mt-1"
+                    type="number"
+                    step="any"
+                    value={factorValue}
+                    onChange={(e) => {
+                      setFactorValue(e.target.value);
+                      setFactorId("");
+                    }}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-muted/20 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{isEstimated ? "Estimated value" : "Measured value"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isEstimated
+                      ? "Lowers data-quality score — use when invoices aren’t available yet."
+                      : "Prefer meter readings or invoices for higher DQ scores."}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="text-[11px] font-medium text-muted-foreground">Measured</span>
+                  <Switch checked={isEstimated} onCheckedChange={setIsEstimated} aria-label="Estimated value" />
+                  <span className="text-[11px] font-medium text-muted-foreground">Estimated</span>
+                </div>
+              </div>
+
+              <div>
+                <Label>Source / description</Label>
                 <Input
                   className="mt-1"
-                  type="number"
-                  step="any"
-                  value={activityValue}
-                  onChange={(e) => setActivityValue(e.target.value)}
+                  value={source}
+                  onChange={(e) => setSource(e.target.value)}
+                  placeholder="e.g. Munich plant electricity — Dec invoice"
                   required
                 />
               </div>
+
               <div>
-                <Label>Emission factor (kgCO₂e / {activityUnit})</Label>
-                <Input
-                  className="mt-1"
-                  type="number"
-                  step="any"
-                  value={factorValue}
-                  onChange={(e) => {
-                    setFactorValue(e.target.value);
-                    setFactorId("");
-                  }}
-                  required
+                <Label>Notes (optional)</Label>
+                <textarea
+                  className="mt-1 flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Assumptions, invoice refs, data gaps…"
+                  rows={3}
                 />
               </div>
-            </div>
 
-            <div>
-              <Label>Source / description</Label>
-              <Input
-                className="mt-1"
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-                placeholder="e.g. Munich plant electricity — Dec invoice"
-                required
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label>Period (YYYY-MM)</Label>
-                <Input className="mt-1" value={period} onChange={(e) => setPeriod(e.target.value)} required />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label>Period (YYYY-MM)</Label>
+                  <Input
+                    className="mt-1"
+                    value={period}
+                    onChange={(e) => setPeriod(e.target.value)}
+                    required
+                  />
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {periodChips.map((chip) => (
+                      <button
+                        key={chip.id}
+                        type="button"
+                        onClick={() => setPeriod(chip.value)}
+                        className={cn(
+                          "rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors",
+                          period === chip.value
+                            ? "border-brand/40 bg-brand-light text-brand-dark"
+                            : "border-border bg-background text-muted-foreground hover:border-brand/25 hover:text-foreground"
+                        )}
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label>Facility</Label>
+                  <Select value={facilityId || facilities[0]?.id} onValueChange={setFacilityId}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select facility" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {facilities.length === 0 ? (
+                        <SelectItem value="none" disabled>
+                          Add a facility under Resources first
+                        </SelectItem>
+                      ) : (
+                        facilities.map((f) => (
+                          <SelectItem key={f.id} value={f.id}>
+                            {f.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
               <div>
-                <Label>Facility</Label>
-                <Select value={facilityId || facilities[0]?.id} onValueChange={setFacilityId}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select facility" /></SelectTrigger>
+                <Label>Link resource (optional)</Label>
+                <Select value={resourceId} onValueChange={setResourceId}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {facilities.length === 0 ? (
-                      <SelectItem value="none" disabled>Add a facility under Resources first</SelectItem>
-                    ) : (
-                      facilities.map((f) => (
-                        <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
-                      ))
-                    )}
+                    <SelectItem value="none">No linked resource</SelectItem>
+                    {vehicles.map((v) => (
+                      <SelectItem key={v.id} value={v.id}>
+                        Vehicle · {v.manufacturer} {v.model} ({v.registration})
+                      </SelectItem>
+                    ))}
+                    {suppliers.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        Supplier · {s.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            <div>
-              <Label>Link resource (optional)</Label>
-              <Select value={resourceId} onValueChange={setResourceId}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No linked resource</SelectItem>
-                  {vehicles.map((v) => (
-                    <SelectItem key={v.id} value={v.id}>
-                      Vehicle · {v.manufacturer} {v.model} ({v.registration})
-                    </SelectItem>
-                  ))}
-                  {suppliers.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      Supplier · {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div>
+                <Label>Evidence file (optional)</Label>
+                <Input
+                  className="mt-1"
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx,.xls"
+                  onChange={(e) => setEvidenceFile(e.target.files?.[0] ?? null)}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Uploads to Supabase Storage after the activity is saved (migration 005).
+                </p>
+                {evidenceError && <p className="mt-1 text-xs text-destructive">{evidenceError}</p>}
+              </div>
 
-            <div>
-              <Label>Evidence file (optional)</Label>
-              <Input
-                className="mt-1"
-                type="file"
-                accept=".pdf,.png,.jpg,.jpeg,.csv,.xlsx,.xls"
-                onChange={(e) => setEvidenceFile(e.target.files?.[0] ?? null)}
-              />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Uploads to Supabase Storage after the activity is saved (migration 005).
-              </p>
-              {evidenceError && <p className="mt-1 text-xs text-destructive">{evidenceError}</p>}
-            </div>
+              <div className="flex flex-wrap gap-3 pt-1">
+                <Button type="submit" disabled={saving || !valueNum || !factorNum || !source.trim()}>
+                  {saving ? "Saving…" : "Save to inventory"}
+                </Button>
+              </div>
+            </section>
+          </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button type="button" variant="outline" onClick={handlePreview}>
-                Preview calculation
-              </Button>
-              <Button type="submit" disabled={saving || !valueNum || !factorNum || !source.trim()}>
-                {saving ? "Saving…" : "Save to inventory"}
-              </Button>
-            </div>
+          {/* Live preview panel */}
+          <aside className="lg:sticky lg:top-20">
+            <div className="dash-card space-y-4 p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/15 text-brand-dark ring-1 ring-brand/20">
+                  <PresetIcon className="h-5 w-5" strokeWidth={1.75} />
+                </div>
+                <div className="min-w-0">
+                  <p className="dash-label">Live preview</p>
+                  <p className="mt-0.5 truncate text-sm font-semibold tracking-tight">{preset.label}</p>
+                </div>
+              </div>
 
-            {(preview !== null || livePreview !== null) && (
-              <div className="rounded border bg-brand/5 p-4 text-sm">
-                <p className="font-mono text-xs uppercase text-muted-foreground">Calculation preview</p>
-                <MetricFigure size="md" className="mt-1">
-                  {formatCO2(preview ?? livePreview ?? 0)}
-                </MetricFigure>
-                <p className="text-xs text-muted-foreground">
+              <div className="rounded-xl border border-border/80 bg-muted/20 p-4">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Calculated emissions
+                </p>
+                {livePreview !== null ? (
+                  <MetricFigure size="md" className="mt-1">
+                    {formatCO2(livePreview)}
+                  </MetricFigure>
+                ) : (
+                  <p className="mt-2 text-2xl font-semibold tabular-nums text-muted-foreground/50">—</p>
+                )}
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                   {activityValue || "0"} {activityUnit} × {factorValue || "0"} ÷ 1000
                 </p>
               </div>
-            )}
-          </form>
-        </CardContent>
-      </Card>
+
+              <dl className="space-y-2.5 text-xs">
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Scope</dt>
+                  <dd className="font-medium capitalize">{scope.replace("scope", "Scope ")}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Period</dt>
+                  <dd className="font-medium tabular-nums">{period}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Quality</dt>
+                  <dd className="font-medium">{isEstimated ? "Estimated" : "Measured"}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted-foreground">Factor source</dt>
+                  <dd className="max-w-[55%] truncate text-right font-medium">
+                    {selectedFactor?.source ?? "Template / manual"}
+                  </dd>
+                </div>
+              </dl>
+
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                Preview updates as you type. Saving posts to inventory and optionally uploads evidence.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </form>
     </div>
   );
 }
