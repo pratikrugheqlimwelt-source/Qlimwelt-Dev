@@ -18,6 +18,7 @@ import { AccountMenu } from "@/components/dashboard/AccountMenu";
 import { LanguageToggle } from "@/components/i18n/language-toggle";
 import { useT } from "@/components/i18n/locale-provider";
 import { QlimAiFloatingChat } from "@/components/qlim-ai/qlim-ai-floating-chat";
+import { QlimAiLiveTicker } from "@/components/qlim-ai/qlim-ai-live-ticker";
 import { PERIODS } from "@/data/carbon";
 
 const NAV_GROUP_DEFS = [
@@ -258,12 +259,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <Menu className="h-5 w-5" />
             </button>
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 shrink-0 max-w-[42%] sm:max-w-[36%] lg:max-w-[28%]">
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("overview.carbonIntelligence")}</p>
               <h1 className="truncate text-lg font-semibold tracking-tight">{pageTitle}</h1>
             </div>
 
-            <div className="flex items-center gap-2">
+            <QlimAiLiveTicker />
+
+            <div className="flex shrink-0 items-center gap-2">
               <div className="relative hidden md:block" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
