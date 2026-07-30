@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
+import { PageHeader } from "@/components/dashboard/shared/page-header";
+import { useT } from "@/components/i18n/locale-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +17,7 @@ const DEFAULT_GWP: Record<string, number> = {
 
 export default function SettingsPage() {
   const { company, emissionFactors, saveSettings, addFactor, saving, gwpValues } = useDashboard();
+  const t = useT();
   const [gwp, setGwp] = useState(gwpValues ?? DEFAULT_GWP);
   const [name, setName] = useState(company.name);
   const [industry, setIndustry] = useState(company.industry);
@@ -86,6 +89,10 @@ export default function SettingsPage() {
 
   return (
     <div className="relative max-w-2xl space-y-4">
+      <PageHeader
+        title={t("pages.settings.title")}
+        description={t("pages.settings.description")}
+      />
       <HelpCorner content="Update company profile, carbon price, and emission factors. Saves persist to Supabase when available, otherwise localStorage for this workspace." />
       <Card>
         <CardHeader><CardTitle className="text-sm">Company settings</CardTitle></CardHeader>

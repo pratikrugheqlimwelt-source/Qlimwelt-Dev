@@ -3,6 +3,7 @@ import "./globals.css";
 import { jakarta, playfair, jetbrains } from "@/lib/fonts";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LocaleProvider } from "@/components/i18n/locale-provider";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
@@ -24,10 +25,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${jakarta.variable} ${playfair.variable} ${jetbrains.variable} font-sans antialiased`}>
         <ThemeProvider defaultTheme="light" storageKey="qlimwelt-theme">
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-          <Toaster />
+          <LocaleProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+            <Toaster />
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

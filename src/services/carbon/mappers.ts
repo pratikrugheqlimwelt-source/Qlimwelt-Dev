@@ -7,6 +7,8 @@ import type {
   ClimateTarget,
   EmissionFactor,
 } from "@/types/carbon";
+import type { Assessment, AssessmentProfile, AssessmentBoundary, ModuleProgress, QuestionResponse, ModuleId, AssessmentStep, AssessmentStatus, AssessmentType } from "@/types/assessment";
+import { emptyProfile, emptyBoundary } from "@/types/assessment";
 
 export type DashboardNotification = {
   id: string;
@@ -40,6 +42,7 @@ export type DashboardBundle = {
   initiatives: ReductionInitiative[];
   climateTarget: ClimateTarget | null;
   notifications: DashboardNotification[];
+  assessments: import("@/types/assessment").Assessment[];
 };
 
 export function mapFacility(row: Record<string, unknown>): Facility {
@@ -162,6 +165,11 @@ export function mapActivity(row: Record<string, unknown>): EmissionActivity {
     evidenceStatus: row.evidence_status as EmissionActivity["evidenceStatus"],
     resourceId: row.resource_id ? String(row.resource_id) : undefined,
     isEstimated: Boolean(row.is_estimated),
+    assessmentId: row.assessment_id ? String(row.assessment_id) : undefined,
+    metadata:
+      row.metadata && typeof row.metadata === "object"
+        ? (row.metadata as Record<string, unknown>)
+        : undefined,
   };
 }
 
@@ -193,6 +201,8 @@ export function activityToRow(a: EmissionActivity, companyId: string) {
     evidence_status: a.evidenceStatus,
     resource_id: a.resourceId ?? null,
     is_estimated: a.isEstimated,
+    assessment_id: a.assessmentId ?? null,
+    metadata: a.metadata ?? {},
   };
 }
 
@@ -285,5 +295,44 @@ export function mapSettings(row: Record<string, unknown>): CompanySettingsRow {
       row.gwp_values && typeof row.gwp_values === "object"
         ? (row.gwp_values as Record<string, number>)
         : undefined,
+  };
+}
+
+export function mapAssessment(row: Record<string, unknown>): Assessment {
+  return {
+    id: String(row.id),
+    companyId: String(row.company_id),
+    name: String(row.name),
+    type: (row.type as AssessmentType) ?? "corporate",
+    status: (row.status as AssessmentStatus) ?? "draft",
+    currentStep: (row.current_step as AssessmentStep) ?? "profile",
+    profile: (row.profile as AssessmentProfile) ?? emptyProfile(),
+    boundary: (row.boundary as AssessmentBoundary) ?? emptyBoundary(),
+    screening: (row.screening as Record<string, unknown>) ?? {},
+    responses: Array.isArray(row.responses) ? (row.responses as QuestionResponse[]) : [],
+    enabledModules: Array.isArray(row.enabled_modules) ? (row.enabled_modules as ModuleId[]) : [],
+    moduleProgress: Array.isArray(row.module_progress) ? (row.module_progress as ModuleProgress[]) : [],
+    assumptions: Array.isArray(row.assumptions) ? (row.assumptions as string[]) : [],
+    createdAt: String(row.created_at ?? new Date().toISOString()),
+    updatedAt: String(row.updated_at ?? new Date().toISOString()),
+  };
+}
+
+export function assessmentToRow(a: Assessment, companyId: string) {
+  return {
+    id: a.id,
+    company_id: companyId,
+    name: a.name,
+    type: a.type,
+    status: a.status,
+    current_step: a.currentStep,
+    profile: a.profile,
+    boundary: a.boundary,
+    screening: a.screening,
+    responses: a.responses,
+    enabled_modules: a.enabledModules,
+    module_progress: a.moduleProgress,
+    assumptions: a.assumptions,
+    updated_at: new Date().toISOString(),
   };
 }

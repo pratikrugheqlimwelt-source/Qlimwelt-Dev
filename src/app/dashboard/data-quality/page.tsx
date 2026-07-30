@@ -7,12 +7,14 @@ import { MetricCard } from "@/components/dashboard/shared/metric-card";
 import { ChartCard } from "@/components/dashboard/shared/chart-card";
 import { ScopeBadge } from "@/components/dashboard/shared/scope-badge";
 import { DataTable, DataTableBody, DataTableCell, DataTableHead, DataTableHeader, DataTableRow } from "@/components/dashboard/shared/data-table";
+import { useT } from "@/components/i18n/locale-provider";
 import { Badge } from "@/components/ui/badge";
 import { HelpCorner } from "@/components/ui/tooltip";
 import { ShieldCheck, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export default function DataQualityPage() {
   const { filteredActivities } = useDashboard();
+  const t = useT();
 
   const scores = filteredActivities.map((a) => dataQualityScore({
     completeness: a.dataQualityScore,
@@ -30,8 +32,8 @@ export default function DataQualityPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Data quality"
-        description="Audit readiness scores across all activity records — weighted by completeness, evidence, and method quality."
+        title={t("pages.dataQuality.title")}
+        description={t("pages.dataQuality.description")}
         tip="Scores each activity record for audit readiness using completeness, factor quality, method, evidence, and verification."
       />
 

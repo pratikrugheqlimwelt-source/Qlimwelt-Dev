@@ -6,6 +6,7 @@ import { absoluteTargetEmissions, targetProgressPct, annualLinearReduction } fro
 import { ChartCard } from "@/components/dashboard/shared/chart-card";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { MetricCard } from "@/components/dashboard/shared/metric-card";
+import { useT } from "@/components/i18n/locale-provider";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import type { ClimateTarget } from "@/types/carbon";
 
 export default function TargetsPage() {
   const { climateTarget, metrics, saveClimateTarget, saving } = useDashboard();
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<ClimateTarget>(climateTarget);
 
@@ -55,8 +57,8 @@ export default function TargetsPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Science-based targets"
-        description="Track and edit progress toward your SBTi-aligned reduction pathway."
+        title={t("pages.targets.title")}
+        description={t("pages.targets.description")}
         tip="Set baseline year, absolute emissions, reduction %, and target year. Progress uses your live filtered inventory."
       />
 

@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
+import { useT } from "@/components/i18n/locale-provider";
 import { QlimAiChat } from "@/components/qlim-ai/qlim-ai-chat";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ Type below — I'll answer in plain language and point you to the right page.`,
 export default function ClimateIntelligencePage() {
   const { climateInsights, actOnInsight, saving, activities, metrics } = useDashboard();
   const router = useRouter();
+  const t = useT();
   const hasInventory = activities.length > 0;
   const isEmptyInsight = climateInsights.length === 1 && climateInsights[0]?.id === "ins-empty";
 
@@ -54,7 +56,8 @@ export default function ClimateIntelligencePage() {
   return (
     <div className="flex flex-col gap-4 lg:h-[calc(100vh-8.75rem)] lg:min-h-[560px]">
       <PageHeader
-        title="Climate Intelligence"
+        title={t("pages.climate.title")}
+        description={t("pages.climate.description")}
         tip="Chat uses your inventory. Analysis and recommendations update from the same activity data."
         className="shrink-0"
       />

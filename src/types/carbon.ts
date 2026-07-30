@@ -115,6 +115,8 @@ export interface EmissionActivity {
   evidenceStatus: EvidenceStatus;
   resourceId?: string;
   isEstimated: boolean;
+  assessmentId?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface EmissionCalculation {

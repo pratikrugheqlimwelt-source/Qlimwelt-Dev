@@ -5,32 +5,38 @@ import { useSearchParams } from "next/navigation";
 import { Logo } from "@/components/marketing/logo";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { PublicOnlyRoute } from "@/components/auth/PublicOnlyRoute";
+import { LanguageToggle } from "@/components/i18n/language-toggle";
+import { useT } from "@/components/i18n/locale-provider";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/dashboard/overview";
   const error = searchParams.get("error");
+  const t = useT();
 
   const errorMessage =
     error === "callback"
-      ? "Authentication failed. Please try signing in again."
+      ? t("login.errCallback")
       : error === "session"
-        ? "Your session expired. Please sign in again."
+        ? t("login.errSession")
         : error === "config"
-          ? "Sign-in is not configured. Add Supabase environment variables and try again."
+          ? t("login.errConfig")
           : null;
 
   return (
     <PublicOnlyRoute>
-      <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-white px-4">
+        <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
+          <LanguageToggle />
+        </div>
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
             <div className="flex justify-center">
               <Logo size="md" />
             </div>
-            <h1 className="mt-6 text-2xl font-semibold tracking-tight">Welcome to Qlimwelt</h1>
+            <h1 className="mt-6 text-2xl font-semibold tracking-tight">{t("login.welcome")}</h1>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Understand your emissions, identify opportunities, and make confident climate decisions.
+              {t("login.subtitle")}
             </p>
           </div>
 
@@ -46,7 +52,7 @@ export default function LoginPage() {
           <GoogleSignInButton redirectTo={redirect} />
 
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
-            We only use your basic Google account information to create and secure your Qlimwelt account.
+            {t("login.privacy")}
           </p>
 
           <p className="text-center">
@@ -54,7 +60,7 @@ export default function LoginPage() {
               href="/"
               className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
-              Back to website
+              {t("login.backWebsite")}
             </Link>
           </p>
         </div>

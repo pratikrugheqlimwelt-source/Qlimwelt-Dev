@@ -59,10 +59,14 @@ import {
   markNotificationsRead,
   createTeamInvite,
   buildCompanyFromBundle,
+  upsertAssessment,
+  deleteAssessment,
   type DashboardNotification,
   type CompanySettingsRow,
 } from "@/services/carbon/dashboardService";
 import { toast } from "@/hooks/use-toast";
+import type { Assessment } from "@/types/assessment";
+import { createBlankAssessment } from "@/types/assessment";
 
 interface CalculationDetail {
   activity: EmissionActivity;
@@ -137,6 +141,11 @@ interface DashboardContextValue {
   isSampleData: boolean;
   isEmpty: boolean;
   gwpValues: Record<string, number>;
+  assessments: Assessment[];
+  createAssessment: (input: { name: string; type: Assessment["type"] }) => Promise<Assessment>;
+  saveAssessment: (assessment: Assessment) => Promise<Assessment>;
+  removeAssessment: (id: string) => Promise<void>;
+  getAssessment: (id: string) => Assessment | undefined;
 }
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
@@ -298,6 +307,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   });
   const [emissionFactors, setEmissionFactors] = useState<EmissionFactor[]>(demoFactors);
   const [notifications, setNotifications] = useState<DashboardNotification[]>([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [filters, setFiltersState] = useState<DashboardFilters>(DEFAULT_FILTERS);
   const [calculationDetail, setCalculationDetail] = useState<CalculationDetail | null>(null);
 
@@ -319,6 +329,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       setInitiatives(bundle.initiatives);
       if (bundle.climateTarget) setClimateTarget(bundle.climateTarget);
       setNotifications(bundle.notifications);
+      setAssessments(bundle.assessments ?? []);
       const factors = bundle.settings?.customFactors?.length
         ? [...bundle.settings.customFactors, ...demoFactors]
         : demoFactors;
@@ -642,6 +653,59 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     [companyId, refresh, withSaving]
   );
 
+  const createAssessment = useCallback(
+    async (input: { name: string; type: Assessment["type"] }) => {
+      const assessment = createBlankAssessment(companyId, input, activeCompany.reportingYear);
+      assessment.profile.legalName = activeCompany.name;
+      assessment.profile.tradingName = activeCompany.name;
+      assessment.profile.industry = activeCompany.industry;
+      assessment.profile.employees = activeCompany.employeeCount;
+      assessment.profile.currency = activeCompany.currency;
+      await withSaving(async () => {
+        const saved = await upsertAssessment(companyId, assessment);
+        setAssessments((prev) => [saved, ...prev.filter((a) => a.id !== saved.id)]);
+        Object.assign(assessment, saved);
+      }, "Assessment created");
+      return assessment;
+    },
+    [activeCompany, companyId, withSaving]
+  );
+
+  const saveAssessment = useCallback(
+    async (assessment: Assessment) => {
+      let saved = assessment;
+      await withSaving(async () => {
+        saved = await upsertAssessment(companyId, assessment);
+        setAssessments((prev) => {
+          const idx = prev.findIndex((a) => a.id === saved.id);
+          if (idx >= 0) {
+            const next = [...prev];
+            next[idx] = saved;
+            return next;
+          }
+          return [saved, ...prev];
+        });
+      });
+      return saved;
+    },
+    [companyId, withSaving]
+  );
+
+  const removeAssessment = useCallback(
+    async (id: string) => {
+      await withSaving(async () => {
+        await deleteAssessment(companyId, id);
+        setAssessments((prev) => prev.filter((a) => a.id !== id));
+      }, "Assessment removed");
+    },
+    [companyId, withSaving]
+  );
+
+  const getAssessment = useCallback(
+    (id: string) => assessments.find((a) => a.id === id),
+    [assessments]
+  );
+
   const actOnInsight = useCallback(
     async (insight: ClimateInsight) => {
       const match = initiatives.find((i) => {
@@ -733,6 +797,11 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       isSampleData,
       isEmpty,
       gwpValues,
+      assessments,
+      createAssessment,
+      saveAssessment,
+      removeAssessment,
+      getAssessment,
     }),
     [
       activeCompany,
@@ -781,6 +850,11 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       isSampleData,
       isEmpty,
       gwpValues,
+      assessments,
+      createAssessment,
+      saveAssessment,
+      removeAssessment,
+      getAssessment,
     ]
   );
 

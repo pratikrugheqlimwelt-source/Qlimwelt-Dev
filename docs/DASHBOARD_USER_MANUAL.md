@@ -10,27 +10,29 @@ A practical guide for sustainability managers, climate analysts, and team member
 2. [Getting started](#2-getting-started)
 3. [How the dashboard is organised](#3-how-the-dashboard-is-organised)
 4. [Core concepts](#4-core-concepts)
-5. [Recommended workflow](#5-recommended-workflow)
-6. [Page-by-page guide](#6-page-by-page-guide)
-7. [Data Collection in detail](#7-data-collection-in-detail)
-8. [Filters, search, and notifications](#8-filters-search-and-notifications)
-9. [Data storage and modes](#9-data-storage-and-modes)
-10. [Tips for audit-ready data](#10-tips-for-audit-ready-data)
-11. [Troubleshooting](#11-troubleshooting)
-12. [Glossary](#12-glossary)
+5. [Recommended user journey](#5-recommended-user-journey)
+6. [Assessments (guided flow) in detail](#6-assessments-guided-flow-in-detail)
+7. [Data Collection (manual entry)](#7-data-collection-manual-entry)
+8. [Page-by-page guide](#8-page-by-page-guide)
+9. [Filters, search, and notifications](#9-filters-search-and-notifications)
+10. [Data storage and modes](#10-data-storage-and-modes)
+11. [Tips for audit-ready data](#11-tips-for-audit-ready-data)
+12. [Troubleshooting](#12-troubleshooting)
+13. [Glossary](#13-glossary)
 
 ---
 
 ## 1. What Qlimwelt does
 
-Qlimwelt helps your organisation measure, manage, and reduce greenhouse gas (GHG) emissions using the **GHG Protocol** structure (Scope 1, 2, and 3).
+Qlimwelt helps your organisation measure, manage, and reduce greenhouse gas (GHG) emissions using the **GHG Protocol** (Scope 1, 2, and 3).
 
 With the dashboard you can:
 
-- Enter activity data (fuel, electricity, travel, waste, goods, and more)
+- Run a **guided assessment** (company → activities that apply → quantities)
+- Enter activity data manually when you already know what to collect
 - Convert activity into **tonnes of CO₂ equivalent (tCO₂e)** using emission factors
 - Track facilities, fleet, and suppliers
-- Monitor data quality and attach evidence (invoices, meters, spreadsheets)
+- Monitor data quality and attach evidence
 - Set science-based style targets and plan reduction initiatives
 - Ask **Qlim AI** for hotspot analysis and next steps
 - Export reports for disclosure and internal review
@@ -43,39 +45,55 @@ tCO₂e = activity value × emission factor ÷ 1000
 
 Example: `10,000 kWh × 0.385 kgCO₂e/kWh ÷ 1000 = 3.85 tCO₂e`
 
+**Design principle:**
+
+```text
+What does the company do?
+        ↓
+Which activities apply?
+        ↓
+How is the data available?
+        ↓
+What quantity was consumed?
+        ↓
+Can you provide supporting evidence?
+        ↓
+Qlimwelt calculates and explains the result
+```
+
 ---
 
 ## 2. Getting started
 
 ### 2.1 Sign in
 
-1. Go to the Qlimwelt site and open **Login**.
+1. Open Qlimwelt and go to **Login**.
 2. Sign in with **Google**.
-3. After authentication you land on the dashboard (usually **Overview**), or continue onboarding if your workspace is new.
+3. You land on the dashboard (**Overview**), or complete onboarding if the workspace is new.
 
 ### 2.2 Onboarding (new companies)
 
-If you are creating a new company workspace, complete the onboarding steps:
+New workspaces walk through:
 
-1. **Personal** — your profile basics  
-2. **Company** — organisation name and context  
-3. **Climate maturity** — where you are on your climate journey  
-4. **Interests** — focus areas that personalise guidance  
-5. **Review & consent** — confirm and create the workspace  
+1. Personal details  
+2. Company details  
+3. Climate maturity  
+4. Interests  
+5. Review & consent  
 
-If you were **invited** to an existing company, you typically skip company creation and join that workspace directly.
+Invited users usually join an existing company and skip company creation.
 
-### 2.3 First login expectations
+### 2.3 First actions after login
 
-- New workspaces start **empty** (no sample inventory loaded automatically).
-- You will still see a built-in **emission factor library** you can use when entering data.
-- Best first actions: add at least one **facility** under Resources, then enter your first activity under **Data Collection**.
+1. Open **Assessments** and create a **Corporate Carbon Footprint**.  
+2. Or, if you only need a quick line item, use **Data Collection**.  
+3. Confirm company basics under **Settings** (employees, revenue, reporting year, carbon price).
+
+New workspaces start **empty** (no sample inventory). A built-in emission factor library is available for calculations.
 
 ---
 
 ## 3. How the dashboard is organised
-
-The left sidebar groups pages by job:
 
 ### Analytics
 
@@ -89,14 +107,15 @@ The left sidebar groups pages by job:
 
 | Page | Purpose |
 |------|---------|
-| **Data Collection** | Enter new emission activities |
+| **Assessments** | Guided carbon assessment wizard (recommended) |
+| **Data Collection** | Manual / power-user activity entry |
 | **Resources** | Master data: facilities, vehicles, suppliers |
 
 ### Planning
 
 | Page | Purpose |
 |------|---------|
-| **Climate Intelligence** | Qlim AI chat + AI recommendations |
+| **Climate Intelligence** | Qlim AI chat + recommendations |
 | **Reduction Planner** | Decarbonisation projects and status |
 | **Targets** | Science-based style reduction pathway |
 
@@ -104,428 +123,421 @@ The left sidebar groups pages by job:
 
 | Page | Purpose |
 |------|---------|
-| **Reports** | PDF / CSV / Excel disclosure packages |
+| **Reports** | PDF / CSV / Excel packages |
 | **Team** | Invite and manage colleagues |
 | **Settings** | Company profile, carbon price, custom factors, GWP |
 
-### Shell extras (top / sidebar)
+### Shell extras
 
-- **Company chip** — quick path toward Settings  
-- **Global search** — jump to pages or find activities  
-- **Period picker** — focus analytics on a month or reporting year  
-- **Notifications** — activity saves and system messages  
-- **Account menu** — profile, team, sign out  
-- **Calculation drawer** — opens from Emissions when you inspect a row  
+- **Company chip** → Settings  
+- **Global search** → pages and activities  
+- **Period picker** → focus analytics on a month / year  
+- **Notifications** → saves and system messages  
+- **Account menu** → profile, team, sign out  
+- **Calculation drawer** → opens from Emissions when you inspect a row  
 
-If you see an amber banner about **local storage**, your browser is holding data locally because cloud tables are unavailable — see [Section 9](#9-data-storage-and-modes).
+If you see an amber **local storage** banner, cloud tables are unavailable — see [Section 10](#10-data-storage-and-modes).
 
 ---
 
 ## 4. Core concepts
 
-### 4.1 Scopes (GHG Protocol)
+### 4.1 Scopes
 
-| Scope | Meaning | Typical examples in Qlimwelt |
-|-------|---------|------------------------------|
-| **Scope 1** | Direct emissions you control | Fleet fuel, natural gas boilers, refrigerant leaks |
-| **Scope 2** | Purchased energy | Grid electricity, district heat / steam |
-| **Scope 3** | Value chain | Purchased goods, freight, business travel, commuting, waste |
+| Scope | Meaning | Examples |
+|-------|---------|----------|
+| **Scope 1** | Direct emissions you control | Fleet fuel, boilers, refrigerants |
+| **Scope 2** | Purchased energy | Electricity, district heat |
+| **Scope 3** | Value chain | Goods, freight, travel, commuting, waste |
 
-### 4.2 Emission activity (inventory line)
+### 4.2 Assessment vs activity
 
-One **activity** is one calculated record for a period, for example:
+| Concept | Meaning |
+|---------|---------|
+| **Assessment** | A guided reporting exercise (name, period, boundaries, screening, modules) |
+| **Activity** | One inventory line: quantity × factor → tCO₂e for a period and facility |
 
-- Period: `2024-12`
-- Facility: Munich HQ
-- Scope: 2
-- Category: Purchased electricity
-- Activity value: `45,000` kWh
-- Factor: `0.000385` kgCO₂e/kWh
-- Result: calculated tCO₂e
-- Source text: invoice or meter description
-- Optional: evidence file, linked vehicle/supplier, estimated flag
+Activities created inside an assessment are tagged with that assessment and still appear in **Emissions** / **Overview**.
 
 ### 4.3 Resources vs inventory
 
-| Resource | What it stores | When it becomes inventory |
-|----------|----------------|---------------------------|
-| **Facility** | Sites for allocation | Used when saving any activity |
-| **Vehicle** | Fleet master data | Use **Add to inventory** (or link from Data Collection) |
-| **Supplier** | Supplier Scope 3 master data | Use **Add to inventory** (or link from Data Collection) |
+| Resource | What it stores | When it counts in the footprint |
+|----------|----------------|----------------------------------|
+| **Facility** | Sites for allocation | When an activity is saved against it |
+| **Vehicle** | Fleet master data | When posted to inventory (or linked) |
+| **Supplier** | Supplier Scope 3 master data | When posted to inventory (or linked) |
 
-Master data alone does **not** change your footprint until you post an activity.
+Master data alone does **not** change totals until you save activities.
 
 ### 4.4 Emission factors
 
-An emission factor converts an activity unit into kgCO₂e.
+Factors convert activity units into kgCO₂e.
 
 - Built-in library factors ship with the product  
 - Custom factors can be added in **Settings**  
-- Choosing a library factor on Data Collection overrides the template default  
-- Higher uncertainty usually means a lower data-quality contribution  
+- Higher uncertainty usually lowers data-quality contribution  
 
 ### 4.5 Data quality & evidence
 
-- **Data quality score** summarises how trustworthy a record is (method, factor age, evidence, estimated vs measured, etc.).
-- Labels typically map to bands such as high / good / moderate / low.
+- **Data quality score** summarises trustworthiness (method, factor, evidence, estimated vs measured).  
 - **Evidence status:** none → pending → uploaded → verified  
-- Prefer **measured** values with invoices or meter exports when possible.
+- Prefer **measured** values with invoices or meter exports.
 
 ### 4.6 Targets & initiatives
 
-- A **climate target** defines baseline year/emissions, target year, and reduction % (absolute or intensity).
-- A **reduction initiative** is a planned project with annual tCO₂e reduction, cost, and status (`planned` → `in_progress` → `completed`).
+- A **climate target** defines baseline, target year, and reduction %.  
+- A **reduction initiative** is a project with annual tCO₂e reduction, cost, and status.
 
 ---
 
-## 5. Recommended workflow
+## 5. Recommended user journey
 
-Use this sequence for a typical reporting month:
+Use this sequence for a typical reporting cycle:
 
-1. **Settings** — confirm company name, reporting year, employee count, revenue, carbon price (€/t).  
-2. **Resources** — ensure facilities exist; update fleet and suppliers if needed.  
-3. **Data Collection** — enter electricity, fuel, heat, travel, waste, goods, etc. Attach evidence where available.  
-4. **Emissions** — review Scope 1–3 totals and open calculation details for spot checks.  
-5. **Data Quality** — fix estimated or low-score records before audit close.  
-6. **Overview** — share KPIs and trends with leadership.  
-7. **Targets / Reduction Planner** — keep pathway and projects current.  
-8. **Climate Intelligence** — ask Qlim AI where to focus next.  
-9. **Reports** — export GHG / disclosure packages.  
-10. **Team** — invite data owners for facilities or categories you do not own yourself.
+```text
+Create assessment
+       ↓
+Company profile
+       ↓
+Select calculation objective (Corporate CCF)
+       ↓
+Reporting boundaries
+       ↓
+Operational screening questions
+       ↓
+Qlimwelt opens relevant emission modules
+       ↓
+Collect activity data (quantities)
+       ↓
+Validate and flag missing information
+       ↓
+Review & mark calculated
+       ↓
+Dashboard, hotspots and reduction recommendations
+```
 
----
+**Monthly close checklist**
 
-## 6. Page-by-page guide
-
-### 6.1 Overview
-
-**Use when:** you need a leadership-ready snapshot.
-
-What you will see:
-
-- Total footprint and Scope 1 / 2 / 3 mix  
-- Intensity KPIs (e.g. per employee / revenue) when company metrics are set  
-- Trend charts over months  
-- Filters for period, facility, scope, and more  
-
-Empty state: if you have no activities yet, Overview prompts you to start in Data Collection.
-
----
-
-### 6.2 Emissions
-
-**Use when:** you need the full inventory and audit lineage.
-
-What you can do:
-
-- Review Scope cards and Scope 3 category breakdowns  
-- Browse the activity table  
-- Open a row to see the **calculation drawer** (formula + result)  
-- Delete a record if it was entered in error (confirm first)  
-
-Tip: use the same filters as Overview so leadership totals match inventory detail.
+1. Update **Resources** if sites / fleet / suppliers changed  
+2. Continue or create an **Assessment** for the period  
+3. Complete activated modules (measured + evidence where possible)  
+4. Spot-check **Emissions** calculation drawer for large lines  
+5. Clear **Data Quality** red / amber items  
+6. Confirm **Targets** and **Reduction Planner**  
+7. Ask **Climate Intelligence** where to cut next  
+8. Export **Reports**  
+9. Brief leadership from **Overview**
 
 ---
 
-### 6.3 Data Quality
+## 6. Assessments (guided flow) in detail
 
-**Use when:** preparing for assurance, CSRD, or internal audit.
+Path: **Operations → Assessments**
 
-What you can do:
+### 6.1 Create an assessment
 
-- See average quality and counts by quality band  
-- Scan records for low scores, missing evidence, or estimated flags  
-- Prioritise follow-ups with facility owners  
+1. Click **New assessment**.  
+2. Enter a clear name, for example:
+   - `2026 Corporate Carbon Footprint`
+   - `Berlin Office Assessment`
+3. Choose what to calculate:
+   - **A. Corporate Carbon Footprint** — full guided flow (recommended MVP)
+   - **B. Product Carbon Footprint** — scaffolded branch (full BOM / PACT later)
+   - **C. Event or Project** — coming soon  
+   - **D. Supplier Data Collection** — coming soon  
+4. Click **Continue**.
 
-Goal: replace estimates with measured data and attach evidence before report freeze.
+### 6.2 Step — Company profile
+
+Capture organisation context once and reuse it.
+
+**Basic fields**
+
+- Legal name, trading name, industry  
+- Country of registration, headquarters, website  
+- Employees, revenue range, currency  
+- Primary / sustainability contacts  
+
+**Organisational structure** (pick one):
+
+| Option | Follow-up examples |
+|--------|--------------------|
+| One office | Address, floor area, ownership, electricity / heating responsibility |
+| Multiple offices | Location count and summary list |
+| Manufacturing | Factories, products, refrigeration, process gases |
+| Retail / hospitality | Location count/type, refrigeration |
+| Logistics / fleet | Vehicle count, fuel types, warehouses |
+| Digital / software | Cloud providers, remote-working policy |
+| Mixed | Free-text operations summary |
+
+Profile fields sync into **Settings** where possible. A one-office setup can create a starter **facility** if none exist yet.
+
+### 6.3 Step — Reporting boundaries
+
+Before quantities, define the reporting frame:
+
+- Period start / end  
+- Base year  
+- Reporting standard (GHG Protocol Corporate, Product, PACT, ESRS/CSRD, custom)  
+- Consolidation approach (operational / financial / equity / not sure)  
+- Included / excluded entities and locations  
+- Currency and preferred emission unit  
+
+If you choose **Not sure** for consolidation, Qlimwelt recommends **operational control** and records it as an **assumption** to confirm later.
+
+### 6.4 Step — Operational screening
+
+Answer **yes/no** operational questions. Do **not** enter quantities here.
+
+Examples:
+
+- Own or control buildings?  
+- Operate manufacturing?  
+- Own or lease vehicles?  
+- Burn fuels?  
+- Use refrigeration / AC?  
+- Purchase electricity / heat?  
+- Purchase goods or services?  
+- Generate waste?  
+- Business travel / commuting?  
+- Transport or sell physical products?  
+
+Each “Yes” activates one or more **data modules** (for example, vehicles → mobile combustion; electricity purchase → Scope 2 electricity).
+
+### 6.5 Step — Collect data (modules)
+
+Only activated modules appear. Each module shows progress: **Complete** or **Missing**.
+
+For each module:
+
+1. Confirm how data is available (invoice, meter, spend, estimate, …).  
+2. Enter quantity, unit, factor, period, facility.  
+3. Mark **Measured** or **Estimated**.  
+4. Add a clear source description.  
+5. Save — the line is written to the company inventory.
+
+**Phase 1 modules include**
+
+| Module | Typical scope |
+|--------|----------------|
+| Stationary combustion | Scope 1 |
+| Company vehicles | Scope 1 |
+| Refrigerants | Scope 1 |
+| Process emissions | Scope 1 (if manufacturing) |
+| Purchased electricity | Scope 2 |
+| Purchased heat / steam | Scope 2 |
+| Purchased goods & services | Scope 3 Cat. 1 |
+| Waste | Scope 3 Cat. 5 |
+| Business travel | Scope 3 Cat. 6 |
+| Employee commuting | Scope 3 Cat. 7 |
+| Upstream / downstream transport | Scope 3 Cat. 4 / 9 |
+
+**Electricity tip:** location-based results are always stored. If you enter a market-based factor, Qlimwelt can store a separate market-based record — both can be reported.
+
+### 6.6 Step — Review & calculate
+
+The review screen shows:
+
+- **Completeness %** (modules with data vs activated modules)  
+- **Calculated tCO₂e so far** from assessment activities  
+- **Missing / incomplete modules** (flagged, not blocking)  
+- **Assumptions** (e.g. consolidation recommendation)  
+
+You can still calculate with incomplete data. Missing categories remain visible.
+
+Click **Mark calculated & open Emissions** to lock the assessment lightly and jump to the inventory view. Results also feed **Overview** and **Data Quality**.
+
+### 6.7 Assessment statuses
+
+| Status | Meaning |
+|--------|---------|
+| Draft | Just created |
+| In progress | Profile / screening / modules underway |
+| Ready for review | Review step opened |
+| Calculated | Finalised for this pass |
+| Locked | Reserved for stronger lock / assurance later |
 
 ---
 
-### 6.4 Data Collection
-
-**Use when:** logging new activity data (primary operational page).
-
-See the full walkthrough in [Section 7](#7-data-collection-in-detail).
-
----
-
-### 6.5 Resources
-
-Three tabs:
-
-#### Facilities
-Add sites with name, country, type, and floor area. Every activity should be allocated to a facility.
-
-#### Vehicles
-Add fleet units (manufacturer, model, registration, fuel/electricity usage, factors).  
-You can add one-by-one or bulk via CSV where available.  
-Use **Add to inventory** to create the corresponding Scope 1 or Scope 2 activity for a period.
-
-#### Suppliers
-Add suppliers with category and reported Scope 3 tCO₂e / quality score.  
-Use **Add to inventory** to post Category 1 (or related) emissions for a period.
-
----
-
-### 6.6 Climate Intelligence
-
-Two panels:
-
-1. **Qlim AI chat** — ask natural-language questions about your inventory (for example: “Which scope dominates?”, “Where should we cut first?”, “What do we need for CSRD?”).  
-2. **AI analysis / recommendations** — derived insights from your current data; you can act on some insights to create or advance reduction initiatives.
-
-Local development may use Ollama; production typically uses a cloud free-tier model when configured. If chat is unavailable, check Settings / environment configuration with your admin.
-
----
-
-### 6.7 Reduction Planner
-
-**Use when:** turning targets into projects.
-
-What you can do:
-
-- Add initiatives (name, annual tCO₂e reduction, cost)  
-- View prioritisation / cost-effectiveness views  
-- Move status: start work → mark completed  
-- Review payback or cost-per-tonne style metrics  
-
----
-
-### 6.8 Targets
-
-**Use when:** defining or updating your reduction pathway.
-
-What you can do:
-
-- View baseline, target year, and progress  
-- Edit target name, years, baseline tCO₂e, reduction %, and absolute vs intensity type  
-- Review the pathway chart against current performance  
-
-Keep baseline emissions aligned with a locked inventory year so progress stays meaningful.
-
----
-
-### 6.9 Reports
-
-**Use when:** exporting packages for disclosure or board packs.
-
-Typical report types include:
-
-- GHG inventory  
-- Scope summary  
-- Facility / fleet / travel / supplier views  
-- Data quality  
-- Target and reduction summaries  
-- Carbon cost  
-
-Actions usually include preview plus export to **PDF**, **CSV**, or **Excel** (authentication required for server exports).
-
----
-
-### 6.10 Team
-
-**Use when:** collaborating across facilities or functions.
-
-What you can do (role-dependent):
-
-- View members and pending invites  
-- Invite by email with a role (e.g. member, manager, admin, viewer)  
-- Revoke access when someone leaves  
-
-Invite emails send when the email integration is configured for your deployment.
-
----
-
-### 6.11 Settings
-
-**Use when:** configuring company context and calculation inputs.
-
-Important fields:
-
-- Company name, industry  
-- Employees, revenue, units produced  
-- Baseline / reporting year  
-- Carbon price (€ per tCO₂e) — used for carbon cost KPIs  
-- GWP values (AR6-style) for GHG gases  
-- **Custom emission factors** — appear in Data Collection’s factor picker  
-
-Update Settings before closing a reporting period so intensity and carbon-cost metrics stay accurate.
-
----
-
-## 7. Data Collection in detail
+## 7. Data Collection (manual entry)
 
 Path: **Operations → Data Collection**
 
-### 7.1 Step-by-step
+Use this when you already know the activity type and want a fast one-off entry (power-user path). Assessments remain the recommended guided journey.
 
-1. **Choose an activity type**  
-   Click an icon card (Mobile combustion, Electricity, Waste, Custom, etc.).  
-   Qlimwelt fills scope, category, unit, and a default factor.
+### 7.1 Steps
 
-2. **Confirm or change the emission factor**  
-   Use the searchable factor library (icons show category).  
-   Selecting a library factor switches you toward custom/manual override behaviour.  
-   Clear the selection to return to the template factor.  
-   Custom factors from Settings appear in this list.
+1. Pick an **activity type** card (electricity, travel, waste, custom, …).  
+2. Optionally pick a library **emission factor** (searchable, icon rows).  
+3. Enter value, factor, source, period, facility.  
+4. Toggle **Measured / Estimated**; add optional notes.  
+5. Use period chips (Last month / This month / FY).  
+6. Optionally link a vehicle/supplier and attach evidence.  
+7. Watch the **live preview**, then **Save to inventory**.
 
-3. **Enter activity details**  
-   - Scope / category / unit (editable if needed)  
-   - Activity value (required)  
-   - Emission factor value (required; editable)  
-   - **Measured / Estimated** toggle  
-     - Measured = preferred for audits  
-     - Estimated = allowed, but lowers data-quality score  
-   - Source / description (required) — e.g. “Munich plant electricity — Dec invoice”  
-   - Notes (optional) — assumptions, gaps, invoice refs (saved into source/evidence context)
+### 7.2 When to use which
 
-4. **Set period and allocation**  
-   - Period as `YYYY-MM`  
-   - Quick chips: **Last month**, **This month**, **FY {reporting year}**  
-   - Facility (required in practice — add one under Resources first)  
-   - Optional link to a vehicle or supplier
-
-5. **Attach evidence (optional)**  
-   Accepted types typically include PDF, PNG, JPG, CSV, XLSX.  
-   File uploads after the activity is saved (requires cloud storage setup).
-
-6. **Watch the live preview**  
-   The side panel shows calculated tCO₂e as you type, plus scope, period, quality mode, and factor source.
-
-7. **Save to inventory**  
-   Creates the activity record, notifies the workspace, and uploads evidence if provided.  
-   Find the new line under **Emissions**.
-
-### 7.2 Activity type catalogue
-
-| Activity type | Scope | Typical unit | Good for |
-|---------------|-------|--------------|----------|
-| Mobile combustion | S1 | litre | Fleet diesel / petrol |
-| Natural gas | S1 | kWh | Stationary combustion |
-| Refrigerants | S1 | kg | Fugitive leaks |
-| Electricity | S2 | kWh | Purchased grid power |
-| Purchased heat | S2 | kWh | District heat / steam |
-| Purchased goods | S3 | EUR | Spend-based Category 1 |
-| Freight transport | S3 | tonne-km | Logistics |
-| Business travel | S3 | passenger-km | Flights / rail |
-| Commuting | S3 | passenger-km | Employee commuting |
-| Waste | S3 | tonne | Disposal / treatment |
-| Custom | varies | unit | Manual or library-driven entries |
-
-### 7.3 After save checklist
-
-- [ ] Record appears on Emissions for the correct period  
-- [ ] Calculation drawer shows expected formula  
-- [ ] Evidence status updated if a file was attached  
-- [ ] Data Quality score looks reasonable (measured + evidence scores higher)
+| Use **Assessments** when… | Use **Data Collection** when… |
+|---------------------------|-------------------------------|
+| Starting a reporting year / site footprint | Adding one known invoice line quickly |
+| You need screening so only relevant modules appear | Correcting or topping up inventory ad hoc |
+| You want completeness tracking by module | You already know scope, category, and factor |
 
 ---
 
-## 8. Filters, search, and notifications
+## 8. Page-by-page guide
+
+### 8.1 Overview
+
+Leadership snapshot: total footprint, scope mix, intensity KPIs, trends, filters. Empty state points you to start collecting data.
+
+### 8.2 Emissions
+
+Full inventory: scope cards, Scope 3 category charts, activity table. Open a row for the **calculation drawer**. Delete mistaken records with confirmation.
+
+### 8.3 Data Quality
+
+Average score and bands (high / good / moderate / low). Chase estimated or low-evidence lines before audit close.
+
+### 8.4 Resources
+
+- **Facilities** — sites for allocation  
+- **Vehicles** — fleet master; CSV bulk where available; post to inventory when ready  
+- **Suppliers** — Scope 3 master; post to inventory when ready  
+
+### 8.5 Climate Intelligence
+
+- **Qlim AI chat** — ask about hotspots, scopes, CSRD next steps (uses live inventory when signed in)  
+- **Recommendations** — derived insights; some can create / advance reduction initiatives  
+
+AI should assist with classification and explanation; final numbers come from the calculation engine.
+
+### 8.6 Reduction Planner
+
+Add initiatives (name, annual tCO₂e reduction, cost). Advance status: planned → in progress → completed. Review cost-effectiveness.
+
+### 8.7 Targets
+
+View and edit baseline, target year, reduction %, absolute vs intensity. Track pathway progress.
+
+### 8.8 Reports
+
+Export packages such as GHG inventory, scope summary, facility / fleet / travel / supplier views, data quality, target and reduction summaries, carbon cost. Preview and export PDF / CSV / Excel when authenticated.
+
+### 8.9 Team
+
+View members and pending invites. Admins invite by email (role-based) and revoke access when needed.
+
+### 8.10 Settings
+
+Company name, industry, employees, revenue, units produced, baseline / reporting year, carbon price (€/t), GWP values, and **custom emission factors** (appear in Data Collection / modules).
+
+---
+
+## 9. Filters, search, and notifications
 
 ### Filters
 
-Most analytics pages respect a shared filter set, for example:
-
-- Period  
-- Facility  
-- Country  
-- Business unit  
-- Scope  
-- Category  
-- Data quality label  
-- Calculation method  
-
-Change filters before interpreting Overview vs Emissions so the numbers stay consistent.
+Shared filters on analytics pages typically include period, facility, country, business unit, scope, category, data quality, and method. Align filters before comparing Overview vs Emissions.
 
 ### Search
 
-Use the shell search to jump between pages or locate activity sources quickly.
+Shell search jumps between pages and can find activity sources.
 
 ### Notifications
 
-Saving activities and similar actions create notifications. Use the bell to review recent workspace events.
+Saving assessments / activities creates notifications. Use the bell for recent events.
 
 ### Period picker
 
-The shell period control focuses the dashboard on a reporting month or year view. Align Data Collection periods with the period you analyse.
+Focuses analytics on a reporting month or year. Keep assessment activity periods aligned with the period you analyse.
 
 ---
 
-## 9. Data storage and modes
+## 10. Data storage and modes
 
-| Mode | Meaning | What you should do |
-|------|---------|--------------------|
-| **Cloud (Supabase)** | Normal connected mode | Work as usual; data persists for the company |
-| **Local** | Fallback when cloud tables are unreachable | Amber banner appears; data is stored in the browser for that company id — treat as temporary and reconnect soon |
-| **Loading / empty** | Fresh workspace | Add Resources + Data Collection entries |
+| Mode | Meaning | What to do |
+|------|---------|------------|
+| **Cloud (Supabase)** | Normal connected mode | Work as usual |
+| **Local** | Fallback when cloud tables are unreachable | Amber banner; browser storage for that company — reconnect before production close |
+| **Empty workspace** | Fresh company | Start with Assessments or Resources |
 
-**Evidence uploads** need cloud storage configured (product migration for evidence storage). If upload fails, the activity may still be saved — re-attach evidence once storage is available.
+**Assessments** persist in the `assessments` table when migration `006_assessments.sql` is applied; otherwise they fall back to local storage like other dashboard data.
 
----
-
-## 10. Tips for audit-ready data
-
-1. Prefer **measured** over estimated whenever invoices or meters exist.  
-2. Always write a clear **source** string (site + period + document type).  
-3. Attach **evidence** for material Scope 1 and 2 lines.  
-4. Keep **facilities** clean — avoid dumping everything into one unnamed site.  
-5. Use the correct **activity type** so scope/category stay consistent year on year.  
-6. Review **Data Quality** weekly during close, not only at year-end.  
-7. Freeze **Settings** (reporting year, employees, revenue) before exporting final reports.  
-8. Document factor choices — library name/source appears on the activity for lineage.  
-9. For fleet and suppliers, post inventory intentionally; do not assume master data auto-counts.  
-10. Use Qlim AI for prioritisation, but treat exported inventory + evidence as the system of record.
+**Evidence uploads** need cloud storage configured. If upload fails, the activity may still save — re-attach evidence once storage is ready.
 
 ---
 
-## 11. Troubleshooting
+## 11. Tips for audit-ready data
+
+1. Prefer the **Assessments** guided path so irrelevant categories stay out of scope.  
+2. Prefer **measured** over estimated whenever invoices or meters exist.  
+3. Write clear **source** strings (site + period + document type).  
+4. Attach **evidence** for material Scope 1 and 2 lines.  
+5. Keep **facilities** clean — avoid dumping everything into one unnamed site.  
+6. Review **Data Quality** during close, not only at year-end.  
+7. Freeze **Settings** (reporting year, employees, revenue) before final exports.  
+8. Confirm **assumptions** (e.g. consolidation) before locking disclosures.  
+9. For fleet and suppliers, post inventory intentionally.  
+10. Use Qlim AI for prioritisation; treat inventory + evidence as the system of record.
+
+---
+
+## 12. Troubleshooting
 
 | Problem | Likely cause | What to try |
 |---------|--------------|-------------|
-| Cannot open dashboard | Not signed in / session expired | Login again with Google |
-| Redirected to onboarding | Incomplete company setup | Finish onboarding steps |
-| No facilities in dropdown | Empty Resources | Add a facility first |
-| Preview shows “—” | Missing value or factor | Enter both activity value and factor |
-| Save button disabled | Missing required fields | Need value, factor, and source |
-| Evidence upload error | Storage / migration not ready | Activity may still save; fix storage and re-upload |
-| Amber local-data banner | Cloud unavailable | Check connection / admin config; avoid relying on local-only for production close |
-| Qlim AI unavailable | LLM provider not configured | Admin: configure local Ollama or cloud Groq/compatible key |
-| Totals look wrong | Filters / period mismatch | Reset filters; confirm activity periods |
-| Intensity KPIs blank/odd | Missing employees or revenue | Update Settings |
+| Cannot open dashboard | Session expired | Login again with Google |
+| Redirected to onboarding | Incomplete setup | Finish onboarding |
+| No modules after screening | All answers No | Re-run screening with applicable Yes answers |
+| Cannot save module activity | Missing facility / fields | Add a facility under Resources; fill quantity, factor, source |
+| Assessment not in cloud | Migration 006 not applied | Run SQL migration or use local fallback meantime |
+| Evidence upload error | Storage not configured | Activity may still save; fix storage and retry |
+| Amber local-data banner | Cloud unavailable | Check connection / admin config |
+| Qlim AI unavailable | LLM provider not configured | Admin: configure Ollama (local) or Groq (cloud) |
+| Totals look wrong | Filters / period mismatch | Reset filters; check activity periods |
+| Intensity KPIs odd | Missing employees / revenue | Update Settings |
 
 ---
 
-## 12. Glossary
+## 13. Glossary
 
 | Term | Definition |
 |------|------------|
 | **tCO₂e** | Tonnes of carbon dioxide equivalent |
+| **Assessment** | Guided reporting exercise with screening and modules |
+| **Module** | Emission data collection block activated by screening |
 | **GHG Protocol** | Global standard for corporate GHG accounting |
 | **Scope 1 / 2 / 3** | Direct / purchased energy / value-chain emissions |
 | **Activity data** | Physical or spend quantity (kWh, litres, €, km…) |
 | **Emission factor** | kgCO₂e per unit of activity |
-| **Location-based** | Grid-average electricity/heat accounting method |
-| **Spend-based** | Estimating emissions from financial spend |
+| **Location-based** | Grid-average electricity / heat accounting |
+| **Market-based** | Contractual instruments (e.g. Guarantees of Origin) |
+| **Consolidation** | How group entities are included (operational / financial / equity) |
 | **Evidence** | Supporting document for an activity line |
 | **DQ score** | Data quality score for audit readiness |
-| **SBT / science-based target** | Target aligned with climate science pathways |
-| **CSRD** | EU Corporate Sustainability Reporting Directive context |
-| **GWP** | Global Warming Potential used to convert gases to CO₂e |
+| **SBT** | Science-based style reduction target |
+| **CSRD / ESRS** | EU sustainability reporting context |
 | **Qlim AI** | In-product assistant for climate analysis |
 
 ---
 
-## Quick reference — monthly close
+## Quick reference
 
-1. Update Resources if sites/fleet/suppliers changed  
-2. Enter all material activities in Data Collection (measured + evidence)  
-3. Spot-check Emissions calculation drawer for large lines  
-4. Clear Data Quality red/amber items  
-5. Confirm Targets progress and Reduction Planner status  
-6. Export Reports package  
-7. Brief leadership from Overview  
+| Goal | Go to |
+|------|--------|
+| Start a footprint the right way | **Assessments → New** |
+| Add one quick line | **Data Collection** |
+| Add sites / fleet / suppliers | **Resources** |
+| See totals and trends | **Overview** |
+| Inspect every line | **Emissions** |
+| Fix weak data | **Data Quality** |
+| Ask for hotspots | **Climate Intelligence** |
+| Plan reductions | **Reduction Planner** / **Targets** |
+| Export disclosure packs | **Reports** |
+| Invite colleagues | **Team** |
+| Company & factors | **Settings** |
 
 ---
 
-*This manual describes the Qlimwelt dashboard as implemented in the product UI. Feature availability (email invites, evidence storage, AI providers) depends on your deployment configuration.*
+*This manual describes the Qlimwelt dashboard as implemented in the product UI, including the guided Assessments pipeline. Feature availability (email invites, evidence storage, AI providers, cloud assessments) depends on your deployment configuration and applied database migrations.*

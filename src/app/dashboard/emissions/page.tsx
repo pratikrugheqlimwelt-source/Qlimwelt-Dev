@@ -7,6 +7,7 @@ import { ScopeBadge } from "@/components/dashboard/shared/scope-badge";
 import { DataTable, DataTableBody, DataTableCell, DataTableHead, DataTableHeader, DataTableRow } from "@/components/dashboard/shared/data-table";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
+import { useT } from "@/components/i18n/locale-provider";
 import { activityToCalculation } from "@/lib/calculations/engine";
 import { CHART, CHART_AXIS, CHART_GRID } from "@/lib/chart-theme";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ const SCOPE3_CATS = [
 
 export default function EmissionsPage() {
   const { filteredActivities, metrics, openCalculation, deleteActivityRecord, saving } = useDashboard();
+  const t = useT();
 
   const handleDelete = async (id: string, source: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -38,8 +40,8 @@ export default function EmissionsPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Emissions inventory"
-        description="GHG Protocol-aligned breakdown of Scope 1, 2, and 3 emissions. Click any record to inspect the calculation."
+        title={t("pages.emissions.title")}
+        description={t("pages.emissions.description")}
         tip="View Scope 1–3 totals, category charts, and activity-level records. Click a row to open the calculation drawer with full data lineage."
       />
 

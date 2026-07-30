@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LayoutDashboard, Cloud, Database, Boxes, Brain, Target, Flag,
   FileText, ShieldCheck, Settings, ChevronLeft, ChevronRight, Menu, X,
-  Bell, Search, Calendar, ChevronDown, Users,
+  Bell, Search, Calendar, ChevronDown, Users, ClipboardList,
 } from "lucide-react";
 import { Logo } from "@/components/marketing/logo";
 import { cn } from "@/lib/utils";
@@ -15,43 +15,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { AccountMenu } from "@/components/dashboard/AccountMenu";
+import { LanguageToggle } from "@/components/i18n/language-toggle";
+import { useT } from "@/components/i18n/locale-provider";
 import { PERIODS } from "@/data/carbon";
 
-const NAV_GROUPS = [
+const NAV_GROUP_DEFS = [
   {
-    label: "Analytics",
+    labelKey: "dashNav.analytics",
     items: [
-      { href: "/dashboard/overview", label: "Overview", icon: LayoutDashboard },
-      { href: "/dashboard/emissions", label: "Emissions", icon: Cloud },
-      { href: "/dashboard/data-quality", label: "Data Quality", icon: ShieldCheck },
+      { href: "/dashboard/overview", labelKey: "dashNav.overview", icon: LayoutDashboard },
+      { href: "/dashboard/emissions", labelKey: "dashNav.emissions", icon: Cloud },
+      { href: "/dashboard/data-quality", labelKey: "dashNav.dataQuality", icon: ShieldCheck },
     ],
   },
   {
-    label: "Operations",
+    labelKey: "dashNav.operations",
     items: [
-      { href: "/dashboard/data-collection", label: "Data Collection", icon: Database },
-      { href: "/dashboard/resources", label: "Resources", icon: Boxes },
+      { href: "/dashboard/assessments", labelKey: "dashNav.assessments", icon: ClipboardList },
+      { href: "/dashboard/data-collection", labelKey: "dashNav.dataCollection", icon: Database },
+      { href: "/dashboard/resources", labelKey: "dashNav.resources", icon: Boxes },
     ],
   },
   {
-    label: "Planning",
+    labelKey: "dashNav.planning",
     items: [
-      { href: "/dashboard/climate-intelligence", label: "Climate Intelligence", icon: Brain },
-      { href: "/dashboard/reduction-planner", label: "Reduction Planner", icon: Target },
-      { href: "/dashboard/targets", label: "Targets", icon: Flag },
+      { href: "/dashboard/climate-intelligence", labelKey: "dashNav.climateIntelligence", icon: Brain },
+      { href: "/dashboard/reduction-planner", labelKey: "dashNav.reductionPlanner", icon: Target },
+      { href: "/dashboard/targets", labelKey: "dashNav.targets", icon: Flag },
     ],
   },
   {
-    label: "Reporting",
+    labelKey: "dashNav.reporting",
     items: [
-      { href: "/dashboard/reports", label: "Reports", icon: FileText },
-      { href: "/dashboard/team", label: "Team", icon: Users },
-      { href: "/dashboard/settings", label: "Settings", icon: Settings },
+      { href: "/dashboard/reports", labelKey: "dashNav.reports", icon: FileText },
+      { href: "/dashboard/team", labelKey: "dashNav.team", icon: Users },
+      { href: "/dashboard/settings", labelKey: "dashNav.settings", icon: Settings },
     ],
   },
 ];
-
-const ALL_NAV = NAV_GROUPS.flatMap((g) => g.items);
 
 const MONTH_LABEL: Record<string, string> = {
   all: "FY 2024",
@@ -72,6 +73,7 @@ const MONTH_LABEL: Record<string, string> = {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useT();
   const {
     company,
     filters,
@@ -93,19 +95,34 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const periodRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLDivElement>(null);
 
-  const pageTitle = ALL_NAV.find((n) => n.href === pathname)?.label ?? "Dashboard";
+  const navGroups = useMemo(
+    () =>
+      NAV_GROUP_DEFS.map((g) => ({
+        label: t(g.labelKey),
+        items: g.items.map((item) => ({
+          href: item.href,
+          label: t(item.labelKey),
+          icon: item.icon,
+        })),
+      })),
+    [t]
+  );
+
+  const allNav = useMemo(() => navGroups.flatMap((g) => g.items), [navGroups]);
+
+  const pageTitle = allNav.find((n) => n.href === pathname)?.label ?? "Dashboard";
 
   const searchResults = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return { nav: [] as typeof ALL_NAV, activities: [] as typeof activities };
-    const nav = ALL_NAV.filter((n) => n.label.toLowerCase().includes(q));
+    if (!q) return { nav: [] as typeof allNav, activities: [] as typeof activities };
+    const nav = allNav.filter((n) => n.label.toLowerCase().includes(q));
     const acts = activities
       .filter((a) =>
         `${a.source} ${a.category} ${a.period} ${a.scope}`.toLowerCase().includes(q)
       )
       .slice(0, 8);
     return { nav, activities: acts };
-  }, [search, activities]);
+  }, [search, activities, allNav]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -173,7 +190,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         )}
 
         <nav className="flex-1 space-y-5 overflow-y-auto p-3">
-          {NAV_GROUPS.map((group) => (
+          {navGroups.map((group) => (
             <div key={group.label}>
               {!collapsed && (
                 <p className="dash-label mb-1.5 px-3 text-muted-foreground/70">
@@ -235,7 +252,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <div className="relative hidden md:block" ref={searchRef}>
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search pages & activities…"
+                  placeholder={t("common.search")}
                   className="h-9 w-52 border-border/60 bg-muted/30 pl-9 text-xs shadow-none lg:w-64"
                   value={search}
                   onChange={(e) => {
@@ -334,6 +351,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex items-center gap-1">
+              <LanguageToggle className="mr-1" />
               <div className="relative" ref={bellRef}>
                 <Button
                   variant="ghost"
@@ -351,19 +369,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 {bellOpen && (
                   <div className="absolute right-0 top-full z-50 mt-1 w-80 overflow-hidden rounded-xl border border-border bg-background shadow-lg">
                     <div className="flex items-center justify-between border-b border-border/50 px-3 py-2">
-                      <p className="text-xs font-semibold">Notifications</p>
+                      <p className="text-xs font-semibold">{t("common.notifications")}</p>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="h-7 text-[10px]"
                         onClick={() => void markAllNotificationsRead()}
                       >
-                        Mark all read
+                        {t("common.markAllRead")}
                       </Button>
                     </div>
                     <div className="max-h-72 overflow-auto">
                       {notifications.length === 0 ? (
-                        <p className="px-3 py-6 text-center text-xs text-muted-foreground">No notifications yet</p>
+                        <p className="px-3 py-6 text-center text-xs text-muted-foreground">{t("common.noNotifications")}</p>
                       ) : (
                         notifications.slice(0, 20).map((n) => (
                           <button
@@ -395,7 +413,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1 px-4 py-4 lg:px-6 lg:py-5">
           {dataMode === "local" && (
             <div className="mx-auto mb-4 max-w-[1600px] rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-900">
-              Working offline (local storage) — apply migration 002 for cloud sync
+              {t("common.localDataBanner")}
             </div>
           )}
           <div className="mx-auto max-w-[1600px]">{children}</div>

@@ -16,6 +16,7 @@ import { ACTIVITY_PRESETS } from "@/lib/carbon/activity-presets";
 import { resolveActivityIcon } from "@/lib/carbon/activity-icons";
 import { ActivityTypeCards } from "@/components/dashboard/data-collection/activity-type-cards";
 import { FactorPicker } from "@/components/dashboard/data-collection/factor-picker";
+import { useT } from "@/components/i18n/locale-provider";
 
 function lastMonthPeriod(ref = new Date()): string {
   const d = new Date(ref.getFullYear(), ref.getMonth() - 1, 1);
@@ -40,6 +41,7 @@ export default function DataCollectionPage() {
     addActivity,
     saving,
   } = useDashboard();
+  const t = useT();
 
   const [presetId, setPresetId] = useState("electricity");
   const [factorId, setFactorId] = useState<string>("");
@@ -186,9 +188,9 @@ export default function DataCollectionPage() {
   return (
     <div className="relative space-y-4">
       <PageHeader
-        title="Data collection"
-        description="Pick an activity type, confirm the factor, then enter measured or estimated values — calculations update live."
-        tip="tCO₂e = activity value × emission factor ÷ 1000. Live preview updates as you type; save adds the record to inventory (and optional evidence). Facilities, vehicles, and suppliers under Resources appear as linked inputs."
+        title={t("pages.dataCollection.title")}
+        description={t("pages.dataCollection.description")}
+        tip={t("pages.dataCollection.tip")}
       />
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -196,9 +198,9 @@ export default function DataCollectionPage() {
         <section className="dash-card space-y-3 p-4 sm:p-5">
           <div>
             <p className="dash-label">Activity type</p>
-            <h3 className="mt-0.5 text-sm font-semibold tracking-tight">What are you recording?</h3>
+            <h3 className="mt-0.5 text-sm font-semibold tracking-tight">{t("pages.dataCollection.whatRecording")}</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Choose a template — scope, category, unit, and factor fill in automatically.
+              {t("pages.dataCollection.chooseTemplate")}
             </p>
           </div>
           <ActivityTypeCards

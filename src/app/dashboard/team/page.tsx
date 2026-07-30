@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { SectionHeader } from "@/components/dashboard/shared/section-header";
+import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { HelpCorner } from "@/components/ui/tooltip";
+import { useT } from "@/components/i18n/locale-provider";
 import { useAuth } from "@/hooks/useAuth";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { fetchCompanyMembers } from "@/services/companyService";
@@ -32,6 +33,7 @@ interface TeamMemberRow {
 export default function TeamPage() {
   const { company, membership, profile } = useAuth();
   const { inviteTeamMember, saving } = useDashboard();
+  const t = useT();
   const [members, setMembers] = useState<TeamMemberRow[]>([]);
   const [invites, setInvites] = useState<TeamInviteRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,9 +116,9 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-4">
-      <SectionHeader
-        title="Team members"
-        description="Invite colleagues. After they sign in with the invited email, they join this workspace automatically."
+      <PageHeader
+        title={t("pages.team.title")}
+        description={t("pages.team.description")}
       />
 
       <div className="dash-card relative overflow-hidden">

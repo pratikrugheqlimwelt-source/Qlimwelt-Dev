@@ -7,6 +7,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/marketing/logo";
 import { NavAnchor, ScrollProgress } from "@/components/marketing/motion-ui";
+import { LanguageToggle } from "@/components/i18n/language-toggle";
+import { useT } from "@/components/i18n/locale-provider";
 import { EASE_OUT } from "@/lib/motion";
 
 interface MarketingNavProps {
@@ -20,13 +22,14 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
   const isHome = variant === "home" || pathname === "/";
   const reduced = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const t = useT();
 
   const homeAnchors: [string, string][] = [
-    ["#carbon-footprint", "Learn"],
-    ["#platform", "Platform"],
-    ["#how-it-works", "Process"],
-    ["#insights", "Insights"],
-    ["#pricing", "Pricing"],
+    ["#carbon-footprint", t("marketingNav.learn")],
+    ["#platform", t("marketingNav.platform")],
+    ["#how-it-works", t("marketingNav.process")],
+    ["#insights", t("marketingNav.insights")],
+    ["#pricing", t("marketingNav.pricing")],
   ];
 
   return (
@@ -51,30 +54,31 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
             </>
           ) : (
             <Link href="/" className={navLinkClass}>
-              Home
+              {t("common.home")}
             </Link>
           )}
           <Link href="/platform" className={navLinkClass}>
-            AI Features
+            {t("marketingNav.aiFeatures")}
           </Link>
           <Link href="/whats-new" className={navLinkClass}>
-            What&apos;s New
+            {t("marketingNav.whatsNew")}
           </Link>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageToggle />
           <motion.div whileHover={reduced ? undefined : { scale: 1.03 }} whileTap={reduced ? undefined : { scale: 0.97 }}>
             <Link
               href="/login"
               className="type-cta inline-block border border-foreground px-4 py-2.5 text-foreground transition-colors duration-300 hover:bg-foreground hover:text-background"
             >
-              Get Started
+              {t("common.getStarted")}
             </Link>
           </motion.div>
           <button
             type="button"
             className="rounded-md p-2 text-foreground lg:hidden"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-label={mobileOpen ? t("common.closeMenu") : t("common.openMenu")}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
           >
@@ -99,21 +103,24 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
               ))
             ) : (
               <Link href="/" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                Home
+                {t("common.home")}
               </Link>
             )}
             <Link href="/platform" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-              AI Features
+              {t("marketingNav.aiFeatures")}
             </Link>
             <Link href="/whats-new" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-              What&apos;s New
+              {t("marketingNav.whatsNew")}
             </Link>
+            <div className="pt-1">
+              <LanguageToggle />
+            </div>
             <Link
               href="/login"
               className="type-cta mt-2 inline-block border border-foreground px-4 py-2.5 text-center text-foreground"
               onClick={() => setMobileOpen(false)}
             >
-              Get Started
+              {t("common.getStarted")}
             </Link>
           </nav>
         </div>

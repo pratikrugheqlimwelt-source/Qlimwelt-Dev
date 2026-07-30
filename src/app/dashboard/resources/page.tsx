@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { DataTable, DataTableBody, DataTableCell, DataTableHead, DataTableHeader, DataTableRow } from "@/components/dashboard/shared/data-table";
+import { useT } from "@/components/i18n/locale-provider";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export default function ResourcesPage() {
     logSupplierEmissions,
     saving,
   } = useDashboard();
+  const t = useT();
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"grid" | "table">("table");
   const [showAdd, setShowAdd] = useState(false);
@@ -158,8 +160,8 @@ export default function ResourcesPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Resources"
-        description="Add facilities, fleet, and suppliers — the components that feed carbon activity inputs."
+        title={t("pages.resources.title")}
+        description={t("pages.resources.description")}
         tip="Master data is not the inventory. Use “Add to inventory” on vehicles/suppliers (or Data Collection) to create calculated emission records."
       />
 

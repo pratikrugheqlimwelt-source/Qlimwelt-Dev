@@ -19,6 +19,7 @@ import type {
   EmissionFactor,
   Company,
 } from "@/types/carbon";
+import type { Assessment } from "@/types/assessment";
 import {
   activityToRow,
   facilityToRow,
@@ -34,6 +35,8 @@ import {
   mapTarget,
   mapNotification,
   mapSettings,
+  mapAssessment,
+  assessmentToRow,
   type DashboardBundle,
   type DashboardNotification,
   type CompanySettingsRow,
@@ -68,6 +71,7 @@ type LocalStore = {
   notifications: DashboardNotification[];
   customFactors: EmissionFactor[];
   invites: TeamInviteRow[];
+  assessments: Assessment[];
 };
 
 function emptyLocalStore(companyId: string): LocalStore {
@@ -111,6 +115,7 @@ function emptyLocalStore(companyId: string): LocalStore {
     ],
     customFactors: [],
     invites: [],
+    assessments: [],
   };
 }
 
@@ -130,6 +135,7 @@ function readLocal(companyId: string): LocalStore {
     }
     const parsed = JSON.parse(raw) as LocalStore;
     if (!parsed.invites) parsed.invites = [];
+    if (!parsed.assessments) parsed.assessments = [];
     if (!parsed.settings) parsed.settings = emptyLocalStore(companyId).settings;
     if (!parsed.settings.gwpValues) {
       parsed.settings.gwpValues = emptyLocalStore(companyId).settings.gwpValues;
@@ -170,12 +176,13 @@ export async function loadDashboardBundle(companyId: string): Promise<DashboardB
       initiatives: local.initiatives,
       climateTarget: local.climateTarget,
       notifications: local.notifications,
+      assessments: local.assessments ?? [],
     };
   }
 
   const supabase = createClient();
 
-  const [settingsRes, facRes, vehRes, supRes, actRes, initRes, tgtRes, notifRes] = await Promise.all([
+  const [settingsRes, facRes, vehRes, supRes, actRes, initRes, tgtRes, notifRes, assessRes] = await Promise.all([
     supabase.from("company_settings").select("*").eq("company_id", companyId).maybeSingle(),
     supabase.from("facilities").select("*").eq("company_id", companyId),
     supabase.from("vehicles").select("*").eq("company_id", companyId),
@@ -184,6 +191,7 @@ export async function loadDashboardBundle(companyId: string): Promise<DashboardB
     supabase.from("reduction_initiatives").select("*").eq("company_id", companyId),
     supabase.from("climate_targets").select("*").eq("company_id", companyId).limit(1).maybeSingle(),
     supabase.from("notifications").select("*").eq("company_id", companyId).order("created_at", { ascending: false }).limit(50),
+    supabase.from("assessments").select("*").eq("company_id", companyId).order("updated_at", { ascending: false }),
   ]);
 
   // Never auto-seed demo inventory. Create empty settings so the workspace is writable.
@@ -191,6 +199,10 @@ export async function loadDashboardBundle(companyId: string): Promise<DashboardB
     await ensureEmptyCompanySettings(companyId);
     return loadDashboardBundle(companyId);
   }
+
+  const assessments = assessRes.error
+    ? readLocal(companyId).assessments ?? []
+    : (assessRes.data ?? []).map(mapAssessment);
 
   return {
     mode: "supabase",
@@ -212,6 +224,7 @@ export async function loadDashboardBundle(companyId: string): Promise<DashboardB
           type: "absolute" as const,
         },
     notifications: (notifRes.data ?? []).map(mapNotification),
+    assessments,
   };
 }
 
@@ -661,4 +674,50 @@ export function buildCompanyFromBundle(
     discountRate: settings?.discountRate ?? demoCompany.discountRate,
     isDemo: false,
   };
+}
+
+export async function upsertAssessment(companyId: string, assessment: Assessment) {
+  const next = { ...assessment, updatedAt: new Date().toISOString() };
+  const useSb = await tablesAvailable();
+  if (!useSb) {
+    const store = readLocal(companyId);
+    const idx = store.assessments.findIndex((a) => a.id === next.id);
+    if (idx >= 0) store.assessments[idx] = next;
+    else store.assessments = [next, ...store.assessments];
+    writeLocal(companyId, store);
+    return next;
+  }
+  const supabase = createClient();
+  const { error } = await supabase.from("assessments").upsert(assessmentToRow(next, companyId));
+  if (error) {
+    // Table may not exist yet — fall back to local
+    const store = readLocal(companyId);
+    const idx = store.assessments.findIndex((a) => a.id === next.id);
+    if (idx >= 0) store.assessments[idx] = next;
+    else store.assessments = [next, ...store.assessments];
+    writeLocal(companyId, store);
+    return next;
+  }
+  return next;
+}
+
+export async function deleteAssessment(companyId: string, assessmentId: string) {
+  const useSb = await tablesAvailable();
+  if (!useSb) {
+    const store = readLocal(companyId);
+    store.assessments = store.assessments.filter((a) => a.id !== assessmentId);
+    writeLocal(companyId, store);
+    return;
+  }
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("assessments")
+    .delete()
+    .eq("id", assessmentId)
+    .eq("company_id", companyId);
+  if (error) {
+    const store = readLocal(companyId);
+    store.assessments = store.assessments.filter((a) => a.id !== assessmentId);
+    writeLocal(companyId, store);
+  }
 }

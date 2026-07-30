@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
+import { useT } from "@/components/i18n/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HelpCorner } from "@/components/ui/tooltip";
@@ -80,6 +81,7 @@ export default function ReportsPage() {
     company,
     filteredActivities,
   } = useDashboard();
+  const t = useT();
   const [previewId, setPreviewId] = useState<string | null>(null);
 
   const summaryLines = useMemo(() => {
@@ -220,8 +222,8 @@ export default function ReportsPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Reports & exports"
-        description="Audit-ready reports for CSRD, GHG Protocol, and internal disclosure. Exports use your current live metrics."
+        title={t("pages.reports.title")}
+        description={t("pages.reports.description")}
         tip="Generate and download disclosure-ready packages. Excel uses authenticated export APIs when available; PDF stays client-side from live metrics."
       />
 

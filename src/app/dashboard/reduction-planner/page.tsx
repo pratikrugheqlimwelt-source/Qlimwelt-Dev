@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { ChartCard } from "@/components/dashboard/shared/chart-card";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
+import { useT } from "@/components/i18n/locale-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import type { ReductionInitiative } from "@/types/carbon";
 
 export default function ReductionPlannerPage() {
   const { reductionInitiatives, setInitiativeStatus, saveInitiative, saving } = useDashboard();
+  const t = useT();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [reduction, setReduction] = useState("");
@@ -76,8 +78,8 @@ export default function ReductionPlannerPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Reduction planner"
-        description="Prioritize decarbonization initiatives by emission impact, cost, and implementation difficulty."
+        title={t("pages.reduction.title")}
+        description={t("pages.reduction.description")}
         tip="Compare reduction initiatives on impact, cost, difficulty, and payback — then track delivery status for each project."
       />
 
