@@ -254,7 +254,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <div className={cn("flex min-h-screen flex-col transition-[padding] duration-300", collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64")}>
         <header className="sticky top-0 z-30 border-b border-border/60 bg-white/90 backdrop-blur-md">
-          <div className="flex h-[4.25rem] items-center gap-2 px-4 lg:gap-3 lg:px-6">
+          <div className="flex h-[4.75rem] items-center gap-2 px-4 lg:gap-3 lg:px-6">
             <button type="button" className="rounded-lg p-2 hover:bg-muted lg:hidden" onClick={() => setMobileOpen(true)} aria-label={t("shell.openNav")}>
               <Menu className="h-5 w-5" />
             </button>

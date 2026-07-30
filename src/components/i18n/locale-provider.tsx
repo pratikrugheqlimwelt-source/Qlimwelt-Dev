@@ -46,6 +46,11 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setLocale = useCallback((next: Locale) => {
+    const scrollY =
+      typeof window !== "undefined"
+        ? window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0
+        : 0;
+
     setLocaleState(next);
     try {
       localStorage.setItem(LOCALE_STORAGE_KEY, next);
@@ -53,6 +58,20 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
       /* ignore */
     }
     document.documentElement.lang = next;
+
+    // Locale swaps remount translated blocks and can trigger scroll anchoring / layout jumps.
+    // Pin the viewport so the landing page (and any route) stays put.
+    const restore = () => {
+      window.scrollTo({ top: scrollY, left: 0, behavior: "auto" });
+    };
+    restore();
+    requestAnimationFrame(() => {
+      restore();
+      requestAnimationFrame(restore);
+    });
+    window.setTimeout(restore, 0);
+    window.setTimeout(restore, 50);
+    window.setTimeout(restore, 150);
   }, []);
 
   const t = useCallback(

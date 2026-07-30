@@ -179,8 +179,8 @@ export function CarbonFootprintSection() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/40" />
             <div className="relative grid gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
-              {footprintFacts.map((fact) => (
-                <div key={fact.label} className="bg-black/40 p-5 backdrop-blur-sm sm:p-6">
+              {footprintFacts.map((fact, fi) => (
+                <div key={`fact-${fi}`} className="bg-black/40 p-5 backdrop-blur-sm sm:p-6">
                   <MetricFigure size="xl" className="text-brand">
                     {fact.value}
                   </MetricFigure>
@@ -292,9 +292,9 @@ export function InsightsNewsSection() {
               <MetaLabel className="text-white/25">{t("marketing.updatedWeekly")}</MetaLabel>
             </div>
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
-              {industryNews.map((item) => (
+              {industryNews.map((item, ni) => (
                 <ExternalResourceLink
-                  key={item.headline}
+                  key={`news-${ni}`}
                   href={item.externalUrl}
                   aria-label={`${item.headline} (opens in new tab)`}
                   className="group block overflow-hidden border border-white/10 bg-[#0a0a0a] transition-colors hover:border-white/20"

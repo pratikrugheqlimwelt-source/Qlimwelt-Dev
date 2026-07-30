@@ -9,10 +9,10 @@ import { buildLiveScanFeed } from "@/lib/qlim-ai/live-scan-feed";
 import { cn } from "@/lib/utils";
 
 const TYPE_MS = 28;
-const HOLD_MS = 3800;
+const HOLD_MS = 4200;
 const CLEAR_MS = 280;
 
-/** Compact QAI notification ticker — fixed height so the header never shifts. */
+/** Compact QAI notification ticker — taller fixed box so messages fit on two lines. */
 export function QlimAiLiveTicker({ className }: { className?: string }) {
   const t = useT();
   const router = useRouter();
@@ -94,24 +94,24 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
           else router.push("/dashboard/climate-intelligence");
         }}
         className={cn(
-          "relative flex h-10 w-full min-w-0 max-w-full items-center gap-2 overflow-hidden rounded-xl border px-2 text-left transition-all",
+          "relative flex h-[3.5rem] w-full min-w-0 max-w-full items-center gap-2.5 overflow-hidden rounded-xl border px-2.5 py-1.5 text-left transition-all",
           "border-border/70 bg-gradient-to-r from-white via-[#f4fbf0] to-white",
           "hover:border-[#82D153]/60 hover:shadow-[0_0_0_3px_rgba(130,209,83,0.12)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#82D153]/40"
         )}
       >
-        <span className="relative flex h-7 w-7 shrink-0 items-center justify-center">
+        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
           <span
             className="absolute inset-0 rounded-full bg-[#82D153]/15 animate-pulse"
             aria-hidden
           />
-          <span className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-[#82D153]/35 bg-white shadow-sm">
+          <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-[#82D153]/35 bg-white shadow-sm">
             <Image
               src="/logo-mark.png"
               alt=""
-              width={18}
-              height={18}
-              className="h-4 w-4 object-contain"
+              width={20}
+              height={20}
+              className="h-[18px] w-[18px] object-contain"
             />
           </span>
         </span>
@@ -122,7 +122,7 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
               {t("shell.aiTicker.agent")}
             </span>
           </div>
-          <p className="mt-0.5 truncate text-xs font-medium leading-none text-foreground">
+          <p className="mt-0.5 line-clamp-2 break-words text-xs font-medium leading-snug text-foreground">
             <span>{typed}</span>
             <span
               className={cn(

@@ -331,13 +331,13 @@ export default function HomePage() {
               { title: brand.vision.title, items: brand.vision.statements },
               { title: brand.values.title, items: brand.values.statements },
             ].map((block, bi) => (
-              <FadeUp key={block.title} delay={bi * 0.1} className="flex flex-col">
+              <FadeUp key={`mvv-${bi}`} delay={bi * 0.1} className="flex flex-col">
                 <MetaLabel>{block.title.toUpperCase()}</MetaLabel>
                 <h3 className="mt-3 font-serif text-3xl font-bold">{block.title}</h3>
                 <ThinRule className="mt-6" />
                 <ul className="mt-6 flex-1 space-y-4">
-                  {block.items.map((item) => (
-                    <li key={item} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
+                  {block.items.map((item, ii) => (
+                    <li key={`${bi}-${ii}`} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-dark" />
                       <span>{item}</span>
                     </li>
@@ -437,7 +437,7 @@ export default function HomePage() {
           </FadeUp>
           <div className="section-content-gap divide-y divide-border">
             {useCases.map((uc, i) => (
-              <FadeUp key={uc.tag} delay={i * 0.08}>
+              <FadeUp key={`uc-${i}`} delay={i * 0.08}>
                 <div className="grid gap-4 py-7 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-start sm:gap-8 sm:py-8">
                   <MetaLabel className="pt-1">{uc.tag}</MetaLabel>
                   <div className="min-w-0">
@@ -491,7 +491,7 @@ export default function HomePage() {
           </FadeUp>
           <div className="section-content-gap grid gap-8 sm:grid-cols-3">
             {storyCards.map((card, i) => (
-              <FadeUp key={card.label} delay={i * 0.1}>
+              <FadeUp key={`story-${i}`} delay={i * 0.1}>
                 <MetricFigure size="hero">{card.stat}</MetricFigure>
                 <MetaLabel className="mt-3">{card.label}</MetaLabel>
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{card.text}</p>
@@ -530,8 +530,8 @@ export default function HomePage() {
                 ]}
               />
               <ul className="section-content-gap space-y-4">
-                {brand.cta.options.map((opt) => (
-                  <li key={opt} className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground">
+                {brand.cta.options.map((opt, oi) => (
+                  <li key={`cta-${oi}`} className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground">
                     <span className="mt-px shrink-0 font-mono text-brand-dark">→</span>
                     <span>{opt}</span>
                   </li>

@@ -27,7 +27,11 @@ export function LanguageToggle({ className, compact }: LanguageToggleProps) {
           <button
             key={opt.code}
             type="button"
-            onClick={() => setLocale(opt.code as Locale)}
+            onClick={(e) => {
+              e.preventDefault();
+              (e.currentTarget as HTMLButtonElement).blur();
+              setLocale(opt.code as Locale);
+            }}
             className={cn(
               "rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide transition-colors",
               active

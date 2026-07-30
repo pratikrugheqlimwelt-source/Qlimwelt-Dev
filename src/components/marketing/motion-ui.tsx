@@ -103,7 +103,7 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
           const isSelected = selected === i;
           return (
             <motion.button
-              key={plan.name}
+              key={`plan-${i}`}
               type="button"
               onClick={() => setSelected(i)}
               className="relative flex h-full flex-col bg-background p-8 text-left outline-none transition-colors sm:p-10 focus-visible:ring-2 focus-visible:ring-brand-dark focus-visible:ring-offset-2"
