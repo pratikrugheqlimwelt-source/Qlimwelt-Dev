@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { CHART } from "@/lib/chart-theme";
 import { cn } from "@/lib/utils";
 import { formatCO2 } from "@/lib/utils";
+import { useT } from "@/components/i18n/locale-provider";
 
 interface ScopeDonutProps {
   scope1: number;
@@ -42,10 +43,11 @@ export function ScopeDonut({
   }, []);
 
   const total = scope1 + scope2 + scope3;
+  const t = useT();
   const data = [
-    { name: "Scope 1", value: Math.max(scope1, total * 0.02), raw: scope1, color: CHART.scope1, pct: total ? (scope1 / total) * 100 : 0 },
-    { name: "Scope 2", value: Math.max(scope2, total * 0.02), raw: scope2, color: CHART.scope2, pct: total ? (scope2 / total) * 100 : 0 },
-    { name: "Scope 3", value: Math.max(scope3, total * 0.02), raw: scope3, color: CHART.scope3, pct: total ? (scope3 / total) * 100 : 0 },
+    { name: t("overview.scope1"), value: Math.max(scope1, total * 0.02), raw: scope1, color: CHART.scope1, pct: total ? (scope1 / total) * 100 : 0 },
+    { name: t("overview.scope2"), value: Math.max(scope2, total * 0.02), raw: scope2, color: CHART.scope2, pct: total ? (scope2 / total) * 100 : 0 },
+    { name: t("overview.scope3"), value: Math.max(scope3, total * 0.02), raw: scope3, color: CHART.scope3, pct: total ? (scope3 / total) * 100 : 0 },
   ];
 
   const displayTotal =
@@ -128,10 +130,11 @@ interface ScopeLegendProps {
 }
 
 export function ScopeLegend({ scope1, scope2, scope3, total }: ScopeLegendProps) {
+  const t = useT();
   const items = [
-    { label: "Scope 1", value: scope1, color: CHART.scope1, pct: total ? (scope1 / total) * 100 : 0 },
-    { label: "Scope 2", value: scope2, color: CHART.scope2, pct: total ? (scope2 / total) * 100 : 0 },
-    { label: "Scope 3", value: scope3, color: CHART.scope3, pct: total ? (scope3 / total) * 100 : 0 },
+    { label: t("overview.scope1"), value: scope1, color: CHART.scope1, pct: total ? (scope1 / total) * 100 : 0 },
+    { label: t("overview.scope2"), value: scope2, color: CHART.scope2, pct: total ? (scope2 / total) * 100 : 0 },
+    { label: t("overview.scope3"), value: scope3, color: CHART.scope3, pct: total ? (scope3 / total) * 100 : 0 },
   ];
 
   return (

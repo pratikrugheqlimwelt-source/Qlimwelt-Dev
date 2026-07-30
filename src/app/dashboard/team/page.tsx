@@ -43,6 +43,16 @@ export default function TeamPage() {
 
   const isAdmin = membership?.role === "admin";
 
+  const roleLabel = (r: string) => {
+    const map: Record<string, string> = {
+      member: t("teamPage.member"),
+      manager: t("teamPage.manager"),
+      admin: t("teamPage.admin"),
+      viewer: t("teamPage.viewer"),
+    };
+    return map[r] ?? r;
+  };
+
   const reload = useCallback(async () => {
     if (!company?.id) return;
     setLoading(true);
@@ -79,17 +89,17 @@ export default function TeamPage() {
       });
       const data = (await res.json().catch(() => ({}))) as { ok?: boolean; emailed?: boolean };
       if (res.ok && data.emailed) {
-        toast({ title: `Invite emailed to ${trimmed}`, variant: "success" });
+        toast({ title: t("teamPage.toastInviteEmailed", { email: trimmed }), variant: "success" });
       } else if (res.ok) {
         toast({
-          title: "Invite recorded",
-          description: "Email service unavailable — share the login link manually.",
+          title: t("teamPage.toastInviteRecorded"),
+          description: t("teamPage.toastEmailUnavailable"),
         });
       }
     } catch {
       toast({
-        title: "Invite recorded",
-        description: "Could not send email — share the login link manually.",
+        title: t("teamPage.toastInviteRecorded"),
+        description: t("teamPage.toastEmailFailed"),
       });
     }
     setEmail("");
@@ -101,12 +111,12 @@ export default function TeamPage() {
     if (!company?.id) return;
     try {
       await revokeTeamInvite(company.id, inviteId);
-      toast({ title: "Invite revoked", variant: "success" });
+      toast({ title: t("teamPage.toastInviteRevoked"), variant: "success" });
       await reload();
     } catch (err) {
       toast({
-        title: "Could not revoke invite",
-        description: err instanceof Error ? err.message : "Try again",
+        title: t("teamPage.toastRevokeFailed"),
+        description: err instanceof Error ? err.message : t("teamPage.toastTryAgain"),
         variant: "destructive",
       });
     }
@@ -122,62 +132,62 @@ export default function TeamPage() {
       />
 
       <div className="dash-card relative overflow-hidden">
-        <HelpCorner content="Workspace team roster and pending invites. Admins can invite and revoke; invitees join via accept_team_invite on login." />
+        <HelpCorner content={t("teamPage.helpTip")} />
         <div className="flex items-center justify-between border-b border-border/40 px-5 py-4 pr-12">
-          <p className="text-sm font-semibold">{company?.name ?? "Workspace"}</p>
+          <p className="text-sm font-semibold">{company?.name ?? t("account.workspace")}</p>
           <Button
             disabled={!isAdmin}
-            title={isAdmin ? "Invite a colleague" : "Only admins can invite"}
+            title={isAdmin ? t("teamPage.inviteColleague") : t("teamPage.onlyAdminsInvite")}
             onClick={() => setShowInvite((v) => !v)}
           >
-            Invite team member
+            {t("teamPage.inviteTeamMember")}
           </Button>
         </div>
 
         {showInvite && isAdmin && (
           <div className="grid gap-3 border-b border-border/40 bg-muted/20 px-5 py-4 sm:grid-cols-[1fr_auto_auto]">
             <div className="space-y-1.5">
-              <Label htmlFor="invite-email">Email</Label>
+              <Label htmlFor="invite-email">{t("teamPage.email")}</Label>
               <Input
                 id="invite-email"
                 type="email"
-                placeholder="colleague@company.com"
+                placeholder={t("teamPage.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="invite-role">Role</Label>
+              <Label htmlFor="invite-role">{t("teamPage.role")}</Label>
               <select
                 id="invite-role"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
-                <option value="member">Member</option>
-                <option value="manager">Manager</option>
-                <option value="admin">Admin</option>
-                <option value="viewer">Viewer</option>
+                <option value="member">{t("teamPage.member")}</option>
+                <option value="manager">{t("teamPage.manager")}</option>
+                <option value="admin">{t("teamPage.admin")}</option>
+                <option value="viewer">{t("teamPage.viewer")}</option>
               </select>
             </div>
             <div className="flex items-end gap-2">
               <Button onClick={() => void handleInvite()} disabled={saving || !email.includes("@")}>
-                {saving ? "Sending…" : "Send invite"}
+                {saving ? t("teamPage.sending") : t("teamPage.sendInvite")}
               </Button>
-              <Button variant="ghost" onClick={() => setShowInvite(false)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setShowInvite(false)}>{t("common.cancel")}</Button>
             </div>
           </div>
         )}
 
         {!isAdmin && (
           <p className="border-b border-border/40 bg-muted/30 px-5 py-3 text-xs text-muted-foreground">
-            Only workspace admins can manage team settings.
+            {t("teamPage.onlyAdminsManage")}
           </p>
         )}
 
         <div className="divide-y divide-border/40">
           {loading ? (
-            <p className="px-5 py-8 text-center text-sm text-muted-foreground">Loading team…</p>
+            <p className="px-5 py-8 text-center text-sm text-muted-foreground">{t("teamPage.loadingTeam")}</p>
           ) : members.length === 0 ? (
             <div className="flex items-center gap-4 px-5 py-6">
               <Avatar className="h-10 w-10">
@@ -185,18 +195,18 @@ export default function TeamPage() {
                 <AvatarFallback>{profile?.full_name?.slice(0, 2).toUpperCase() ?? "U"}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium">{profile?.full_name ?? "You"}</p>
+                <p className="font-medium">{profile?.full_name ?? t("teamPage.you")}</p>
                 <p className="text-sm text-muted-foreground">{profile?.email}</p>
               </div>
               <Badge variant="secondary" className="ml-auto capitalize">
-                {membership?.role ?? "admin"}
+                {roleLabel(membership?.role ?? "admin")}
               </Badge>
-              <Badge variant="outline">Active</Badge>
+              <Badge variant="outline">{t("teamPage.active")}</Badge>
             </div>
           ) : (
             members.map((member) => {
               const p = member.profiles;
-              const name = p?.full_name ?? p?.email ?? "Member";
+              const name = p?.full_name ?? p?.email ?? t("teamPage.member");
               return (
                 <div key={member.id} className="flex items-center gap-4 px-5 py-4">
                   <Avatar className="h-10 w-10">
@@ -211,9 +221,9 @@ export default function TeamPage() {
                     )}
                   </div>
                   <Badge variant="secondary" className="capitalize">
-                    {member.role}
+                    {roleLabel(member.role)}
                   </Badge>
-                  <Badge variant="outline">Active</Badge>
+                  <Badge variant="outline">{t("teamPage.active")}</Badge>
                 </div>
               );
             })
@@ -223,19 +233,19 @@ export default function TeamPage() {
         {pending.length > 0 && (
           <div className="border-t border-border/40">
             <p className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Pending invites ({pending.length})
+              {t("teamPage.pendingInvites", { count: pending.length })}
             </p>
             <div className="divide-y divide-border/40">
               {pending.map((inv) => (
                 <div key={inv.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{inv.email}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{inv.role} · {new Date(inv.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{roleLabel(inv.role)} · {new Date(inv.createdAt).toLocaleDateString()}</p>
                   </div>
-                  <Badge variant="warning" className="text-[10px]">Pending</Badge>
+                  <Badge variant="warning" className="text-[10px]">{t("teamPage.pending")}</Badge>
                   {isAdmin && (
                     <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => void handleRevoke(inv.id)}>
-                      Revoke
+                      {t("teamPage.revoke")}
                     </Button>
                   )}
                 </div>
@@ -245,7 +255,7 @@ export default function TeamPage() {
         )}
 
         <p className="border-t border-border/40 px-5 py-3 text-xs text-muted-foreground">
-          Invites are recorded and emailed when Resend is configured. Invitees join this company automatically after signing in with the invited email.
+          {t("teamPage.invitesFooter")}
         </p>
       </div>
     </div>

@@ -1,8 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { resolveActivityIcon, scopeChipLabel } from "@/lib/carbon/activity-icons";
+import { resolveActivityIcon } from "@/lib/carbon/activity-icons";
 import type { ActivityPreset } from "@/lib/carbon/activity-presets";
+import { useDomainT } from "@/lib/i18n/use-domain-t";
 
 type ActivityTypeCardsProps = {
   presets: ActivityPreset[];
@@ -11,11 +12,14 @@ type ActivityTypeCardsProps = {
 };
 
 export function ActivityTypeCards({ presets, value, onChange }: ActivityTypeCardsProps) {
+  const d = useDomainT();
+
   return (
     <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {presets.map((preset) => {
         const Icon = resolveActivityIcon(`${preset.id} ${preset.label} ${preset.category}`);
         const selected = value === preset.id;
+        const localized = d.preset(preset.id);
         return (
           <button
             key={preset.id}
@@ -47,12 +51,12 @@ export function ActivityTypeCards({ presets, value, onChange }: ActivityTypeCard
                   preset.scope === "scope3" && "bg-teal-50 text-teal-700"
                 )}
               >
-                {scopeChipLabel(preset.scope)}
+                {d.scope(preset.scope)}
               </span>
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold tracking-tight text-foreground">{preset.label}</p>
-              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{preset.hint}</p>
+              <p className="truncate text-sm font-semibold tracking-tight text-foreground">{localized.label}</p>
+              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{localized.hint}</p>
             </div>
             {selected && (
               <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-brand" aria-hidden />

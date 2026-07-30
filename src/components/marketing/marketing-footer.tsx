@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Logo } from "@/components/marketing/logo";
 import { MetaLabel } from "@/components/marketing/editorial";
+import { useT } from "@/components/i18n/locale-provider";
 
 export function MarketingFooter() {
+  const t = useT();
+
   return (
     <footer className="border-t border-border bg-background">
       <div className="section-container py-10 lg:py-12">
@@ -10,35 +15,35 @@ export function MarketingFooter() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Logo size="sm" />
             <p className="mt-6 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              AI-powered carbon intelligence platform for European businesses.
+              {t("marketing.footerTagline")}
             </p>
           </div>
           <div>
-            <MetaLabel>Platform</MetaLabel>
+            <MetaLabel>{t("marketing.footerPlatform")}</MetaLabel>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/platform" className="transition-colors hover:text-foreground">Features</Link></li>
-              <li><Link href="/#carbon-footprint" className="transition-colors hover:text-foreground">Carbon Footprint Guide</Link></li>
-              <li><Link href="/#insights" className="transition-colors hover:text-foreground">Insights & News</Link></li>
-              <li><Link href="/#pricing" className="transition-colors hover:text-foreground">Pricing</Link></li>
-              <li><Link href="/login" className="transition-colors hover:text-foreground">Dashboard</Link></li>
+              <li><Link href="/platform" className="transition-colors hover:text-foreground">{t("marketing.footerFeatures")}</Link></li>
+              <li><Link href="/#carbon-footprint" className="transition-colors hover:text-foreground">{t("marketing.footerFootprintGuide")}</Link></li>
+              <li><Link href="/#insights" className="transition-colors hover:text-foreground">{t("marketing.footerInsights")}</Link></li>
+              <li><Link href="/#pricing" className="transition-colors hover:text-foreground">{t("marketing.footerPricing")}</Link></li>
+              <li><Link href="/login" className="transition-colors hover:text-foreground">{t("marketing.footerDashboard")}</Link></li>
             </ul>
           </div>
           <div>
-            <MetaLabel>Company</MetaLabel>
+            <MetaLabel>{t("marketing.footerCompany")}</MetaLabel>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/#about" className="transition-colors hover:text-foreground">About</Link></li>
-              <li><Link href="/#insights" className="transition-colors hover:text-foreground">Blog</Link></li>
-              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Careers</Link></li>
-              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Press</Link></li>
+              <li><Link href="/#about" className="transition-colors hover:text-foreground">{t("marketing.footerAbout")}</Link></li>
+              <li><Link href="/#insights" className="transition-colors hover:text-foreground">{t("marketing.footerBlog")}</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">{t("marketing.footerCareers")}</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">{t("marketing.footerPress")}</Link></li>
             </ul>
           </div>
           <div>
-            <MetaLabel>Legal</MetaLabel>
+            <MetaLabel>{t("marketing.footerLegal")}</MetaLabel>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Privacy Policy</Link></li>
-              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Terms of Service</Link></li>
-              <li><Link href="/#contact" className="transition-colors hover:text-foreground">GDPR</Link></li>
-              <li><Link href="/#contact" className="transition-colors hover:text-foreground">Cookie Policy</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">{t("marketing.footerPrivacy")}</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">{t("marketing.footerTerms")}</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">{t("marketing.footerGdpr")}</Link></li>
+              <li><Link href="/#contact" className="transition-colors hover:text-foreground">{t("marketing.footerCookies")}</Link></li>
             </ul>
           </div>
         </div>

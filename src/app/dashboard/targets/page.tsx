@@ -18,6 +18,8 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { Flag, Target, TrendingDown, Calendar } from "lucide-react";
 import type { ClimateTarget } from "@/types/carbon";
 
+type TargetStatus = "ahead" | "on_track" | "at_risk" | "off_track";
+
 export default function TargetsPage() {
   const { climateTarget, metrics, saveClimateTarget, saving } = useDashboard();
   const t = useT();
@@ -31,12 +33,21 @@ export default function TargetsPage() {
   const targetEmissions = absoluteTargetEmissions(climateTarget.baselineEmissionsTCO2e, climateTarget.targetReductionPct);
   const progress = targetProgressPct(climateTarget.baselineEmissionsTCO2e, metrics.totalTCO2e * 12, targetEmissions);
   const annualReduction = annualLinearReduction(climateTarget.baselineEmissionsTCO2e, targetEmissions, climateTarget.targetYear - climateTarget.baselineYear);
-  const status = progress >= 80 ? "ahead" : progress >= 50 ? "on_track" : progress >= 25 ? "at_risk" : "off_track";
+  const status: TargetStatus = progress >= 80 ? "ahead" : progress >= 50 ? "on_track" : progress >= 25 ? "at_risk" : "off_track";
+
+  const statusLabel = (s: TargetStatus) => {
+    const map: Record<TargetStatus, string> = {
+      ahead: t("targetsPage.ahead"),
+      on_track: t("targetsPage.onTrack"),
+      at_risk: t("targetsPage.atRisk"),
+      off_track: t("targetsPage.offTrack"),
+    };
+    return map[s];
+  };
 
   const pathway = Array.from({ length: Math.max(1, climateTarget.targetYear - climateTarget.baselineYear + 1) }, (_, i) => {
     const year = climateTarget.baselineYear + i;
-    const required = climateTarget.baselineEmissionsTCO2e - annualReduction * i;
-    return { year, required, actual: year <= 2024 ? climateTarget.baselineEmissionsTCO2e * (1 - i * 0.04) : null };
+    return { year, required: climateTarget.baselineEmissionsTCO2e - annualReduction * i, actual: year <= 2024 ? climateTarget.baselineEmissionsTCO2e * (1 - i * 0.04) : null };
   });
 
   const handleSave = async () => {
@@ -59,11 +70,11 @@ export default function TargetsPage() {
       <PageHeader
         title={t("pages.targets.title")}
         description={t("pages.targets.description")}
-        tip="Set baseline year, absolute emissions, reduction %, and target year. Progress uses your live filtered inventory."
+        tip={t("targetsPage.tip")}
       />
 
       <div className="dash-card relative overflow-hidden">
-        <HelpCorner content="Your science-based target summary: baseline year, absolute target, status versus the linear pathway, and key reduction metrics." />
+        <HelpCorner content={t("targetsPage.summaryHelp")} />
         <div className="border-b border-border/40 bg-gradient-to-r from-brand/5 to-transparent p-6 pr-12">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-start gap-4">
@@ -71,26 +82,30 @@ export default function TargetsPage() {
                 <Flag className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Science-based target</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("targetsPage.sbtLabel")}</p>
                 <h2 className="text-xl font-semibold tracking-tight">{climateTarget.name}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {climateTarget.targetReductionPct}% reduction by {climateTarget.targetYear} from {climateTarget.baselineYear} baseline
+                  {t("targetsPage.reductionBy", {
+                    pct: climateTarget.targetReductionPct,
+                    targetYear: climateTarget.targetYear,
+                    baselineYear: climateTarget.baselineYear,
+                  })}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={status === "ahead" || status === "on_track" ? "success" : "warning"} className="text-sm capitalize">
-                {status.replace(/_/g, " ")}
+              <Badge variant={status === "ahead" || status === "on_track" ? "success" : "warning"} className="text-sm">
+                {statusLabel(status)}
               </Badge>
               <Button size="sm" variant="outline" onClick={() => setEditing((v) => !v)}>
-                {editing ? "Close" : "Edit target"}
+                {editing ? t("targetsPage.close") : t("targetsPage.editTarget")}
               </Button>
             </div>
           </div>
 
           <div className="mt-6">
             <div className="mb-2 flex justify-between text-sm">
-              <span className="font-medium">Progress to target</span>
+              <span className="font-medium">{t("targetsPage.progressToTarget")}</span>
               <span className="dash-num">{progress.toFixed(0)}%</span>
             </div>
             <Progress value={Math.min(100, progress)} className="h-2.5" />
@@ -100,11 +115,11 @@ export default function TargetsPage() {
         {editing && (
           <div className="grid gap-4 border-b border-border/40 bg-muted/20 p-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-              <Label>Target name</Label>
+              <Label>{t("targetsPage.targetName")}</Label>
               <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <Label>Baseline year</Label>
+              <Label>{t("targetsPage.baselineYear")}</Label>
               <Input
                 type="number"
                 value={draft.baselineYear}
@@ -112,7 +127,7 @@ export default function TargetsPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Target year</Label>
+              <Label>{t("targetsPage.targetYear")}</Label>
               <Input
                 type="number"
                 value={draft.targetYear}
@@ -120,18 +135,18 @@ export default function TargetsPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Type</Label>
+              <Label>{t("targetsPage.type")}</Label>
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 value={draft.type}
                 onChange={(e) => setDraft({ ...draft, type: e.target.value as ClimateTarget["type"] })}
               >
-                <option value="absolute">Absolute</option>
-                <option value="intensity">Intensity</option>
+                <option value="absolute">{t("targetsPage.absolute")}</option>
+                <option value="intensity">{t("targetsPage.intensity")}</option>
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Baseline emissions (tCO₂e)</Label>
+              <Label>{t("targetsPage.baselineEmissions")}</Label>
               <Input
                 type="number"
                 step="any"
@@ -140,7 +155,7 @@ export default function TargetsPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Reduction %</Label>
+              <Label>{t("targetsPage.reductionPct")}</Label>
               <Input
                 type="number"
                 step="any"
@@ -150,24 +165,24 @@ export default function TargetsPage() {
             </div>
             <div className="flex items-end gap-2">
               <Button onClick={() => void handleSave()} disabled={saving}>
-                {saving ? "Saving…" : "Save target"}
+                {saving ? t("common.saving") : t("targetsPage.saveTarget")}
               </Button>
               <Button variant="ghost" onClick={() => { setDraft(climateTarget); setEditing(false); }}>
-                Cancel
+                {t("common.cancel")}
               </Button>
             </div>
           </div>
         )}
 
         <div className="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard accent="neutral" icon={Calendar} label="Baseline" value={`${climateTarget.baselineEmissionsTCO2e.toLocaleString()} t`} sub={`${climateTarget.baselineYear}`} tooltip="Absolute emissions in the baseline year used for your science-based target." />
-          <MetricCard accent="success" icon={Target} label={`${climateTarget.targetYear} target`} value={`${targetEmissions.toLocaleString()} t`} sub={`${climateTarget.targetReductionPct}% reduction`} tooltip="Absolute emissions level required by the target year after applying the reduction percentage." />
-          <MetricCard accent="brand" icon={TrendingDown} label="Annual reduction req." value={`${annualReduction.toFixed(0)} t/yr`} tooltip="Average annual reduction needed on a linear pathway from baseline to target." />
-          <MetricCard accent="neutral" label="Current (filtered)" value={`${(metrics.totalTCO2e * 12).toFixed(0)} t/yr`} sub="Estimated annual" tooltip="Current filtered emissions annualised (×12) for comparison against the pathway." />
+          <MetricCard accent="neutral" icon={Calendar} label={t("targetsPage.baseline")} value={`${climateTarget.baselineEmissionsTCO2e.toLocaleString()} t`} sub={`${climateTarget.baselineYear}`} tooltip={t("targetsPage.baselineTooltip")} />
+          <MetricCard accent="success" icon={Target} label={t("targetsPage.targetYearLabel", { year: climateTarget.targetYear })} value={`${targetEmissions.toLocaleString()} t`} sub={`${climateTarget.targetReductionPct}% reduction`} tooltip={t("targetsPage.targetTooltip")} />
+          <MetricCard accent="brand" icon={TrendingDown} label={t("targetsPage.annualReductionReq")} value={`${annualReduction.toFixed(0)} t/yr`} tooltip={t("targetsPage.annualReductionTooltip")} />
+          <MetricCard accent="neutral" label={t("targetsPage.currentFiltered")} value={`${(metrics.totalTCO2e * 12).toFixed(0)} t/yr`} sub={t("targetsPage.estimatedAnnual")} tooltip={t("targetsPage.currentTooltip")} />
         </div>
       </div>
 
-      <ChartCard title="Reduction pathway" tip="Required linear pathway vs actual emissions trajectory" icon={Target}>
+      <ChartCard title={t("targetsPage.reductionPathway")} tip={t("targetsPage.pathwayTip")} icon={Target}>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={pathway}>
             <CartesianGrid {...CHART_GRID} />
@@ -175,8 +190,8 @@ export default function TargetsPage() {
             <YAxis {...CHART_AXIS} />
             <Tooltip formatter={(v: number) => [`${v?.toFixed(0) ?? "—"} tCO₂e`, ""]} />
             <ReferenceLine y={targetEmissions} stroke={CHART.target} strokeDasharray="4 4" />
-            <Line type="monotone" dataKey="required" stroke={CHART.baseline} strokeDasharray="4 4" dot={false} name="Required pathway" />
-            <Line type="monotone" dataKey="actual" stroke={CHART.actual} strokeWidth={2} name="Actual" connectNulls={false} />
+            <Line type="monotone" dataKey="required" stroke={CHART.baseline} strokeDasharray="4 4" dot={false} name={t("targetsPage.requiredPathway")} />
+            <Line type="monotone" dataKey="actual" stroke={CHART.actual} strokeWidth={2} name={t("targetsPage.actual")} connectNulls={false} />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>

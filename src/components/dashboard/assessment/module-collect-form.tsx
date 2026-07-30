@@ -14,6 +14,8 @@ import type { EmissionActivity, Facility } from "@/types/carbon";
 import { calculateEmissionsTCO2e } from "@/lib/calculations/engine";
 import { formatCO2 } from "@/lib/utils";
 import { MetricFigure } from "@/components/ui/metric-figure";
+import { useT } from "@/components/i18n/locale-provider";
+import { useDomainT } from "@/lib/i18n/use-domain-t";
 
 type ModuleCollectFormProps = {
   assessmentId: string;
@@ -31,6 +33,8 @@ export function ModuleCollectForm({
   onSaved,
 }: ModuleCollectFormProps) {
   const { facilities, company, addActivity, saving } = useDashboard();
+  const t = useT();
+  const d = useDomainT();
   const mod = getModule(moduleId);
 
   const [facilityId, setFacilityId] = useState(facilities[0]?.id ?? "");
@@ -60,7 +64,7 @@ export function ModuleCollectForm({
     );
   }, [moduleId, fuelType, mod, unit]);
 
-  if (!mod) return <p className="text-sm text-muted-foreground">Unknown module.</p>;
+  if (!mod) return <p className="text-sm text-muted-foreground">{t("moduleForm.unknownModule")}</p>;
 
   const handleSave = async () => {
     if (!valueNum || !source.trim() || !factorNum || locked) return;
@@ -107,7 +111,6 @@ export function ModuleCollectForm({
 
     await addActivity(base);
 
-    // Dual Scope 2: market-based sibling when renewable / contractual factor provided
     if (moduleId === "scope2_electricity" && Number(marketFactor) > 0) {
       await addActivity({
         ...base,
@@ -132,7 +135,7 @@ export function ModuleCollectForm({
 
       {moduleId === "scope1_stationary" && (
         <div>
-          <Label>Fuel type</Label>
+          <Label>{t("moduleForm.fuelType")}</Label>
           <Select
             value={fuelType}
             onValueChange={(v) => {
@@ -156,16 +159,16 @@ export function ModuleCollectForm({
 
       {moduleId === "scope1_mobile" && (
         <div>
-          <Label>How can you provide vehicle data?</Label>
+          <Label>{t("moduleForm.vehicleDataMethod")}</Label>
           <Select value={dataMethod} onValueChange={setDataMethod}>
             <SelectTrigger className="mt-1">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="fuel">Fuel consumption</SelectItem>
-              <SelectItem value="distance">Distance travelled</SelectItem>
-              <SelectItem value="invoice">Fleet invoice</SelectItem>
-              <SelectItem value="estimate">Estimated fleet data</SelectItem>
+              <SelectItem value="fuel">{t("moduleForm.fuelConsumption")}</SelectItem>
+              <SelectItem value="distance">{t("moduleForm.distanceTravelled")}</SelectItem>
+              <SelectItem value="invoice">{t("moduleForm.fleetInvoice")}</SelectItem>
+              <SelectItem value="estimate">{t("moduleForm.estimatedFleetData")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -173,16 +176,16 @@ export function ModuleCollectForm({
 
       {(moduleId === "scope2_electricity" || moduleId.startsWith("scope3")) && (
         <div>
-          <Label>Data availability</Label>
+          <Label>{t("moduleForm.dataAvailability")}</Label>
           <Select value={dataMethod} onValueChange={setDataMethod}>
             <SelectTrigger className="mt-1">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="invoice">Invoice / bill</SelectItem>
-              <SelectItem value="meter">Meter reading</SelectItem>
-              <SelectItem value="spend">Spend / procurement</SelectItem>
-              <SelectItem value="estimate">Estimate</SelectItem>
+              <SelectItem value="invoice">{t("moduleForm.invoiceBill")}</SelectItem>
+              <SelectItem value="meter">{t("moduleForm.meterReading")}</SelectItem>
+              <SelectItem value="spend">{t("moduleForm.spendProcurement")}</SelectItem>
+              <SelectItem value="estimate">{t("moduleForm.estimate")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -190,7 +193,7 @@ export function ModuleCollectForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label>Quantity ({unit})</Label>
+          <Label>{t("moduleForm.quantity")} ({d.unit(unit)})</Label>
           <Input
             className="mt-1"
             type="number"
@@ -201,7 +204,7 @@ export function ModuleCollectForm({
           />
         </div>
         <div>
-          <Label>Unit</Label>
+          <Label>{t("moduleForm.unit")}</Label>
           <Select value={unit} onValueChange={setUnit}>
             <SelectTrigger className="mt-1">
               <SelectValue />
@@ -209,7 +212,7 @@ export function ModuleCollectForm({
             <SelectContent>
               {unitChoices.map((u) => (
                 <SelectItem key={u} value={u}>
-                  {u}
+                  {d.unit(u)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -219,7 +222,7 @@ export function ModuleCollectForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label>Emission factor (kgCO₂e / {unit})</Label>
+          <Label>{t("moduleForm.factor", { unit: d.unit(unit) })}</Label>
           <Input
             className="mt-1"
             type="number"
@@ -230,7 +233,7 @@ export function ModuleCollectForm({
           />
         </div>
         <div>
-          <Label>Period (YYYY-MM)</Label>
+          <Label>{t("moduleForm.period")}</Label>
           <Input
             className="mt-1"
             value={period}
@@ -243,7 +246,7 @@ export function ModuleCollectForm({
       {moduleId === "scope2_electricity" && (
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <Label>Renewable share (%)</Label>
+            <Label>{t("moduleForm.renewableShare")}</Label>
             <Input
               className="mt-1"
               type="number"
@@ -253,7 +256,7 @@ export function ModuleCollectForm({
             />
           </div>
           <div>
-            <Label>Market-based factor (optional)</Label>
+            <Label>{t("moduleForm.marketBasedFactor")}</Label>
             <Input
               className="mt-1"
               type="number"
@@ -264,22 +267,22 @@ export function ModuleCollectForm({
               disabled={locked}
             />
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Location-based is always stored. Market-based is added separately when set.
+              {t("moduleForm.marketBasedHint")}
             </p>
           </div>
         </div>
       )}
 
       <div>
-        <Label>Facility</Label>
+        <Label>{t("moduleForm.facility")}</Label>
         <Select value={facilityId || facilities[0]?.id} onValueChange={setFacilityId}>
           <SelectTrigger className="mt-1">
-            <SelectValue placeholder="Select facility" />
+            <SelectValue placeholder={t("moduleForm.selectFacility")} />
           </SelectTrigger>
           <SelectContent>
             {facilities.length === 0 ? (
               <SelectItem value="none" disabled>
-                Add a facility under Resources first
+                {t("moduleForm.addFacilityFirst")}
               </SelectItem>
             ) : (
               facilities.map((f) => (
@@ -293,24 +296,24 @@ export function ModuleCollectForm({
       </div>
 
       <div>
-        <Label>Source / description</Label>
+        <Label>{t("moduleForm.source")}</Label>
         <Input
           className="mt-1"
           value={source}
           onChange={(e) => setSource(e.target.value)}
-          placeholder="Invoice ref, meter ID, or description"
+          placeholder={t("moduleForm.sourcePlaceholder")}
           disabled={locked}
         />
       </div>
 
       <div className="flex items-center justify-between rounded-xl border border-border px-3 py-2">
-        <span className="text-sm">{isEstimated ? "Estimated" : "Measured"}</span>
+        <span className="text-sm">{isEstimated ? t("common.estimated") : t("common.measured")}</span>
         <Switch checked={isEstimated} onCheckedChange={setIsEstimated} disabled={locked} />
       </div>
 
       {preview !== null && (
         <div className="rounded-xl bg-muted/30 p-3">
-          <p className="text-[10px] font-mono uppercase text-muted-foreground">Preview</p>
+          <p className="text-[10px] font-mono uppercase text-muted-foreground">{t("moduleForm.preview")}</p>
           <MetricFigure size="sm">{formatCO2(preview)}</MetricFigure>
         </div>
       )}
@@ -320,7 +323,7 @@ export function ModuleCollectForm({
         onClick={handleSave}
         disabled={locked || saving || !valueNum || !factorNum || !source.trim()}
       >
-        {saving ? "Saving…" : "Save activity to inventory"}
+        {saving ? t("common.saving") : t("moduleForm.saveActivity")}
       </Button>
     </div>
   );

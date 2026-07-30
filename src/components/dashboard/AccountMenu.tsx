@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Building2, LogOut, User, Users } from "lucide-react";
@@ -14,13 +14,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useT } from "@/components/i18n/locale-provider";
 
 export function AccountMenu() {
   const { user, profile, company, signOut } = useAuth();
   const router = useRouter();
+  const t = useT();
   const [signingOut, setSigningOut] = useState(false);
 
-  const displayName = profile?.full_name ?? user?.email ?? "User";
+  const displayName = profile?.full_name ?? user?.email ?? t("account.user");
   const initials = displayName
     .split(" ")
     .map((n) => n[0])
@@ -50,7 +52,7 @@ export function AccountMenu() {
         <div className="hidden text-left lg:block">
           <p className="max-w-[120px] truncate text-xs font-semibold">{displayName}</p>
           <p className="max-w-[120px] truncate text-[10px] text-muted-foreground">
-            {company?.name ?? "Workspace"}
+            {company?.name ?? t("account.workspace")}
           </p>
         </div>
       </DropdownMenuTrigger>
@@ -65,19 +67,19 @@ export function AccountMenu() {
         <DropdownMenuItem asChild>
           <Link href="/dashboard/settings" className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
-            Profile settings
+            {t("account.profileSettings")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/dashboard/settings" className="cursor-pointer">
             <Building2 className="mr-2 h-4 w-4" />
-            Company settings
+            {t("account.companySettings")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/dashboard/team" className="cursor-pointer">
             <Users className="mr-2 h-4 w-4" />
-            Team members
+            {t("account.teamMembers")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -87,7 +89,7 @@ export function AccountMenu() {
           onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          Sign out
+          {t("account.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

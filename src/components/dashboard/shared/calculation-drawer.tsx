@@ -6,9 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { ScopeBadge } from "@/components/dashboard/shared/scope-badge";
 import { Calculator, FileCheck2 } from "lucide-react";
 import { MetricFigure } from "@/components/ui/metric-figure";
+import { useT } from "@/components/i18n/locale-provider";
+import { useDomainT } from "@/lib/i18n/use-domain-t";
 
 export function CalculationDrawer() {
   const { calculationDetail, closeCalculation } = useDashboard();
+  const t = useT();
+  const d = useDomainT();
   if (!calculationDetail) return null;
   const { activity, formula, resultTCO2e } = calculationDetail;
 
@@ -21,8 +25,8 @@ export function CalculationDrawer() {
               <Calculator className="h-5 w-5" />
             </div>
             <div>
-              <SheetTitle className="text-left">Calculation breakdown</SheetTitle>
-              <p className="text-xs text-muted-foreground">{activity.source}</p>
+              <SheetTitle className="text-left">{t("calcDrawer.title")}</SheetTitle>
+              <p className="text-xs text-muted-foreground">{d.source(activity.source)}</p>
             </div>
           </div>
         </SheetHeader>
@@ -30,23 +34,23 @@ export function CalculationDrawer() {
         <div className="mt-6 space-y-5 text-sm">
           <div className="flex flex-wrap gap-2">
             <ScopeBadge scope={activity.scope} />
-            <Badge variant="secondary">{activity.category}</Badge>
+            <Badge variant="secondary">{d.category(activity.category)}</Badge>
             <Badge variant="outline">{activity.period}</Badge>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Method" value={activity.method.replace(/_/g, " ")} />
-            <Field label="GHG" value={activity.ghg} />
-            <Field label="Activity" value={`${activity.activityValue} ${activity.activityUnit}`} />
-            <Field label="GWP" value={String(activity.gwp)} />
+            <Field label={t("calcDrawer.method")} value={d.method(activity.method)} />
+            <Field label={t("calcDrawer.ghg")} value={activity.ghg} />
+            <Field label={t("calcDrawer.activity")} value={`${activity.activityValue} ${d.unit(activity.activityUnit)}`} />
+            <Field label={t("calcDrawer.gwp")} value={String(activity.gwp)} />
           </div>
 
           <div className="rounded-xl border border-border/60 bg-slate-50 p-4">
             <p className="mb-3 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               <FileCheck2 className="h-3.5 w-3.5" />
-              Formula
+              {t("calcDrawer.formula")}
             </p>
-            <p className="font-mono text-xs text-muted-foreground">emissions = activity × factor × conversion</p>
+            <p className="font-mono text-xs text-muted-foreground">{t("calcDrawer.formulaDesc")}</p>
             <p className="mt-2 font-mono text-xs leading-relaxed">{formula}</p>
             <div className="mt-4 border-t border-border/40 pt-4">
               <MetricFigure size="lg" value={resultTCO2e.toFixed(4)} unit="tCO₂e" />
@@ -54,13 +58,15 @@ export function CalculationDrawer() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Emission factor" value={`${activity.emissionFactorValue}`} sub={activity.emissionFactorSource} />
-            <Field label="Uncertainty" value={`±${activity.uncertaintyPct}%`} />
+            <Field label={t("calcDrawer.emissionFactor")} value={`${activity.emissionFactorValue}`} sub={d.factorName(activity.emissionFactorSource)} />
+            <Field label={t("calcDrawer.uncertainty")} value={`±${activity.uncertaintyPct}%`} />
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Badge variant={activity.isEstimated ? "warning" : "success"}>{activity.isEstimated ? "Estimated" : "Calculated"}</Badge>
-            <Badge variant="secondary">DQ: {activity.dataQualityScore}%</Badge>
+            <Badge variant={activity.isEstimated ? "warning" : "success"}>
+              {activity.isEstimated ? t("common.estimated") : t("calcDrawer.calculated")}
+            </Badge>
+            <Badge variant="secondary">{t("calcDrawer.dq", { score: activity.dataQualityScore })}</Badge>
           </div>
         </div>
       </SheetContent>

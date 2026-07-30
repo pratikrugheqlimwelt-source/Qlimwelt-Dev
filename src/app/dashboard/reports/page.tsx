@@ -13,18 +13,18 @@ import { cn, formatCO2, formatCurrency } from "@/lib/utils";
 import { buildCsrdPdf } from "@/lib/reports/csrd-pdf";
 import { activityToCalculation } from "@/lib/calculations/engine";
 
-const REPORTS = [
-  { id: "ghg", name: "Corporate GHG Inventory", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "scope", name: "Scope 1, 2 & 3 Summary", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "facility", name: "Facility Emission Report", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "fleet", name: "Vehicle Fleet Report", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "travel", name: "Business Travel Report", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "supplier", name: "Supplier Emission Report", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "dq", name: "Data Quality Report", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "target", name: "Target Progress Report", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "reduction", name: "Reduction Opportunity Report", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-  { id: "carbon-cost", name: "Carbon Cost Exposure Report", pages: "CSV/PDF", status: "Ready" as const, updated: "Live" },
-];
+const REPORT_IDS = [
+  "ghg",
+  "scope",
+  "facility",
+  "fleet",
+  "travel",
+  "supplier",
+  "dq",
+  "target",
+  "reduction",
+  "carbonCost",
+] as const;
 
 const REPORT_API_TYPE: Record<string, string> = {
   ghg: "ghg",
@@ -36,7 +36,7 @@ const REPORT_API_TYPE: Record<string, string> = {
   dq: "summary",
   target: "target",
   reduction: "reduction",
-  "carbon-cost": "summary",
+  carbonCost: "summary",
 };
 
 function downloadBlob(filename: string, content: string, mime: string) {
@@ -84,8 +84,24 @@ export default function ReportsPage() {
   const t = useT();
   const [previewId, setPreviewId] = useState<string | null>(null);
 
+  const reports = useMemo(
+    () =>
+      REPORT_IDS.map((id) => ({
+        id,
+        name: t(`reportsPage.catalog.${id}`),
+        pages: t("reportsPage.csvPdf"),
+        status: t("reportsPage.ready") as "Ready",
+        updated: t("shell.live"),
+      })),
+    [t]
+  );
+
+  const periodLabel =
+    filters.period === "all"
+      ? t("reportsPage.fy2024AllMonths")
+      : filters.period;
+
   const summaryLines = useMemo(() => {
-    const periodLabel = filters.period === "all" ? "FY 2024 (all months)" : filters.period;
     return [
       `Qlimwelt Report — ${company.name}`,
       `Period: ${periodLabel}`,
@@ -121,12 +137,12 @@ export default function ReportsPage() {
     suppliers,
     reductionInitiatives,
     climateTarget,
-    filters,
+    periodLabel,
     company,
     filteredActivities,
   ]);
 
-  const previewReport = REPORTS.find((r) => r.id === previewId);
+  const previewReport = reports.find((r) => r.id === previewId);
 
   const downloadPdf = (name: string) => {
     const byCat = new Map<string, number>();
@@ -148,7 +164,7 @@ export default function ReportsPage() {
 
     const pdf = buildCsrdPdf({
       companyName: company.name,
-      periodLabel: filters.period === "all" ? `FY ${company.reportingYear}` : filters.period,
+      periodLabel: filters.period === "all" ? t("shell.fy2024") : filters.period,
       generatedAt: new Date().toISOString(),
       totalTCO2e: metrics.totalTCO2e,
       scope1: metrics.scope1,
@@ -176,7 +192,7 @@ export default function ReportsPage() {
       pdf,
       "application/pdf"
     );
-    toast({ title: "CSRD multi-page PDF downloaded", description: `${name} · 5 pages` });
+    toast({ title: t("reportsPage.toastPdfDownloaded"), description: t("reportsPage.toastPdfPages", { name }) });
   };
 
   const downloadExcel = async (reportId: string, name: string) => {
@@ -189,7 +205,7 @@ export default function ReportsPage() {
 
     const fromApi = await downloadFromApi(path, `${name.replace(/\s+/g, "-").toLowerCase()}.csv`);
     if (fromApi) {
-      toast({ title: "Excel/CSV downloaded (API)", description: name });
+      toast({ title: t("reportsPage.toastExcelApi"), description: name });
       return;
     }
 
@@ -216,15 +232,18 @@ export default function ReportsPage() {
       .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
       .join("\n");
     downloadBlob(`${name.replace(/\s+/g, "-").toLowerCase()}.csv`, csv, "text/csv;charset=utf-8");
-    toast({ title: "Excel/CSV downloaded", description: `${name} (client fallback)` });
+    toast({ title: t("reportsPage.toastExcelFallback"), description: t("reportsPage.toastExcelFallbackDesc", { name }) });
   };
+
+  const previewPeriod =
+    filters.period === "all" ? t("shell.fy2024") : filters.period;
 
   return (
     <div className="space-y-4">
       <PageHeader
         title={t("pages.reports.title")}
         description={t("pages.reports.description")}
-        tip="Generate and download disclosure-ready packages. Excel uses authenticated export APIs when available; PDF stays client-side from live metrics."
+        tip={t("reportsPage.tip")}
       />
 
       <div className="flex flex-wrap gap-2">
@@ -233,37 +252,37 @@ export default function ReportsPage() {
           size="sm"
           className="h-8 text-xs"
           onClick={() => void downloadFromApi(`/api/export/activities?format=csv&period=${encodeURIComponent(filters.period)}`, "activities.csv").then((ok) =>
-            toast({ title: ok ? "Activities CSV exported" : "Export API unavailable — use report Excel for client CSV", variant: ok ? "success" : "destructive" })
+            toast({ title: ok ? t("reportsPage.toastActivitiesExported") : t("reportsPage.toastExportUnavailable"), variant: ok ? "success" : "destructive" })
           )}
         >
-          <Download className="mr-1.5 h-3.5 w-3.5" />Export activities API
+          <Download className="mr-1.5 h-3.5 w-3.5" />{t("reportsPage.exportActivitiesApi")}
         </Button>
         <Button
           variant="outline"
           size="sm"
           className="h-8 text-xs"
           onClick={() => void downloadFromApi(`/api/export/summary?format=csv&period=${encodeURIComponent(filters.period)}`, "ghg-summary.csv").then((ok) =>
-            toast({ title: ok ? "GHG summary exported" : "Export API unavailable", variant: ok ? "success" : "destructive" })
+            toast({ title: ok ? t("reportsPage.toastGhgExported") : t("reportsPage.toastExportUnavailableShort"), variant: ok ? "success" : "destructive" })
           )}
         >
-          <Download className="mr-1.5 h-3.5 w-3.5" />Export summary API
+          <Download className="mr-1.5 h-3.5 w-3.5" />{t("reportsPage.exportSummaryApi")}
         </Button>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        {REPORTS.map((r) => (
+        {reports.map((r) => (
           <div key={r.id} className="dash-card group relative p-5 pr-12 transition-all hover:shadow-[0_8px_30px_rgba(15,23,42,0.07)]">
-            <HelpCorner content={`${r.name}: ${r.pages} export · ${r.status.toLowerCase()}. Export PDF/CSV from live metrics, or preview the summary.`} />
+            <HelpCorner content={t("reportsPage.helpTemplate", { name: r.name, pages: r.pages, status: r.status.toLowerCase() })} />
             <div className="flex items-start gap-4">
               <div className={cn(
                 "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
-                r.status === "Ready" ? "bg-brand/10 text-brand-dark" : "bg-amber-50 text-amber-600"
+                "bg-brand/10 text-brand-dark"
               )}>
                 <FileText className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold tracking-tight">{r.name}</h3>
-                  <Badge variant={r.status === "Ready" ? "success" : "warning"} className="text-[10px]">{r.status}</Badge>
+                  <Badge variant="success" className="text-[10px]">{r.status}</Badge>
                 </div>
                 <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                   <span>{r.pages}</span>
@@ -272,13 +291,13 @@ export default function ReportsPage() {
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => downloadPdf(r.name)}>
-                    <Download className="mr-1.5 h-3.5 w-3.5" />PDF
+                    <Download className="mr-1.5 h-3.5 w-3.5" />{t("reportsPage.pdf")}
                   </Button>
                   <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => void downloadExcel(r.id, r.name)}>
-                    <Download className="mr-1.5 h-3.5 w-3.5" />Excel
+                    <Download className="mr-1.5 h-3.5 w-3.5" />{t("reportsPage.excel")}
                   </Button>
                   <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => setPreviewId(r.id)}>
-                    <Eye className="mr-1.5 h-3.5 w-3.5" />Preview
+                    <Eye className="mr-1.5 h-3.5 w-3.5" />{t("reportsPage.preview")}
                   </Button>
                 </div>
               </div>
@@ -297,7 +316,7 @@ export default function ReportsPage() {
               <div>
                 <h3 className="font-semibold">{previewReport.name}</h3>
                 <p className="text-xs text-muted-foreground">
-                  Live summary preview · {filters.period === "all" ? "FY 2024" : filters.period}
+                  {t("reportsPage.previewSummary", { period: previewPeriod })}
                 </p>
               </div>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPreviewId(null)}>
@@ -308,8 +327,8 @@ export default function ReportsPage() {
               {summaryLines.join("\n")}
             </pre>
             <div className="mt-4 flex gap-2">
-              <Button size="sm" onClick={() => downloadPdf(previewReport.name)}>Download PDF</Button>
-              <Button size="sm" variant="outline" onClick={() => void downloadExcel(previewReport.id, previewReport.name)}>Download CSV</Button>
+              <Button size="sm" onClick={() => downloadPdf(previewReport.name)}>{t("reportsPage.downloadPdf")}</Button>
+              <Button size="sm" variant="outline" onClick={() => void downloadExcel(previewReport.id, previewReport.name)}>{t("reportsPage.downloadCsv")}</Button>
             </div>
           </div>
         </div>

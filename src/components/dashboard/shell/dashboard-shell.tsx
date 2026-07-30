@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   LayoutDashboard, Cloud, Database, Boxes, Brain, Target, Flag,
   FileText, ShieldCheck, Settings, ChevronLeft, ChevronRight, Menu, X,
@@ -54,20 +54,20 @@ const NAV_GROUP_DEFS = [
   },
 ];
 
-const MONTH_LABEL: Record<string, string> = {
-  all: "FY 2024",
-  "2024-01": "Jan 2024",
-  "2024-02": "Feb 2024",
-  "2024-03": "Mar 2024",
-  "2024-04": "Apr 2024",
-  "2024-05": "May 2024",
-  "2024-06": "Jun 2024",
-  "2024-07": "Jul 2024",
-  "2024-08": "Aug 2024",
-  "2024-09": "Sep 2024",
-  "2024-10": "Oct 2024",
-  "2024-11": "Nov 2024",
-  "2024-12": "Dec 2024",
+const PERIOD_KEYS: Record<string, string> = {
+  all: "shell.fy2024",
+  "2024-01": "shell.jan",
+  "2024-02": "shell.feb",
+  "2024-03": "shell.mar",
+  "2024-04": "shell.apr",
+  "2024-05": "shell.may",
+  "2024-06": "shell.jun",
+  "2024-07": "shell.jul",
+  "2024-08": "shell.aug",
+  "2024-09": "shell.sep",
+  "2024-10": "shell.oct",
+  "2024-11": "shell.nov",
+  "2024-12": "shell.dec",
 };
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -110,7 +110,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   const allNav = useMemo(() => navGroups.flatMap((g) => g.items), [navGroups]);
 
-  const pageTitle = allNav.find((n) => n.href === pathname)?.label ?? "Dashboard";
+  const periodLabel = useCallback(
+    (period: string) => {
+      const key = PERIOD_KEYS[period];
+      return key ? t(key) : period;
+    },
+    [t]
+  );
+
+  const pageTitle = allNav.find((n) => n.href === pathname)?.label ?? t("shell.dashboard");
 
   const searchResults = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -140,7 +148,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {mobileOpen && (
         <button
           type="button"
-          aria-label="Close menu"
+          aria-label={t("common.closeMenu")}
           className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
@@ -155,14 +163,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       >
         <div className={cn("flex h-[4.25rem] items-center border-b border-border/60 px-4", collapsed && "justify-center px-2")}>
           {!collapsed ? <Logo size="sm" /> : <Logo size="sm" variant="icon" />}
-          <button type="button" onClick={() => setMobileOpen(false)} className="ml-auto lg:hidden" aria-label="Close navigation">
+          <button type="button" onClick={() => setMobileOpen(false)} className="ml-auto lg:hidden" aria-label={t("shell.closeNav")}>
             <X className="h-5 w-5" />
           </button>
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}
             className={cn("hidden rounded-lg p-1.5 text-muted-foreground hover:bg-muted lg:flex", !collapsed && "ml-auto")}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={collapsed ? t("shell.expandSidebar") : t("shell.collapseSidebar")}
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
@@ -181,7 +189,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-semibold">{company.name}</p>
                 <p className="truncate text-[10px] text-muted-foreground">
-                  {MONTH_LABEL[filters.period] ?? filters.period} · Live
+                  {periodLabel(filters.period)} · {t("shell.live")}
                 </p>
               </div>
               <Settings className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -228,10 +236,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="border-t border-border/40 p-3">
           {!collapsed ? (
             <Link href="/" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
-              ← Back to website
+              ← {t("marketing.backToWebsite")}
             </Link>
           ) : (
-            <Link href="/" className="flex justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted/50" title="Back to website">←</Link>
+            <Link href="/" className="flex justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted/50" title={t("marketing.backToWebsite")}>←</Link>
           )}
         </div>
       </aside>
@@ -239,12 +247,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className={cn("flex min-h-screen flex-col transition-[padding] duration-300", collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64")}>
         <header className="sticky top-0 z-30 border-b border-border/60 bg-white/90 backdrop-blur-md">
           <div className="flex h-[4.25rem] items-center gap-3 px-4 lg:px-6">
-            <button type="button" className="rounded-lg p-2 hover:bg-muted lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
+            <button type="button" className="rounded-lg p-2 hover:bg-muted lg:hidden" onClick={() => setMobileOpen(true)} aria-label={t("shell.openNav")}>
               <Menu className="h-5 w-5" />
             </button>
 
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Carbon Intelligence</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("overview.carbonIntelligence")}</p>
               <h1 className="truncate text-lg font-semibold tracking-tight">{pageTitle}</h1>
             </div>
 
@@ -264,12 +272,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 {searchOpen && search.trim() && (
                   <div className="absolute right-0 top-full z-50 mt-1 w-80 overflow-hidden rounded-xl border border-border bg-background shadow-lg">
                     {searchResults.nav.length === 0 && searchResults.activities.length === 0 ? (
-                      <p className="px-3 py-4 text-xs text-muted-foreground">No matches</p>
+                      <p className="px-3 py-4 text-xs text-muted-foreground">{t("shell.noMatches")}</p>
                     ) : (
                       <>
                         {searchResults.nav.length > 0 && (
                           <div className="border-b border-border/50 p-2">
-                            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Pages</p>
+                            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("shell.pages")}</p>
                             {searchResults.nav.map((n) => (
                               <button
                                 key={n.href}
@@ -289,7 +297,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         )}
                         {searchResults.activities.length > 0 && (
                           <div className="p-2">
-                            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Activities</p>
+                            <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("shell.activities")}</p>
                             {searchResults.activities.map((a) => (
                               <button
                                 key={a.id}
@@ -323,7 +331,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 >
                   <Calendar className="h-3.5 w-3.5" />
                   <span className="max-w-[5.5rem] truncate sm:max-w-none">
-                    {MONTH_LABEL[filters.period] ?? filters.period}
+                    {periodLabel(filters.period)}
                   </span>
                   <ChevronDown className="h-3 w-3 opacity-60" />
                 </Button>
@@ -342,7 +350,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                           setPeriodOpen(false);
                         }}
                       >
-                        {MONTH_LABEL[p] ?? p}
+                        {periodLabel(p)}
                       </button>
                     ))}
                   </div>

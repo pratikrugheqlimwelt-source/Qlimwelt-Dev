@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/components/i18n/locale-provider";
 
 interface WelcomeCardProps {
   firstName?: string;
@@ -12,6 +13,7 @@ interface WelcomeCardProps {
 export function WelcomeCard({ firstName, companyName }: WelcomeCardProps) {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     try {
@@ -55,11 +57,10 @@ export function WelcomeCard({ firstName, companyName }: WelcomeCardProps) {
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold tracking-tight">
-            Welcome to Qlimwelt{name ? `, ${name}` : ""}
+            {t("overview.welcomeTitle", { name: name ? `, ${name}` : "" })}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your workspace for {company ?? "your company"} is ready. Explore emissions, targets, and
-            climate intelligence from your dashboard.
+            {t("overview.welcomeBody", { company: company ?? t("overview.yourCompany") })}
           </p>
         </div>
         <Button
@@ -68,7 +69,7 @@ export function WelcomeCard({ firstName, companyName }: WelcomeCardProps) {
           size="icon"
           className="h-8 w-8 shrink-0"
           onClick={handleDismiss}
-          aria-label="Dismiss welcome message"
+          aria-label={t("overview.dismissWelcome")}
         >
           <X className="h-4 w-4" />
         </Button>

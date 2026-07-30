@@ -17,6 +17,7 @@ import { resolveActivityIcon } from "@/lib/carbon/activity-icons";
 import { ActivityTypeCards } from "@/components/dashboard/data-collection/activity-type-cards";
 import { FactorPicker } from "@/components/dashboard/data-collection/factor-picker";
 import { useT } from "@/components/i18n/locale-provider";
+import { useDomainT } from "@/lib/i18n/use-domain-t";
 
 function lastMonthPeriod(ref = new Date()): string {
   const d = new Date(ref.getFullYear(), ref.getMonth() - 1, 1);
@@ -42,6 +43,7 @@ export default function DataCollectionPage() {
     saving,
   } = useDashboard();
   const t = useT();
+  const d = useDomainT();
 
   const [presetId, setPresetId] = useState("electricity");
   const [factorId, setFactorId] = useState<string>("");
@@ -60,6 +62,7 @@ export default function DataCollectionPage() {
   const [evidenceError, setEvidenceError] = useState<string | null>(null);
 
   const preset = ACTIVITY_PRESETS.find((c) => c.id === presetId) ?? ACTIVITY_PRESETS[3];
+  const presetLocalized = d.preset(preset.id);
   const selectedFactor = emissionFactors.find((f) => f.id === factorId);
   const PresetIcon = resolveActivityIcon(`${preset.id} ${preset.label} ${preset.category}`);
 
@@ -94,11 +97,15 @@ export default function DataCollectionPage() {
 
   const periodChips = useMemo(
     () => [
-      { id: "last", label: "Last month", value: lastMonthPeriod() },
-      { id: "current", label: "This month", value: currentMonthPeriod() },
-      { id: "fy", label: `FY ${company.reportingYear}`, value: fyPeriod(company.reportingYear) },
+      { id: "last", label: t("pages.dataCollection.lastMonth"), value: lastMonthPeriod() },
+      { id: "current", label: t("pages.dataCollection.thisMonth"), value: currentMonthPeriod() },
+      {
+        id: "fy",
+        label: t("pages.dataCollection.fyYear", { year: company.reportingYear }),
+        value: fyPeriod(company.reportingYear),
+      },
     ],
-    [company.reportingYear]
+    [company.reportingYear, t]
   );
 
   const handlePresetChange = (id: string) => {
@@ -170,10 +177,10 @@ export default function DataCollectionPage() {
         const res = await fetch("/api/evidence", { method: "POST", body: formData });
         const data = (await res.json()) as { error?: string; hint?: string };
         if (!res.ok) {
-          setEvidenceError(data.hint || data.error || "Evidence upload failed");
+          setEvidenceError(data.hint || data.error || t("pages.dataCollection.evidenceUploadFailed"));
         }
       } catch {
-        setEvidenceError("Evidence upload failed — check storage / migration 005.");
+        setEvidenceError(t("pages.dataCollection.evidenceUploadFailedHint"));
       }
     }
 
@@ -197,7 +204,7 @@ export default function DataCollectionPage() {
         {/* Activity type cards */}
         <section className="dash-card space-y-3 p-4 sm:p-5">
           <div>
-            <p className="dash-label">Activity type</p>
+            <p className="dash-label">{t("pages.dataCollection.activityType")}</p>
             <h3 className="mt-0.5 text-sm font-semibold tracking-tight">{t("pages.dataCollection.whatRecording")}</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {t("pages.dataCollection.chooseTemplate")}
@@ -215,8 +222,8 @@ export default function DataCollectionPage() {
           <div className="space-y-4">
             <section className="dash-card space-y-4 p-4 sm:p-5">
               <div>
-                <p className="dash-label">Emission factor</p>
-                <h3 className="mt-0.5 text-sm font-semibold tracking-tight">Library or manual</h3>
+                <p className="dash-label">{t("pages.dataCollection.emissionFactor")}</p>
+                <h3 className="mt-0.5 text-sm font-semibold tracking-tight">{t("pages.dataCollection.libraryOrManual")}</h3>
               </div>
               <FactorPicker
                 factors={emissionFactors}
@@ -227,26 +234,26 @@ export default function DataCollectionPage() {
 
             <section className="dash-card space-y-4 p-4 sm:p-5">
               <div>
-                <p className="dash-label">Activity details</p>
-                <h3 className="mt-0.5 text-sm font-semibold tracking-tight">Values & allocation</h3>
+                <p className="dash-label">{t("pages.dataCollection.activityDetails")}</p>
+                <h3 className="mt-0.5 text-sm font-semibold tracking-tight">{t("pages.dataCollection.valuesAllocation")}</h3>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <Label>Scope</Label>
+                  <Label>{t("pages.dataCollection.scope")}</Label>
                   <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
                     <SelectTrigger className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="scope1">Scope 1</SelectItem>
-                      <SelectItem value="scope2">Scope 2</SelectItem>
-                      <SelectItem value="scope3">Scope 3</SelectItem>
+                      <SelectItem value="scope1">{d.scope("scope1")}</SelectItem>
+                      <SelectItem value="scope2">{d.scope("scope2")}</SelectItem>
+                      <SelectItem value="scope3">{d.scope("scope3")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label>Category</Label>
+                  <Label>{t("pages.dataCollection.category")}</Label>
                   <Input
                     className="mt-1"
                     value={category}
@@ -255,7 +262,7 @@ export default function DataCollectionPage() {
                   />
                 </div>
                 <div>
-                  <Label>Activity unit</Label>
+                  <Label>{t("pages.dataCollection.activityUnit")}</Label>
                   <Input
                     className="mt-1"
                     value={activityUnit}
@@ -267,7 +274,9 @@ export default function DataCollectionPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label>Activity value ({activityUnit})</Label>
+                  <Label>
+                    {t("pages.dataCollection.activityValue")} ({d.unit(activityUnit)})
+                  </Label>
                   <Input
                     className="mt-1"
                     type="number"
@@ -278,7 +287,7 @@ export default function DataCollectionPage() {
                   />
                 </div>
                 <div>
-                  <Label>Emission factor (kgCO₂e / {activityUnit})</Label>
+                  <Label>{t("moduleForm.factor", { unit: d.unit(activityUnit) })}</Label>
                   <Input
                     className="mt-1"
                     type="number"
@@ -295,45 +304,49 @@ export default function DataCollectionPage() {
 
               <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-muted/20 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium">{isEstimated ? "Estimated value" : "Measured value"}</p>
+                  <p className="text-sm font-medium">
+                    {isEstimated ? t("pages.dataCollection.estimatedValue") : t("pages.dataCollection.measuredValue")}
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    {isEstimated
-                      ? "Lowers data-quality score — use when invoices aren’t available yet."
-                      : "Prefer meter readings or invoices for higher DQ scores."}
+                    {isEstimated ? t("pages.dataCollection.estimatedHint") : t("pages.dataCollection.measuredHint")}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="text-[11px] font-medium text-muted-foreground">Measured</span>
-                  <Switch checked={isEstimated} onCheckedChange={setIsEstimated} aria-label="Estimated value" />
-                  <span className="text-[11px] font-medium text-muted-foreground">Estimated</span>
+                  <span className="text-[11px] font-medium text-muted-foreground">{t("common.measured")}</span>
+                  <Switch
+                    checked={isEstimated}
+                    onCheckedChange={setIsEstimated}
+                    aria-label={t("pages.dataCollection.estimatedValue")}
+                  />
+                  <span className="text-[11px] font-medium text-muted-foreground">{t("common.estimated")}</span>
                 </div>
               </div>
 
               <div>
-                <Label>Source / description</Label>
+                <Label>{t("pages.dataCollection.sourceDesc")}</Label>
                 <Input
                   className="mt-1"
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
-                  placeholder="e.g. Munich plant electricity — Dec invoice"
+                  placeholder={t("pages.dataCollection.sourcePlaceholder")}
                   required
                 />
               </div>
 
               <div>
-                <Label>Notes (optional)</Label>
+                <Label>{t("pages.dataCollection.notesOptional")}</Label>
                 <textarea
                   className="mt-1 flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Assumptions, invoice refs, data gaps…"
+                  placeholder={t("pages.dataCollection.notesPlaceholder")}
                   rows={3}
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label>Period (YYYY-MM)</Label>
+                  <Label>{t("pages.dataCollection.periodYyyyMm")}</Label>
                   <Input
                     className="mt-1"
                     value={period}
@@ -359,15 +372,15 @@ export default function DataCollectionPage() {
                   </div>
                 </div>
                 <div>
-                  <Label>Facility</Label>
+                  <Label>{t("pages.dataCollection.facility")}</Label>
                   <Select value={facilityId || facilities[0]?.id} onValueChange={setFacilityId}>
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select facility" />
+                      <SelectValue placeholder={t("pages.dataCollection.selectFacility")} />
                     </SelectTrigger>
                     <SelectContent>
                       {facilities.length === 0 ? (
                         <SelectItem value="none" disabled>
-                          Add a facility under Resources first
+                          {t("pages.dataCollection.addFacilityFirst")}
                         </SelectItem>
                       ) : (
                         facilities.map((f) => (
@@ -382,21 +395,21 @@ export default function DataCollectionPage() {
               </div>
 
               <div>
-                <Label>Link resource (optional)</Label>
+                <Label>{t("pages.dataCollection.linkResource")}</Label>
                 <Select value={resourceId} onValueChange={setResourceId}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No linked resource</SelectItem>
+                    <SelectItem value="none">{t("pages.dataCollection.noLinkedResource")}</SelectItem>
                     {vehicles.map((v) => (
                       <SelectItem key={v.id} value={v.id}>
-                        Vehicle · {v.manufacturer} {v.model} ({v.registration})
+                        {t("pages.dataCollection.vehiclePrefix")} {v.manufacturer} {v.model} ({v.registration})
                       </SelectItem>
                     ))}
                     {suppliers.map((s) => (
                       <SelectItem key={s.id} value={s.id}>
-                        Supplier · {s.name}
+                        {t("pages.dataCollection.supplierPrefix")} {s.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -404,7 +417,7 @@ export default function DataCollectionPage() {
               </div>
 
               <div>
-                <Label>Evidence file (optional)</Label>
+                <Label>{t("pages.dataCollection.evidenceFile")}</Label>
                 <Input
                   className="mt-1"
                   type="file"
@@ -412,14 +425,14 @@ export default function DataCollectionPage() {
                   onChange={(e) => setEvidenceFile(e.target.files?.[0] ?? null)}
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Uploads to Supabase Storage after the activity is saved (migration 005).
+                  {t("pages.dataCollection.evidenceUploadHint")}
                 </p>
                 {evidenceError && <p className="mt-1 text-xs text-destructive">{evidenceError}</p>}
               </div>
 
               <div className="flex flex-wrap gap-3 pt-1">
                 <Button type="submit" disabled={saving || !valueNum || !factorNum || !source.trim()}>
-                  {saving ? "Saving…" : "Save to inventory"}
+                  {saving ? t("common.saving") : t("pages.dataCollection.saveInventory")}
                 </Button>
               </div>
             </section>
@@ -433,14 +446,14 @@ export default function DataCollectionPage() {
                   <PresetIcon className="h-5 w-5" strokeWidth={1.75} />
                 </div>
                 <div className="min-w-0">
-                  <p className="dash-label">Live preview</p>
-                  <p className="mt-0.5 truncate text-sm font-semibold tracking-tight">{preset.label}</p>
+                  <p className="dash-label">{t("pages.dataCollection.livePreview")}</p>
+                  <p className="mt-0.5 truncate text-sm font-semibold tracking-tight">{presetLocalized.label}</p>
                 </div>
               </div>
 
               <div className="rounded-xl border border-border/80 bg-muted/20 p-4">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Calculated emissions
+                  {t("pages.dataCollection.calculatedEmissions")}
                 </p>
                 {livePreview !== null ? (
                   <MetricFigure size="md" className="mt-1">
@@ -450,33 +463,35 @@ export default function DataCollectionPage() {
                   <p className="mt-2 text-2xl font-semibold tabular-nums text-muted-foreground/50">—</p>
                 )}
                 <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  {activityValue || "0"} {activityUnit} × {factorValue || "0"} ÷ 1000
+                  {activityValue || "0"} {d.unit(activityUnit)} × {factorValue || "0"} ÷ 1000
                 </p>
               </div>
 
               <dl className="space-y-2.5 text-xs">
                 <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Scope</dt>
-                  <dd className="font-medium capitalize">{scope.replace("scope", "Scope ")}</dd>
+                  <dt className="text-muted-foreground">{t("pages.dataCollection.scope")}</dt>
+                  <dd className="font-medium">{d.scope(scope)}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Period</dt>
+                  <dt className="text-muted-foreground">{t("pages.dataCollection.period")}</dt>
                   <dd className="font-medium tabular-nums">{period}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Quality</dt>
-                  <dd className="font-medium">{isEstimated ? "Estimated" : "Measured"}</dd>
+                  <dt className="text-muted-foreground">{t("pages.dataCollection.quality")}</dt>
+                  <dd className="font-medium">{d.quality(isEstimated ? "Estimated" : "Measured")}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-muted-foreground">Factor source</dt>
+                  <dt className="text-muted-foreground">{t("pages.dataCollection.factorSource")}</dt>
                   <dd className="max-w-[55%] truncate text-right font-medium">
-                    {selectedFactor?.source ?? "Template / manual"}
+                    {selectedFactor
+                      ? d.factorName(selectedFactor.name)
+                      : t("pages.dataCollection.templateManual")}
                   </dd>
                 </div>
               </dl>
 
               <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Preview updates as you type. Saving posts to inventory and optionally uploads evidence.
+                {t("pages.dataCollection.previewHint")}
               </p>
             </div>
           </aside>

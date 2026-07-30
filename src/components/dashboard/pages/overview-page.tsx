@@ -8,6 +8,7 @@ import { SectionHeader } from "@/components/dashboard/shared/section-header";
 import { ScopeDonut, ScopeLegend } from "@/components/dashboard/charts/scope-donut";
 import { WelcomeCard } from "@/components/dashboard/WelcomeCard";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
+import { useT } from "@/components/i18n/locale-provider";
 import { Button } from "@/components/ui/button";
 import { HelpCorner } from "@/components/ui/tooltip";
 import { formatCO2, formatCurrency } from "@/lib/utils";
@@ -37,6 +38,7 @@ export function OverviewPage() {
     isEmpty,
     reductionInitiatives,
   } = useDashboard();
+  const t = useT();
 
   const totalSpark = monthlyTrend.map((m) => m.total);
   const s1Spark = monthlyTrend.map((m) => m.scope1);
@@ -49,6 +51,8 @@ export function OverviewPage() {
       ? `FY ${company.reportingYear}`
       : filters.period;
 
+  const pct = (n: number) => (total ? ((n / total) * 100).toFixed(0) : "0");
+
   return (
     <div className="space-y-4">
       <WelcomeCard />
@@ -60,24 +64,23 @@ export function OverviewPage() {
               <Database className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-semibold">Your inventory is empty</p>
+              <p className="text-sm font-semibold">{t("overview.emptyTitle")}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Start adding emission activities in Data Collection to populate your footprint.
+                {t("overview.emptyBody")}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" asChild>
-              <Link href="/dashboard/data-collection">Go to data collection</Link>
+              <Link href="/dashboard/data-collection">{t("overview.goDataCollection")}</Link>
             </Button>
           </div>
         </div>
       )}
 
-      {/* Executive hero banner */}
       <div className="dash-hero-banner relative p-5 lg:p-6">
         <HelpCorner
-          content="Executive snapshot of your total footprint, scope mix, CSRD readiness, and key risk/progress indicators for the selected reporting year."
+          content={t("pages.overview.description")}
           className="right-3 top-3 [&_button]:border-white/20 [&_button]:bg-white/10 [&_button]:text-white/80 [&_button:hover]:bg-white/20 [&_button:hover]:text-white"
         />
         <div className="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA0KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-60" />
@@ -87,21 +90,30 @@ export function OverviewPage() {
         <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="dash-pill-green"><Leaf className="h-3 w-3" />Carbon Intelligence</span>
-              <span className="dash-pill bg-white/10 text-white/80 ring-white/20"><CheckCircle2 className="h-3 w-3" />CSRD-ready</span>
+              <span className="dash-pill-green"><Leaf className="h-3 w-3" />{t("overview.carbonIntelligence")}</span>
+              <span className="dash-pill bg-white/10 text-white/80 ring-white/20"><CheckCircle2 className="h-3 w-3" />{t("overview.csrdReady")}</span>
               {highRisks > 0 && (
                 <span className="dash-pill bg-amber-500/20 text-amber-200 ring-amber-400/30">
                   <AlertCircle className="h-3 w-3" />
-                  {highRisks} risk{highRisks === 1 ? "" : "s"} flagged
+                  {highRisks === 1
+                    ? t("overview.riskFlagged", { count: highRisks })
+                    : t("overview.risksFlagged", { count: highRisks })}
                 </span>
               )}
             </div>
             <MetricFigure size="xl" className="mt-4 text-white" unitClassName="opacity-60">
               {formatCO2(metrics.totalTCO2e)}
             </MetricFigure>
-            <p className="mt-1 text-base text-white/60">Total emissions · {periodLabel} · All scopes</p>
+            <p className="mt-1 text-base text-white/60">
+              {t("overview.totalEmissionsLine", { period: periodLabel })}
+            </p>
             <p className="mt-3 text-sm text-white/50">
-              {company.name} · {company.employeeCount.toLocaleString()} employees · €{(company.revenueEUR / 1_000_000).toFixed(0)}M revenue · {facilities.length} facilities
+              {company.name} ·{" "}
+              {t("overview.companyMeta", {
+                employees: company.employeeCount.toLocaleString(),
+                revenue: (company.revenueEUR / 1_000_000).toFixed(0),
+                facilities: facilities.length,
+              })}
             </p>
           </div>
 
@@ -120,10 +132,10 @@ export function OverviewPage() {
 
         <div className="relative mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "Target progress", value: `${metrics.targetProgress.toFixed(0)}%`, sub: "2030 SBT" },
-            { label: "Verified data", value: `${metrics.verifiedPct.toFixed(0)}%`, sub: "Audit ready" },
-            { label: "Carbon exposure", value: formatCurrency(metrics.carbonCostExposure), sub: `@€${company.carbonPricePerTonne}/t` },
-            { label: "Period change", value: `${metrics.changePct >= 0 ? "+" : ""}${metrics.changePct.toFixed(1)}%`, sub: "vs prior period" },
+            { label: t("overview.targetProgress"), value: `${metrics.targetProgress.toFixed(0)}%`, sub: t("overview.sbt2030") },
+            { label: t("overview.verifiedData"), value: `${metrics.verifiedPct.toFixed(0)}%`, sub: t("overview.auditReady") },
+            { label: t("overview.carbonExposure"), value: formatCurrency(metrics.carbonCostExposure), sub: `@€${company.carbonPricePerTonne}/t` },
+            { label: t("overview.periodChange"), value: `${metrics.changePct >= 0 ? "+" : ""}${metrics.changePct.toFixed(1)}%`, sub: t("overview.vsPriorPeriod") },
           ].map((stat) => (
             <div key={stat.label} className="dash-hero-stat">
               <MetricFigure size="md" className="text-white" unitClassName="opacity-55">
@@ -136,28 +148,27 @@ export function OverviewPage() {
         </div>
       </div>
 
-      {/* Hero KPIs with sparklines */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard size="hero" accent="brand" icon={Activity} label="Total emissions" value={formatCO2(metrics.totalTCO2e)} tooltip="Sum of Scope 1, 2, and 3." trend={metrics.changePct} sparkline={totalSpark} />
-        <MetricCard size="hero" accent="scope1" icon={Factory} label="Scope 1" value={formatCO2(metrics.scope1)} tooltip="Direct emissions." sub={`${total ? ((metrics.scope1 / total) * 100).toFixed(0) : 0}% of total`} sparkline={s1Spark} />
-        <MetricCard size="hero" accent="scope2" icon={Zap} label="Scope 2" value={formatCO2(metrics.scope2)} tooltip="Purchased energy." sub={`${total ? ((metrics.scope2 / total) * 100).toFixed(0) : 0}% of total`} sparkline={s2Spark} />
-        <MetricCard size="hero" accent="scope3" icon={Cloud} label="Scope 3" value={formatCO2(metrics.scope3)} tooltip="Value chain emissions." sub={`${total ? ((metrics.scope3 / total) * 100).toFixed(0) : 0}% of total`} sparkline={s3Spark} />
+        <MetricCard size="hero" accent="brand" icon={Activity} label={t("overview.totalEmissions")} value={formatCO2(metrics.totalTCO2e)} tooltip={t("overview.tipTotal")} trend={metrics.changePct} sparkline={totalSpark} />
+        <MetricCard size="hero" accent="scope1" icon={Factory} label={t("overview.scope1")} value={formatCO2(metrics.scope1)} tooltip={t("overview.tipScope1")} sub={t("overview.ofTotal", { pct: pct(metrics.scope1) })} sparkline={s1Spark} />
+        <MetricCard size="hero" accent="scope2" icon={Zap} label={t("overview.scope2")} value={formatCO2(metrics.scope2)} tooltip={t("overview.tipScope2")} sub={t("overview.ofTotal", { pct: pct(metrics.scope2) })} sparkline={s2Spark} />
+        <MetricCard size="hero" accent="scope3" icon={Cloud} label={t("overview.scope3")} value={formatCO2(metrics.scope3)} tooltip={t("overview.tipScope3")} sub={t("overview.ofTotal", { pct: pct(metrics.scope3) })} sparkline={s3Spark} />
       </div>
 
       <FilterBar />
 
-      <KpiSection title="Intensity & performance" description="Normalized metrics for benchmarking and disclosure">
-        <MetricCard accent="indigo" icon={TrendingUp} label="Period change" value={`${metrics.changePct >= 0 ? "+" : ""}${metrics.changePct.toFixed(1)}%`} tooltip="Percentage change vs previous period." trend={metrics.changePct} sparkline={totalSpark} />
-        <MetricCard accent="teal" icon={Users} label="Per employee" value={`${metrics.perEmployee.toFixed(2)} t`} tooltip="Emissions per employee." sub={`${company.employeeCount} employees`} />
-        <MetricCard accent="indigo" icon={BarChart3} label="Per revenue" value={`${metrics.perRevenue.toFixed(3)} t/€M`} tooltip="Emissions intensity per €M revenue." />
-        <MetricCard accent="success" icon={Target} label="Target progress" value={`${metrics.targetProgress.toFixed(0)}%`} tooltip="Progress toward 2030 SBT." progress={metrics.targetProgress} />
+      <KpiSection title={t("overview.intensityTitle")} description={t("overview.intensityDesc")}>
+        <MetricCard accent="indigo" icon={TrendingUp} label={t("overview.periodChange")} value={`${metrics.changePct >= 0 ? "+" : ""}${metrics.changePct.toFixed(1)}%`} tooltip={t("overview.vsPriorPeriod")} trend={metrics.changePct} sparkline={totalSpark} />
+        <MetricCard accent="teal" icon={Users} label={t("overview.perEmployee")} value={`${metrics.perEmployee.toFixed(2)} t`} tooltip={t("overview.perEmployee")} sub={t("overview.employeesCount", { count: company.employeeCount })} />
+        <MetricCard accent="indigo" icon={BarChart3} label={t("overview.perRevenue")} value={`${metrics.perRevenue.toFixed(3)} t/€M`} tooltip={t("overview.perRevenue")} />
+        <MetricCard accent="success" icon={Target} label={t("overview.targetProgress")} value={`${metrics.targetProgress.toFixed(0)}%`} tooltip={t("overview.sbt2030")} progress={metrics.targetProgress} />
       </KpiSection>
 
-      <KpiSection title="Data quality & financial" description="Audit readiness and carbon cost exposure">
-        <MetricCard accent="success" icon={ShieldCheck} label="Verified data" value={`${metrics.verifiedPct.toFixed(0)}%`} tooltip="Records with verified evidence." progress={metrics.verifiedPct} />
-        <MetricCard accent="warning" label="Estimated data" value={`${metrics.estimatedPct.toFixed(0)}%`} tooltip="Records using estimates." progress={metrics.estimatedPct} />
-        <MetricCard accent="brand" label="Reduction opportunity" value={formatCO2(metrics.reductionOpportunity)} tooltip="Planned initiative reductions." sub={`From ${reductionInitiatives.length} initiatives`} />
-        <MetricCard accent="indigo" icon={DollarSign} label="Carbon cost exposure" value={formatCurrency(metrics.carbonCostExposure)} tooltip={`At €${company.carbonPricePerTonne}/t carbon price.`} sub={`Savings: ${formatCurrency(metrics.financialSavings)}`} />
+      <KpiSection title={t("overview.qualityTitle")} description={t("overview.qualityDesc")}>
+        <MetricCard accent="success" icon={ShieldCheck} label={t("overview.verifiedData")} value={`${metrics.verifiedPct.toFixed(0)}%`} tooltip={t("overview.auditReady")} progress={metrics.verifiedPct} />
+        <MetricCard accent="warning" label={t("overview.estimatedData")} value={`${metrics.estimatedPct.toFixed(0)}%`} tooltip={t("overview.estimatedData")} progress={metrics.estimatedPct} />
+        <MetricCard accent="brand" label={t("overview.reductionOpp")} value={formatCO2(metrics.reductionOpportunity)} tooltip={t("overview.reductionOpp")} sub={t("overview.fromInitiatives", { count: reductionInitiatives.length })} />
+        <MetricCard accent="indigo" icon={DollarSign} label={t("overview.carbonCost")} value={formatCurrency(metrics.carbonCostExposure)} tooltip={`€${company.carbonPricePerTonne}/t`} sub={t("overview.savings", { amount: formatCurrency(metrics.financialSavings) })} />
       </KpiSection>
 
       <OverviewCharts />

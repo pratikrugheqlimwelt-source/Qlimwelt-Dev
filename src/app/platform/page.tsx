@@ -23,8 +23,10 @@ import {
   platformQueries, capabilityTicker, capabilityMap, copilotExamples,
   autonomousAgents, documentStages, extractedDocuments,
 } from "@/data/marketing-data";
+import { useT } from "@/components/i18n/locale-provider";
 
 export default function PlatformPage() {
+  const t = useT();
   const [queryIndex, setQueryIndex] = useState(0);
   const [activeExample, setActiveExample] = useState(0);
   const [docStage, setDocStage] = useState(0);
@@ -51,14 +53,13 @@ export default function PlatformPage() {
       <Section dark className="border-white/10 py-14 lg:py-16">
         <SectionContainer narrow className="text-center">
           <FadeUp>
-            <MetaLabel className="text-brand">PLATFORM INTELLIGENCE // AI-NATIVE</MetaLabel>
+            <MetaLabel className="text-brand">{t("marketing.platformHeroLabel")}</MetaLabel>
             <h1 className="section-headline-gap font-serif text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
-              The AI Operating System
-              <span className="mt-1 block font-normal italic text-brand">for Sustainability.</span>
+              {t("marketing.platformHeroTitle")}
+              <span className="mt-1 block font-normal italic text-brand">{t("marketing.platformHeroAccent")}</span>
             </h1>
             <p className="mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-white/60">
-              Qlimwelt AI is not a dashboard. It is an autonomous climate intelligence layer that thinks,
-              reports, forecasts, and acts — so your sustainability team can focus on what matters.
+              {t("marketing.platformHeroBody")}
             </p>
             <div className="mx-auto mt-10 flex max-w-xl items-center gap-3 border border-white/15 bg-white/[0.04] p-4">
               <Bot className="h-5 w-5 shrink-0 text-brand" />
@@ -72,11 +73,11 @@ export default function PlatformPage() {
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <a href="#capabilities">
                 <span className="type-cta inline-flex items-center gap-2 border border-white px-6 py-3 text-white transition-colors hover:bg-white hover:text-black">
-                  Explore Features <ChevronRight className="h-4 w-4" />
+                  {t("marketing.exploreFeatures")} <ChevronRight className="h-4 w-4" />
                 </span>
               </a>
               <Link href="/login" className="type-nav text-white/50 transition-colors hover:text-white">
-                Open Dashboard →
+                {t("marketing.openDashboard")}
               </Link>
             </div>
           </FadeUp>

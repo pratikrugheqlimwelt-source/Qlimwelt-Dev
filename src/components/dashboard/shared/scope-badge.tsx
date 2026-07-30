@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useDomainT } from "@/lib/i18n/use-domain-t";
 
 type Scope = "scope1" | "scope2" | "scope3" | "1" | "2" | "3";
 
@@ -12,11 +15,18 @@ const STYLES: Record<string, string> = {
 };
 
 export function ScopeBadge({ scope, className }: { scope: string; className?: string }) {
+  const d = useDomainT();
   const key = scope.replace(/\s/g, "").toLowerCase();
-  const label = scope.startsWith("scope") ? `Scope ${scope.replace("scope", "")}` : scope;
+  const label = d.scope(scope);
 
   return (
-    <span className={cn("inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", STYLES[key] ?? STYLES.scope3, className)}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        STYLES[key] ?? STYLES.scope3,
+        className
+      )}
+    >
       {label}
     </span>
   );

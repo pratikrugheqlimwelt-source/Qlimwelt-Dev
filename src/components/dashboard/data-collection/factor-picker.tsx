@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { resolveActivityIcon } from "@/lib/carbon/activity-icons";
 import type { EmissionFactor } from "@/types/carbon";
+import { useT } from "@/components/i18n/locale-provider";
+import { useDomainT } from "@/lib/i18n/use-domain-t";
 
 type FactorPickerProps = {
   factors: EmissionFactor[];
@@ -14,6 +16,8 @@ type FactorPickerProps = {
 };
 
 export function FactorPicker({ factors, value, onChange }: FactorPickerProps) {
+  const t = useT();
+  const d = useDomainT();
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -25,9 +29,11 @@ export function FactorPicker({ factors, value, onChange }: FactorPickerProps) {
         f.name.toLowerCase().includes(q) ||
         f.category.toLowerCase().includes(q) ||
         f.source.toLowerCase().includes(q) ||
-        f.subcategory.toLowerCase().includes(q)
+        f.subcategory.toLowerCase().includes(q) ||
+        d.factorName(f.name).toLowerCase().includes(q) ||
+        d.category(f.category).toLowerCase().includes(q)
     );
-  }, [factors, query]);
+  }, [factors, query, d]);
 
   const selected = factors.find((f) => f.id === value);
 
@@ -44,9 +50,9 @@ export function FactorPicker({ factors, value, onChange }: FactorPickerProps) {
             );
           })()}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{selected.name}</p>
+            <p className="truncate text-sm font-semibold">{d.factorName(selected.name)}</p>
             <p className="truncate text-[11px] text-muted-foreground">
-              {selected.value} kgCO₂e/{selected.denominatorUnit} · {selected.source}
+              {selected.value} kgCO₂e/{d.unit(selected.denominatorUnit)} · {selected.source}
             </p>
           </div>
           <button
@@ -54,7 +60,7 @@ export function FactorPicker({ factors, value, onChange }: FactorPickerProps) {
             className="text-[11px] font-medium text-muted-foreground hover:text-foreground"
             onClick={() => onChange("")}
           >
-            Clear
+            {t("pages.dataCollection.clear")}
           </button>
         </div>
       )}
@@ -64,7 +70,7 @@ export function FactorPicker({ factors, value, onChange }: FactorPickerProps) {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search factors by name, category, source…"
+          placeholder={t("pages.dataCollection.searchFactors")}
           className="pl-9"
         />
       </div>
@@ -82,14 +88,14 @@ export function FactorPicker({ factors, value, onChange }: FactorPickerProps) {
             <SlidersFallback />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-medium">Template / manual factor</p>
-            <p className="text-[11px] text-muted-foreground">Use the selected activity card defaults</p>
+            <p className="font-medium">{t("domain.factor.templateManual")}</p>
+            <p className="text-[11px] text-muted-foreground">{t("pages.dataCollection.useCardDefaults")}</p>
           </div>
           {!value && <Check className="h-4 w-4 shrink-0 text-brand-dark" />}
         </button>
 
         {filtered.length === 0 ? (
-          <p className="px-3 py-6 text-center text-xs text-muted-foreground">No factors match your search.</p>
+          <p className="px-3 py-6 text-center text-xs text-muted-foreground">{t("pages.dataCollection.noFactors")}</p>
         ) : (
           filtered.map((f) => {
             const Icon = resolveActivityIcon(`${f.category} ${f.name} ${f.subcategory}`);
@@ -115,9 +121,9 @@ export function FactorPicker({ factors, value, onChange }: FactorPickerProps) {
                   <Icon className="h-4 w-4" strokeWidth={1.75} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{f.name}</p>
+                  <p className="truncate text-sm font-medium">{d.factorName(f.name)}</p>
                   <p className="truncate text-[11px] text-muted-foreground">
-                    {f.category} · {f.value} kgCO₂e/{f.denominatorUnit} · {f.source}
+                    {d.category(f.category)} · {f.value} kgCO₂e/{d.unit(f.denominatorUnit)} · {f.source}
                   </p>
                 </div>
                 {active && <Check className="h-4 w-4 shrink-0 text-brand-dark" />}
@@ -126,7 +132,7 @@ export function FactorPicker({ factors, value, onChange }: FactorPickerProps) {
           })
         )}
       </div>
-      <p className="text-xs text-muted-foreground">Add custom factors in Settings — they appear here automatically.</p>
+      <p className="text-xs text-muted-foreground">{t("pages.dataCollection.addCustomFactors")}</p>
     </div>
   );
 }

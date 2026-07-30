@@ -30,27 +30,25 @@ import { MetricFigure } from "@/components/ui/metric-figure";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { brand } from "@/data/brand-content";
-import {
-  heroStats,
-  howItWorksSteps,
-  platformFeatures,
-  useCases,
-  pricingPlans,
-  storyCards,
-  qlimAiDemo,
-} from "@/data/marketing-data";
+import { qlimAiDemo } from "@/data/marketing-data";
+import { useT } from "@/components/i18n/locale-provider";
+import { useLocalizedMarketing } from "@/lib/i18n/use-localized-marketing";
+import { useLocalizedBrand } from "@/lib/i18n/use-localized-brand";
 
 function QuoteCarousel() {
+  const t = useT();
+  const brand = useLocalizedBrand();
   const [index, setIndex] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setIndex((i) => (i + 1) % brand.quotes.length), 5000);
-    return () => clearInterval(t);
-  }, []);
+    const id = setInterval(() => setIndex((i) => (i + 1) % brand.quotes.length), 5000);
+    return () => clearInterval(id);
+  }, [brand.quotes.length]);
 
   return (
     <div className="border border-border px-5 py-10 text-center sm:px-8">
-      <MetaLabel>INSIGHT // {String(index + 1).padStart(2, "0")}</MetaLabel>
+      <MetaLabel>
+        {t("marketing.insightLabel")} // {String(index + 1).padStart(2, "0")}
+      </MetaLabel>
       <AnimatePresence mode="wait">
         <motion.p
           key={index}
@@ -69,7 +67,7 @@ function QuoteCarousel() {
             key={i}
             onClick={() => setIndex(i)}
             className={`h-px transition-all ${i === index ? "w-8 bg-foreground" : "w-4 bg-border"}`}
-            aria-label={`Quote ${i + 1}`}
+            aria-label={t("marketing.quoteAria", { n: i + 1 })}
           />
         ))}
       </div>
@@ -78,10 +76,40 @@ function QuoteCarousel() {
 }
 
 export default function HomePage() {
+  const t = useT();
+  const brand = useLocalizedBrand();
+  const {
+    heroStats,
+    howItWorksSteps,
+    platformFeatures,
+    pricingPlans,
+    storyCards,
+  } = useLocalizedMarketing();
   const [qlimAiOpen, setQlimAiOpen] = useState(false);
   const [demoSubmitting, setDemoSubmitting] = useState(false);
   const now = new Date();
   const timestamp = `${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}.${now.getFullYear()} // ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} UTC`;
+
+  const useCases = [
+    {
+      tag: t("marketing.uc1Tag"),
+      title: t("marketing.uc1Title"),
+      description: t("marketing.uc1Desc"),
+      stat: t("marketing.uc1Stat"),
+    },
+    {
+      tag: t("marketing.uc2Tag"),
+      title: t("marketing.uc2Title"),
+      description: t("marketing.uc2Desc"),
+      stat: t("marketing.uc2Stat"),
+    },
+    {
+      tag: t("marketing.uc3Tag"),
+      title: t("marketing.uc3Title"),
+      description: t("marketing.uc3Desc"),
+      stat: t("marketing.uc3Stat"),
+    },
+  ];
 
   const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -105,19 +133,19 @@ export default function HomePage() {
       const data = (await res.json()) as { error?: string };
 
       if (!res.ok) {
-        throw new Error(data.error ?? "Request failed");
+        throw new Error(data.error ?? t("marketing.demoFailedDesc"));
       }
 
       toast({
-        title: "Demo requested",
-        description: "Thanks — we'll respond within one business day.",
+        title: t("marketing.demoRequestedTitle"),
+        description: t("marketing.demoRequestedDesc"),
         variant: "success",
       });
       form.reset();
     } catch (err) {
       toast({
-        title: "Could not send request",
-        description: err instanceof Error ? err.message : "Please try again or email us directly.",
+        title: t("marketing.demoFailedTitle"),
+        description: err instanceof Error ? err.message : t("marketing.demoFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -139,22 +167,23 @@ export default function HomePage() {
               <EditorialHeadline
                 as="h1"
                 lines={[
-                  { text: "Measure Emissions", italic: true },
-                  { text: "Before Audit.", accent: true },
+                  { text: t("marketing.heroLine1"), italic: true },
+                  { text: t("marketing.heroLine2"), accent: true },
                 ]}
               />
               <AnimatedRule className="mt-6 max-w-xs" />
               <p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground">
-                The world&apos;s first autonomous AI carbon intelligence platform for European enterprises.{" "}
-                <em className="text-foreground">500k+ emission factors.</em> Real-time Scope 1–3. Zero guesswork.
+                {t("marketing.heroBody")}{" "}
+                <em className="text-foreground">{t("marketing.heroBodyAccent")}</em>{" "}
+                {t("marketing.heroBodyEnd")}
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-4">
-                <EditorialCta href="#contact">Request a Demo</EditorialCta>
+                <EditorialCta href="#contact">{t("marketing.requestDemo")}</EditorialCta>
                 <Link
                   href="/login"
                   className="type-nav inline-flex items-center gap-2 px-2 py-4"
                 >
-                  Login for Free →
+                  {t("marketing.loginForFree")}
                 </Link>
               </div>
             </FadeUp>
@@ -170,11 +199,11 @@ export default function HomePage() {
         <div className="watermark-text absolute inset-x-0 top-1/2 -translate-y-1/2 text-center">QLIMWELT</div>
         <SectionContainer narrow className="relative text-center">
           <FadeUp>
-            <MetaLabel className="text-center">THE FUTURE OF</MetaLabel>
-            <h2 className="mt-4 font-serif text-5xl font-bold sm:text-6xl lg:text-7xl">Carbon</h2>
-            <p className="mt-1 font-serif text-5xl italic sm:text-6xl lg:text-7xl">Intelligence</p>
-            <MetaLabel className="mt-8 text-center tracking-[0.3em]">STARTS BEFORE</MetaLabel>
-            <p className="mt-3 font-serif text-4xl font-bold text-brand-dark sm:text-5xl">The First Audit.</p>
+            <MetaLabel className="text-center">{t("marketing.futureOf")}</MetaLabel>
+            <h2 className="mt-4 font-serif text-5xl font-bold sm:text-6xl lg:text-7xl">{t("marketing.carbon")}</h2>
+            <p className="mt-1 font-serif text-5xl italic sm:text-6xl lg:text-7xl">{t("marketing.intelligence")}</p>
+            <MetaLabel className="mt-8 text-center tracking-[0.3em]">{t("marketing.startsBefore")}</MetaLabel>
+            <p className="mt-3 font-serif text-4xl font-bold text-brand-dark sm:text-5xl">{t("marketing.theFirstAudit")}</p>
           </FadeUp>
           <AnimatedRule className="section-content-gap" />
         </SectionContainer>
@@ -187,11 +216,11 @@ export default function HomePage() {
           <FadeUp>
             <SectionIntro
               lines={[
-                { text: "Three Steps", italic: true },
-                { text: "To CSRD-Ready." },
+                { text: t("marketing.threeSteps"), italic: true },
+                { text: t("marketing.toCsrdReady") },
               ]}
             />
-            <MetaLabel className="mt-4">WORKFLOW // AUTOMATED</MetaLabel>
+            <MetaLabel className="mt-4">{t("marketing.workflowAutomated")}</MetaLabel>
           </FadeUp>
           <div className="section-content-gap">
             <InteractiveSteps
@@ -216,8 +245,8 @@ export default function HomePage() {
             <SectionIntro
               dark
               lines={[
-                { text: "Numbers", italic: true },
-                { text: "That Drive Decisions." },
+                { text: t("marketing.numbersThat"), italic: true },
+                { text: t("marketing.driveDecisions") },
               ]}
             />
           </FadeUp>
@@ -226,16 +255,16 @@ export default function HomePage() {
               <MetricDark
                 index="METRIC_01"
                 value={heroStats[1].value.replace(",", "")}
-                label="tCO₂e processed this month"
-                meta={["SENSORS ACTIVE", "CONFIDENCE: 99.9%", timestamp]}
+                label={t("marketing.metricProcessed")}
+                meta={[t("marketing.sensorsActive"), "CONFIDENCE: 99.9%", timestamp]}
               />
             </FadeUp>
             <FadeUp delay={0.2}>
               <MetricDark
                 index="METRIC_02"
                 value="97%"
-                label="Reporting time reduction"
-                meta={["CSRD COMPLIANCE", "CONFIDENCE: 98.4%", timestamp]}
+                label={t("marketing.metricReporting")}
+                meta={[t("marketing.csrdCompliance"), "CONFIDENCE: 98.4%", timestamp]}
               />
             </FadeUp>
           </div>
@@ -252,8 +281,8 @@ export default function HomePage() {
           <FadeUp>
             <SectionIntro
               lines={[
-                { text: "Why Speed", italic: true },
-                { text: "Is Everything." },
+                { text: t("marketing.whySpeed"), italic: true },
+                { text: t("marketing.isEverything") },
               ]}
             />
           </FadeUp>
@@ -261,22 +290,22 @@ export default function HomePage() {
             <FadeUpItem>
               <StatColumn
                 value="3 hrs"
-                label="EARLY DETECTION"
-                description="AI identifies emission anomalies before they impact your CSRD disclosure."
+                label={t("marketing.earlyDetection")}
+                description={t("marketing.earlyDetectionDesc")}
               />
             </FadeUpItem>
             <FadeUpItem>
               <StatColumn
                 value="97%"
-                label="FASTER REPORTING"
-                description="From weeks of manual work to audit-ready ESRS reports in hours."
+                label={t("marketing.fasterReporting")}
+                description={t("marketing.fasterReportingDesc")}
               />
             </FadeUpItem>
             <FadeUpItem>
               <StatColumn
                 value="24/7"
-                label="CONTINUOUS MONITORING"
-                description="Autonomous agents track regulatory changes and supplier data around the clock."
+                label={t("marketing.continuousMonitoring")}
+                description={t("marketing.continuousMonitoringDesc")}
               />
             </FadeUpItem>
           </FadeUpStagger>
@@ -325,10 +354,10 @@ export default function HomePage() {
         <SectionContainer>
           <FadeUp>
             <SectionIntro
-              label="PLATFORM // MODULES"
+              label={t("marketing.platformModules")}
               lines={[
-                { text: "Everything You", italic: true },
-                { text: "Need." },
+                { text: t("marketing.everythingYou"), italic: true },
+                { text: t("marketing.need") },
               ]}
             />
           </FadeUp>
@@ -353,33 +382,31 @@ export default function HomePage() {
         <SectionContainer>
           <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
             <FadeUp>
-              <MetaLabel className="text-brand-dark">QLIM AI // CLIMATE INTELLIGENCE</MetaLabel>
+              <MetaLabel className="text-brand-dark">{t("marketing.qlimAiLabel")}</MetaLabel>
               <h2 className="section-headline-gap font-serif text-4xl font-bold text-foreground sm:text-5xl">
-                Your AI layer for <span className="font-normal italic">climate decisions.</span>
+                {t("marketing.qlimAiHeadline")}{" "}
+                <span className="font-normal italic">{t("marketing.qlimAiHeadlineAccent")}</span>
               </h2>
               <ThinRule className="mt-8" />
               <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-                We are always working on AI research in climate change. Qlim AI tracks every data point through
-                ingest, lineage, and reasoning — so you get answers you can audit and act on.
+                {t("marketing.qlimAiBody")}
               </p>
               <ul className="mt-6 space-y-4">
-                {[
-                  "Reads any data format — PDFs, CSVs, ERP exports, bank statements",
-                  "Every calculation is auditable with full data lineage",
-                  "EU-only hosting. Your data never leaves Frankfurt or Dublin.",
-                ].map((item) => (
+                {[t("marketing.qlimAiBullet1"), t("marketing.qlimAiBullet2"), t("marketing.qlimAiBullet3")].map(
+                  (item) => (
                   <li key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-dark" />
                     <span>{item}</span>
                   </li>
-                ))}
+                )
+                )}
               </ul>
               <button
                 type="button"
                 onClick={() => setQlimAiOpen(true)}
                 className="motion-safe:transition-all type-cta mt-10 border border-foreground px-6 py-3 text-foreground hover:bg-foreground hover:text-background active:scale-[0.98]"
               >
-                Open Qlim AI →
+                {t("marketing.openQlimAi")}
               </button>
             </FadeUp>
             <FadeUp delay={0.15} className="lg:pt-2">
@@ -387,7 +414,7 @@ export default function HomePage() {
                 type="button"
                 onClick={() => setQlimAiOpen(true)}
                 className="block w-full text-left shadow-sm"
-                aria-label="Open Qlim AI Climate Intelligence"
+                aria-label={t("marketing.openQlimAi")}
               >
                 <QlimAiChat messages={qlimAiDemo.slice(0, 2)} animateLast={false} />
               </button>
@@ -401,10 +428,10 @@ export default function HomePage() {
         <SectionContainer>
           <FadeUp>
             <SectionIntro
-              label="SOLUTIONS // INDUSTRY"
+              label={t("marketing.solutionsLabel")}
               lines={[
-                { text: "Built for", italic: true },
-                { text: "European Business." },
+                { text: t("marketing.builtFor"), italic: true },
+                { text: t("marketing.europeanBusiness") },
               ]}
             />
           </FadeUp>
@@ -437,10 +464,10 @@ export default function HomePage() {
         <SectionContainer>
           <FadeUp>
             <SectionIntro
-              label="PRICING // TRANSPARENT"
+              label={t("marketing.pricingLabel")}
               lines={[
-                { text: "No Surprises.", italic: true },
-                { text: "Just Progress." },
+                { text: t("marketing.noSurprises"), italic: true },
+                { text: t("marketing.justProgress") },
               ]}
             />
           </FadeUp>
@@ -455,10 +482,10 @@ export default function HomePage() {
         <SectionContainer>
           <FadeUp>
             <SectionIntro
-              label="COMPANY // ORIGIN"
+              label={t("marketing.companyOrigin")}
               lines={[
-                { text: "Built to Fix", italic: true },
-                { text: "A Real Problem." },
+                { text: t("marketing.builtToFix"), italic: true },
+                { text: t("marketing.aRealProblem") },
               ]}
             />
           </FadeUp>
@@ -479,9 +506,9 @@ export default function HomePage() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-serif text-3xl font-bold">Pratik Rughe</p>
-                  <MetaLabel className="mt-2">FOUNDER & CEO // QLIMWELT AI</MetaLabel>
+                  <MetaLabel className="mt-2">{t("marketing.founderRole")}</MetaLabel>
                   <blockquote className="mt-8 max-w-2xl border-l border-brand-dark pl-6 font-serif text-xl italic leading-relaxed text-muted-foreground">
-                    Carbon accounting has a data quality crisis. The tools were built for checkbox compliance, not genuine decarbonisation. We built Qlimwelt to change that.
+                    {t("marketing.founderQuote")}
                   </blockquote>
                 </div>
               </div>
@@ -496,10 +523,10 @@ export default function HomePage() {
           <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
             <FadeUp>
               <SectionIntro
-                label="GET STARTED"
+                label={t("marketing.getStarted")}
                 lines={[
-                  { text: "Start Measuring", italic: true },
-                  { text: "What Matters." },
+                  { text: t("marketing.startMeasuring"), italic: true },
+                  { text: t("marketing.whatMatters") },
                 ]}
               />
               <ul className="section-content-gap space-y-4">
@@ -513,37 +540,37 @@ export default function HomePage() {
             </FadeUp>
             <FadeUp delay={0.15}>
               <div className="border border-border p-8 lg:p-10">
-                <MetaLabel>REQUEST // DEMO</MetaLabel>
+                <MetaLabel>{t("marketing.requestDemoLabel")}</MetaLabel>
                 <form onSubmit={handleDemoSubmit} className="section-content-gap space-y-5">
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
                       <Label htmlFor="firstName" className="type-label">
-                        First name
+                        {t("marketing.firstName")}
                       </Label>
                       <Input id="firstName" name="firstName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                     </div>
                     <div>
                       <Label htmlFor="lastName" className="type-label">
-                        Last name
+                        {t("marketing.lastName")}
                       </Label>
                       <Input id="lastName" name="lastName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="email" className="type-label">
-                      Email
+                      {t("marketing.email")}
                     </Label>
                     <Input id="email" name="email" type="email" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                   </div>
                   <div>
                     <Label htmlFor="company" className="type-label">
-                      Company
+                      {t("marketing.company")}
                     </Label>
                     <Input id="company" name="company" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
                   </div>
                   <div>
                     <Label htmlFor="message" className="type-label">
-                      Message
+                      {t("marketing.message")}
                     </Label>
                     <textarea
                       id="message"
@@ -557,10 +584,10 @@ export default function HomePage() {
                     disabled={demoSubmitting}
                     className="type-cta w-full border border-foreground py-4 transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {demoSubmitting ? "Sending…" : "Request a Demo"}
+                    {demoSubmitting ? t("marketing.sending") : t("marketing.requestDemo")}
                   </button>
                   <p className="text-center type-label">
-                    No spam · Response within one business day
+                    {t("marketing.noSpam")}
                   </p>
                 </form>
               </div>

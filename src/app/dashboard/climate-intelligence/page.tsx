@@ -13,27 +13,20 @@ import { MetricFigure } from "@/components/ui/metric-figure";
 import { ArrowRight, Leaf, Zap, Factory, TrendingDown } from "lucide-react";
 import type { ClimateInsight } from "@/types/carbon";
 
-const WELCOME = {
-  role: "assistant" as const,
-  content: `★ Brief take
-Hi — I'm Qlim AI, your carbon consultant on Qlimwelt. Ask me anything about your footprint, scopes, hotspots, or CSRD next steps.
-
-★ What this means for you
-I'll use your live inventory when you're signed in, and rate priorities with ★★★★★ → ★☆☆☆☆ so you can see what matters most.
-
-★ Consultant recommendation
-Start with a simple question like "What's our biggest scope?" or "Where should we cut first?"
-
-★ Next step in Qlimwelt
-Type below — I'll answer in plain language and point you to the right page.`,
-};
-
 export default function ClimateIntelligencePage() {
   const { climateInsights, actOnInsight, saving, activities, metrics } = useDashboard();
   const router = useRouter();
   const t = useT();
   const hasInventory = activities.length > 0;
   const isEmptyInsight = climateInsights.length === 1 && climateInsights[0]?.id === "ins-empty";
+
+  const welcomeMessage = useMemo(
+    () => ({
+      role: "assistant" as const,
+      content: t("climatePage.welcomeContent"),
+    }),
+    [t]
+  );
 
   const scopeShare = useMemo(() => {
     const total = metrics.totalTCO2e || 0;
@@ -58,63 +51,63 @@ export default function ClimateIntelligencePage() {
       <PageHeader
         title={t("pages.climate.title")}
         description={t("pages.climate.description")}
-        tip="Chat uses your inventory. Analysis and recommendations update from the same activity data."
+        tip={t("climatePage.tip")}
         className="shrink-0"
       />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.85fr)]">
-        {/* Chat */}
         <QlimAiChat
-          messages={[WELCOME]}
+          messages={[welcomeMessage]}
           animateLast={false}
           interactive
           fill
           className="h-[min(70vh,560px)] w-full min-w-0 lg:h-full"
         />
 
-        {/* Analysis + recommendations */}
         <aside className="flex min-h-0 min-w-0 flex-col gap-4 lg:h-full lg:overflow-hidden">
           <section className="shrink-0 rounded-2xl border border-border bg-background p-4 sm:p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-base font-semibold tracking-tight">AI analysis</h2>
+              <h2 className="text-base font-semibold tracking-tight">{t("climatePage.aiAnalysis")}</h2>
               <Badge variant="secondary" className="shrink-0 text-[10px]">
-                {hasInventory ? `${activities.length} activities` : "No inventory"}
+                {hasInventory ? t("climatePage.activitiesCount", { count: activities.length }) : t("climatePage.noInventory")}
               </Badge>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
               <StatTile
                 icon={Leaf}
-                label="Total"
+                label={t("climatePage.total")}
                 value={`${formatNumber(metrics.totalTCO2e, 1)}`}
                 unit="tCO₂e"
                 accent
               />
               <StatTile
                 icon={TrendingDown}
-                label="Reduction opp."
+                label={t("climatePage.reductionOpp")}
                 value={`${formatNumber(metrics.reductionOpportunity, 1)}`}
                 unit="tCO₂e"
               />
               <StatTile
                 icon={Factory}
-                label="Scope 1"
+                label={t("overview.scope1")}
                 value={`${formatNumber(metrics.scope1, 1)}`}
                 unit="tCO₂e"
                 hint={`${scopeShare.s1.toFixed(0)}%`}
+                ofTotalLabel={t("climatePage.ofTotal")}
               />
               <StatTile
                 icon={Zap}
-                label="Scope 2"
+                label={t("overview.scope2")}
                 value={`${formatNumber(metrics.scope2, 1)}`}
                 unit="tCO₂e"
                 hint={`${scopeShare.s2.toFixed(0)}%`}
+                ofTotalLabel={t("climatePage.ofTotal")}
               />
             </div>
 
             <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3.5 py-3">
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-xs text-muted-foreground">Scope 3</p>
+                <p className="text-xs text-muted-foreground">{t("overview.scope3")}</p>
                 <p className="dash-num text-sm">
                   <MetricFigure size="sm" className="!inline-flex">
                     {`${formatNumber(metrics.scope3, 1)} tCO₂e`}
@@ -129,17 +122,17 @@ export default function ClimateIntelligencePage() {
                   <div
                     className="min-w-0 bg-brand-dark/80"
                     style={{ width: `${scopeShare.s1}%` }}
-                    title="Scope 1"
+                    title={t("overview.scope1")}
                   />
                   <div
                     className="min-w-0 bg-brand"
                     style={{ width: `${scopeShare.s2}%` }}
-                    title="Scope 2"
+                    title={t("overview.scope2")}
                   />
                   <div
                     className="min-w-0 bg-brand/40"
                     style={{ width: `${scopeShare.s3}%` }}
-                    title="Scope 3"
+                    title={t("overview.scope3")}
                   />
                 </div>
               </div>
@@ -158,13 +151,13 @@ export default function ClimateIntelligencePage() {
 
             <div className="mt-3 grid grid-cols-2 gap-2.5">
               <div className="rounded-lg border border-border px-3 py-2.5">
-                <p className="text-[10px] text-muted-foreground">Carbon cost</p>
+                <p className="text-[10px] text-muted-foreground">{t("climatePage.carbonCost")}</p>
                 <p className="dash-num mt-0.5 truncate text-sm">
                   {formatCurrency(metrics.carbonCostExposure)}
                 </p>
               </div>
               <div className="rounded-lg border border-border px-3 py-2.5">
-                <p className="text-[10px] text-muted-foreground">Verified</p>
+                <p className="text-[10px] text-muted-foreground">{t("climatePage.verified")}</p>
                 <p className="dash-num mt-0.5 text-sm">
                   {metrics.verifiedPct.toFixed(0)}%
                 </p>
@@ -173,10 +166,10 @@ export default function ClimateIntelligencePage() {
           </section>
 
           <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-background p-4 sm:p-5">
-            <h2 className="mb-3 shrink-0 text-base font-semibold tracking-tight">Recommendations</h2>
+            <h2 className="mb-3 shrink-0 text-base font-semibold tracking-tight">{t("climatePage.recommendations")}</h2>
             {recommendations.length === 0 ? (
               <p className="text-sm leading-relaxed text-muted-foreground">
-                Add activities in Data Collection to generate recommendations.
+                {t("climatePage.emptyRecommendations")}
               </p>
             ) : (
               <ul className="min-h-0 space-y-2.5 overflow-y-auto">
@@ -215,7 +208,7 @@ export default function ClimateIntelligencePage() {
                         disabled={saving}
                         onClick={() => void handleAct(ins)}
                       >
-                        Act <ArrowRight className="ml-1 h-3 w-3" />
+                        {t("climatePage.act")} <ArrowRight className="ml-1 h-3 w-3" />
                       </Button>
                     </div>
                   </li>
@@ -236,6 +229,7 @@ function StatTile({
   unit,
   hint,
   accent,
+  ofTotalLabel,
 }: {
   icon: typeof Leaf;
   label: string;
@@ -243,6 +237,7 @@ function StatTile({
   unit?: string;
   hint?: string;
   accent?: boolean;
+  ofTotalLabel?: string;
 }) {
   return (
     <div
@@ -258,7 +253,7 @@ function StatTile({
       <MetricFigure size="sm" className="mt-1.5 truncate">
         {unit ? `${value} ${unit}` : value}
       </MetricFigure>
-      {hint && <p className="mt-0.5 text-[10px] text-muted-foreground">{hint} of total</p>}
+      {hint && ofTotalLabel && <p className="mt-0.5 text-[10px] text-muted-foreground">{hint} {ofTotalLabel}</p>}
     </div>
   );
 }

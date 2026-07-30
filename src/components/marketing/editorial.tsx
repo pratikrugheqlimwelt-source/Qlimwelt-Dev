@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { EASE_OUT } from "@/lib/motion";
 import { MetricFigure } from "@/components/ui/metric-figure";
+import { useT } from "@/components/i18n/locale-provider";
 
 /* ── Layout primitives ── */
 
@@ -100,9 +101,10 @@ export function MetaLabel({ children, className }: { children: React.ReactNode; 
 }
 
 export function StatusBar() {
+  const t = useT();
   return (
     <MetaLabel className="text-brand-dark">
-      SYSTEM STATUS: OPERATIONAL // {new Date().getFullYear()}
+      {t("marketing.systemStatus", { year: new Date().getFullYear() })}
     </MetaLabel>
   );
 }

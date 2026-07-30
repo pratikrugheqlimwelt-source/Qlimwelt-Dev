@@ -27,6 +27,24 @@ export default function ReductionPlannerPage() {
   const [reduction, setReduction] = useState("");
   const [cost, setCost] = useState("");
 
+  const statusLabel = (status: ReductionInitiative["status"]) => {
+    const map: Record<ReductionInitiative["status"], string> = {
+      planned: t("reductionPage.planned"),
+      in_progress: t("reductionPage.inProgress"),
+      completed: t("reductionPage.completed"),
+    };
+    return map[status];
+  };
+
+  const difficultyLabel = (level: ReductionInitiative["difficulty"]) => {
+    const map: Record<ReductionInitiative["difficulty"], string> = {
+      low: t("reductionPage.low"),
+      medium: t("reductionPage.med"),
+      high: t("reductionPage.high"),
+    };
+    return map[level];
+  };
+
   const enriched = reductionInitiatives.map((i) => ({
     ...i,
     netSaving: netAnnualSaving(i.annualFinancialSaving, i.annualOperatingCost),
@@ -75,48 +93,50 @@ export default function ReductionPlannerPage() {
     setShowForm(false);
   };
 
+  const difficultyTicks = ["", t("reductionPage.low"), t("reductionPage.med"), t("reductionPage.high")];
+
   return (
     <div className="space-y-4">
       <PageHeader
         title={t("pages.reduction.title")}
         description={t("pages.reduction.description")}
-        tip="Compare reduction initiatives on impact, cost, difficulty, and payback — then track delivery status for each project."
+        tip={t("reductionPage.tip")}
       />
 
       <div className="dash-card p-4">
         {!showForm ? (
           <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>
-            <Plus className="mr-1.5 h-3.5 w-3.5" />Add initiative
+            <Plus className="mr-1.5 h-3.5 w-3.5" />{t("reductionPage.addInitiative")}
           </Button>
         ) : (
           <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
             <div className="space-y-1.5">
-              <Label htmlFor="init-name">Name</Label>
-              <Input id="init-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. LED retrofit" />
+              <Label htmlFor="init-name">{t("reductionPage.name")}</Label>
+              <Input id="init-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("reductionPage.namePlaceholder")} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="init-reduction">Reduction (tCO₂e/yr)</Label>
+              <Label htmlFor="init-reduction">{t("reductionPage.reductionPerYear")}</Label>
               <Input id="init-reduction" type="number" min={0} step="any" value={reduction} onChange={(e) => setReduction(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="init-cost">Cost (€)</Label>
+              <Label htmlFor="init-cost">{t("reductionPage.costEuro")}</Label>
               <Input id="init-cost" type="number" min={0} step="any" value={cost} onChange={(e) => setCost(e.target.value)} />
             </div>
             <div className="flex items-end gap-2">
               <Button size="sm" disabled={saving || !name.trim() || !reduction} onClick={() => void handleAdd()}>
-                {saving ? "Saving…" : "Save"}
+                {saving ? t("common.saving") : t("common.save")}
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowForm(false)}>{t("common.cancel")}</Button>
             </div>
           </div>
         )}
       </div>
 
-      <ChartCard title="Prioritisation matrix" tip="Bubble size = annual reduction potential. X-axis = implementation difficulty." icon={Target}>
+      <ChartCard title={t("reductionPage.prioritisationMatrix")} tip={t("reductionPage.matrixTip")} icon={Target}>
         <ResponsiveContainer width="100%" height={260}>
           <ScatterChart>
             <CartesianGrid {...CHART_GRID} />
-            <XAxis dataKey="difficulty" name="Difficulty" domain={[0, 4]} tickFormatter={(v) => ["", "Low", "Med", "High"][v] ?? ""} tick={{ fontSize: 11, fill: CHART.tick }} />
+            <XAxis dataKey="difficulty" name={t("reductionPage.difficulty")} domain={[0, 4]} tickFormatter={(v) => difficultyTicks[v] ?? ""} tick={{ fontSize: 11, fill: CHART.tick }} />
             <YAxis dataKey="potential" name="tCO₂e/yr" tick={{ fontSize: 11, fill: CHART.tick }} />
             <ZAxis dataKey="size" range={[100, 600]} />
             <Tooltip cursor={{ strokeDasharray: "3 3" }} />
@@ -131,7 +151,13 @@ export default function ReductionPlannerPage() {
           const advance = nextStatus(i.status);
           return (
             <div key={i.id} className="dash-card relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgba(15,23,42,0.07)]">
-              <HelpCorner content={`${i.name}: estimated ${i.annualEmissionReductionTCO2e.toLocaleString()} tCO₂e/yr reduction, ${formatCurrency(i.netSaving)} net annual saving, ${i.difficulty} difficulty, and ${i.payback.toFixed(1)}-year payback.`} />
+              <HelpCorner content={t("reductionPage.helpTemplate", {
+                name: i.name,
+                reduction: i.annualEmissionReductionTCO2e.toLocaleString(),
+                saving: formatCurrency(i.netSaving),
+                difficulty: difficultyLabel(i.difficulty),
+                payback: i.payback.toFixed(1),
+              })} />
               <div className="p-5 pr-12">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
@@ -141,10 +167,12 @@ export default function ReductionPlannerPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-semibold">{i.name}</p>
-                        <Badge variant={i.status === "completed" ? "success" : i.status === "in_progress" ? "warning" : "secondary"} className="text-[10px] capitalize">
-                          {i.status.replace(/_/g, " ")}
+                        <Badge variant={i.status === "completed" ? "success" : i.status === "in_progress" ? "warning" : "secondary"} className="text-[10px]">
+                          {statusLabel(i.status)}
                         </Badge>
-                        <Badge variant="outline" className="text-[10px] capitalize">{i.difficulty} difficulty</Badge>
+                        <Badge variant="outline" className="text-[10px]">
+                          {t("reductionPage.difficultyLabel", { level: difficultyLabel(i.difficulty) })}
+                        </Badge>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{i.category} · {i.source}</p>
                     </div>
@@ -156,7 +184,9 @@ export default function ReductionPlannerPage() {
                           {`${i.annualEmissionReductionTCO2e.toLocaleString()} tCO₂e/yr`}
                         </MetricFigure>
                       </p>
-                      <p className="text-sm text-muted-foreground">{formatCurrency(i.netSaving)} net saving/yr</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("reductionPage.netSavingPerYear", { amount: formatCurrency(i.netSaving) })}
+                      </p>
                     </div>
                     {advance && (
                       <Button
@@ -167,9 +197,9 @@ export default function ReductionPlannerPage() {
                         onClick={() => void setInitiativeStatus(i.id, advance)}
                       >
                         {advance === "in_progress" ? (
-                          <><Play className="mr-1.5 h-3.5 w-3.5" />Start initiative</>
+                          <><Play className="mr-1.5 h-3.5 w-3.5" />{t("reductionPage.startInitiative")}</>
                         ) : (
-                          <><CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />Mark completed</>
+                          <><CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />{t("reductionPage.markCompleted")}</>
                         )}
                       </Button>
                     )}
@@ -178,17 +208,17 @@ export default function ReductionPlannerPage() {
 
                 <div className="mt-4">
                   <div className="mb-1.5 flex justify-between text-xs">
-                    <span className="text-muted-foreground">Implementation progress</span>
+                    <span className="text-muted-foreground">{t("reductionPage.implementationProgress")}</span>
                     <span className="font-medium">{progressPct}%</span>
                   </div>
                   <Progress value={progressPct} className="h-1.5" />
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-4">
-                  <Stat label="Implementation" value={formatCurrency(i.implementationCost)} />
-                  <Stat label="Cost/t reduced" value={formatCurrency(i.costPerTonne)} />
-                  <Stat label="Payback" value={i.payback === Infinity ? "—" : `${i.payback.toFixed(1)} yrs`} />
-                  <Stat label="Lifetime reduction" value={`${i.lifetimeReduction.toLocaleString()} t`} />
+                  <Stat label={t("reductionPage.implementation")} value={formatCurrency(i.implementationCost)} />
+                  <Stat label={t("reductionPage.costPerTonne")} value={formatCurrency(i.costPerTonne)} />
+                  <Stat label={t("reductionPage.payback")} value={i.payback === Infinity ? "—" : `${i.payback.toFixed(1)} ${t("reductionPage.yrs")}`} />
+                  <Stat label={t("reductionPage.lifetimeReduction")} value={`${i.lifetimeReduction.toLocaleString()} t`} />
                 </div>
               </div>
             </div>

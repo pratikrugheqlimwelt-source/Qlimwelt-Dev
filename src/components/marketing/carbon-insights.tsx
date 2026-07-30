@@ -16,17 +16,26 @@ import {
   EditorialCta,
 } from "@/components/marketing/editorial";
 import { ExternalResourceLink } from "@/components/marketing/external-link";
-import {
-  carbonFootprintTopics,
-  footprintFacts,
-  insightArticles,
-  industryNews,
-} from "@/data/marketing-data";
+import { useT } from "@/components/i18n/locale-provider";
+import { useLocalizedMarketing } from "@/lib/i18n/use-localized-marketing";
 import { cn } from "@/lib/utils";
 import { MetricFigure } from "@/components/ui/metric-figure";
 
 const IMAGE_FALLBACK =
   "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1200&q=80";
+
+type ScopeTopic = {
+  id: string;
+  tag: string;
+  title: string;
+  description: string;
+  share: string;
+  shareLabel: string;
+  accent: string;
+  examples: string[];
+  image: string;
+  imageAlt: string;
+};
 
 /** Unsplash photos — native img avoids Next.js optimizer config issues on deploy */
 function EditorialImage({
@@ -50,17 +59,13 @@ function EditorialImage({
     <img
       src={resolvedSrc}
       alt={alt}
-      loading={priority ? "eager" : "lazy"}
-      decoding="async"
-      referrerPolicy="no-referrer"
-      onError={() => {
-        if (resolvedSrc !== IMAGE_FALLBACK) setResolvedSrc(IMAGE_FALLBACK);
-      }}
       className={cn(
-        "object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]",
-        fill ? "absolute inset-0 h-full w-full" : "h-full w-full",
+        fill ? "absolute inset-0 h-full w-full object-cover" : "h-full w-full object-cover",
         className
       )}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+      onError={() => setResolvedSrc(IMAGE_FALLBACK)}
     />
   );
 
@@ -69,7 +74,7 @@ function EditorialImage({
   return <div className={cn("overflow-hidden bg-neutral-900", className)}>{img}</div>;
 }
 
-function ScopeCard({ topic }: { topic: (typeof carbonFootprintTopics)[number] }) {
+function ScopeCard({ topic }: { topic: ScopeTopic }) {
   return (
     <article className="group flex h-full flex-col overflow-hidden border border-border bg-background shadow-sm transition-shadow hover:shadow-md">
       <div className="relative aspect-[5/4] overflow-hidden bg-neutral-900">
@@ -96,17 +101,12 @@ function ScopeCard({ topic }: { topic: (typeof carbonFootprintTopics)[number] })
         <ThinRule className="my-5" />
         <div className="flex flex-wrap gap-2">
           {topic.examples.map((ex) => (
-            <span
-              key={ex}
-              className="bg-muted/60 px-2.5 py-1 type-label"
-            >
+            <span key={ex} className="bg-muted/60 px-2.5 py-1 type-label">
               {ex}
             </span>
           ))}
         </div>
-        <p className="mt-4 type-label">
-          {topic.shareLabel}
-        </p>
+        <p className="mt-4 type-label">{topic.shareLabel}</p>
       </div>
     </article>
   );
@@ -135,27 +135,30 @@ function ArticleBanner({
 }
 
 export function CarbonFootprintSection() {
+  const t = useT();
+  const { carbonFootprintTopics, footprintFacts } = useLocalizedMarketing();
+
   return (
     <Section id="carbon-footprint">
       <SectionNumberWrap n="03" />
       <SectionContainer>
         <FadeUp>
           <SectionIntro
-            label="EDUCATION // GHG PROTOCOL"
+            label={t("marketing.educationLabel")}
             lines={[
-              { text: "Understanding", italic: true },
-              { text: "Your Carbon Footprint." },
+              { text: t("marketing.understanding"), italic: true },
+              { text: t("marketing.yourCarbonFootprint") },
             ]}
           />
           <p className="section-headline-gap max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            A corporate carbon footprint measures greenhouse gas emissions across three scopes defined by the{" "}
+            {t("marketing.footprintIntroBefore")}{" "}
             <ExternalResourceLink
               href="https://ghgprotocol.org/corporate-standard"
               className="font-medium text-foreground underline-offset-4 hover:underline"
             >
               GHG Protocol
-            </ExternalResourceLink>
-            {" "}— the global standard used for CSRD, SBTi, and CDP reporting.
+            </ExternalResourceLink>{" "}
+            {t("marketing.footprintIntroAfter")}
           </p>
         </FadeUp>
 
@@ -194,6 +197,8 @@ export function CarbonFootprintSection() {
 }
 
 export function InsightsNewsSection() {
+  const t = useT();
+  const { insightArticles, industryNews } = useLocalizedMarketing();
   const featured = insightArticles.find((a) => a.featured)!;
   const rest = insightArticles.filter((a) => !a.featured);
 
@@ -204,19 +209,17 @@ export function InsightsNewsSection() {
         <FadeUp>
           <SectionIntro
             dark
-            label="INSIGHTS // BLOG & NEWS"
+            label={t("marketing.insightsLabel")}
             lines={[
-              { text: "Carbon Intelligence", italic: true },
-              { text: "Briefing Room." },
+              { text: t("marketing.briefingRoom1"), italic: true },
+              { text: t("marketing.briefingRoom2") },
             ]}
           />
           <p className="section-headline-gap max-w-2xl text-sm leading-relaxed text-white/50">
-            Regulatory updates, methodology guides, and reduction strategies for sustainability teams navigating
-            CSRD and decarbonisation.
+            {t("marketing.insightsIntro")}
           </p>
         </FadeUp>
 
-        {/* Featured hero with full banner */}
         <FadeUp delay={0.05}>
           <ExternalResourceLink
             href={featured.externalUrl}
@@ -224,18 +227,11 @@ export function InsightsNewsSection() {
             className="group section-content-gap block overflow-hidden border border-white/10 bg-[#0a0a0a]"
           >
             <div className="relative min-h-[280px] overflow-hidden lg:min-h-[360px]">
-              <EditorialImage
-                src={featured.image}
-                alt={featured.imageAlt}
-                priority
-                fill
-              />
+              <EditorialImage src={featured.image} alt={featured.imageAlt} priority fill />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/20" />
               <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 lg:p-10">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="bg-brand px-2.5 py-1 type-label text-black">
-                    {featured.category}
-                  </span>
+                  <span className="bg-brand px-2.5 py-1 type-label text-black">{featured.category}</span>
                   <span className="type-label text-white/50">{featured.date}</span>
                   <span className="flex items-center gap-1 type-label text-white/50">
                     <Clock className="h-3 w-3" />
@@ -247,7 +243,7 @@ export function InsightsNewsSection() {
                 </h3>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">{featured.excerpt}</p>
                 <span className="type-label mt-6 inline-flex items-center gap-2 text-brand transition-colors group-hover:text-white">
-                  Read source article
+                  {t("marketing.readSourceArticle")}
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                 </span>
               </div>
@@ -255,7 +251,6 @@ export function InsightsNewsSection() {
           </ExternalResourceLink>
         </FadeUp>
 
-        {/* Article grid — each with banner */}
         <FadeUpStagger className="section-content-gap grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {rest.map((article) => (
             <FadeUpItem key={article.slug}>
@@ -264,11 +259,7 @@ export function InsightsNewsSection() {
                 aria-label={`${article.title} (opens in new tab)`}
                 className="group flex h-full flex-col overflow-hidden border border-white/10 bg-[#0a0a0a] transition-colors hover:border-white/20"
               >
-                <ArticleBanner
-                  image={article.image}
-                  imageAlt={article.imageAlt}
-                  category={article.category}
-                />
+                <ArticleBanner image={article.image} imageAlt={article.imageAlt} category={article.category} />
                 <div className="flex flex-1 flex-col p-5 sm:p-6">
                   <div className="flex items-center gap-2 type-label text-white/40">
                     <span>{article.date}</span>
@@ -282,7 +273,7 @@ export function InsightsNewsSection() {
                     {article.excerpt}
                   </p>
                   <span className="type-label mt-4 inline-flex items-center gap-1 text-white/40 group-hover:text-brand">
-                    Read source
+                    {t("marketing.readSource")}
                     <ExternalLink className="h-3 w-3" aria-hidden="true" />
                   </span>
                 </div>
@@ -291,15 +282,14 @@ export function InsightsNewsSection() {
           ))}
         </FadeUpStagger>
 
-        {/* Industry pulse — banner on every item */}
         <FadeUp delay={0.15}>
           <div className="section-content-gap">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Newspaper className="h-5 w-5 text-brand" />
-                <MetaLabel className="text-white/40">INDUSTRY PULSE // LIVE FEED</MetaLabel>
+                <MetaLabel className="text-white/40">{t("marketing.industryPulse")}</MetaLabel>
               </div>
-              <MetaLabel className="text-white/25">UPDATED WEEKLY</MetaLabel>
+              <MetaLabel className="text-white/25">{t("marketing.updatedWeekly")}</MetaLabel>
             </div>
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
               {industryNews.map((item) => (
@@ -313,9 +303,7 @@ export function InsightsNewsSection() {
                     <EditorialImage src={item.image} alt={item.imageAlt} fill />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-2 p-4">
-                      <span className="bg-brand px-2 py-0.5 type-label text-black">
-                        {item.source}
-                      </span>
+                      <span className="bg-brand px-2 py-0.5 type-label text-black">{item.source}</span>
                       <span className="type-label text-white/60">{item.date}</span>
                     </div>
                   </div>
@@ -325,7 +313,7 @@ export function InsightsNewsSection() {
                     </h4>
                     <p className="mt-2 text-xs leading-relaxed text-white/50 sm:text-sm">{item.summary}</p>
                     <span className="type-label mt-4 inline-flex items-center gap-1 text-white/35 group-hover:text-brand">
-                      Open source
+                      {t("marketing.openSource")}
                       <ExternalLink className="h-3 w-3" aria-hidden="true" />
                     </span>
                   </div>
@@ -338,21 +326,21 @@ export function InsightsNewsSection() {
         <FadeUp delay={0.2}>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <EditorialCta href="/whats-new" className="border-white/30 text-white hover:bg-white hover:text-black">
-              View all insights
+              {t("marketing.viewAllInsights")}
             </EditorialCta>
-            <Link
-              href="#contact"
-              className="type-label text-white/40 transition-colors hover:text-white"
-            >
-              Subscribe to briefing →
+            <Link href="#contact" className="type-label text-white/40 transition-colors hover:text-white">
+              {t("marketing.subscribeBriefing")}
             </Link>
           </div>
           <p className="type-label mt-6 text-white/25">
-            Photography via{" "}
-            <ExternalResourceLink href="https://unsplash.com/license" className="underline-offset-2 hover:text-white/50 hover:underline">
+            {t("marketing.photoCredit")}{" "}
+            <ExternalResourceLink
+              href="https://unsplash.com/license"
+              className="underline-offset-2 hover:text-white/50 hover:underline"
+            >
               Unsplash
-            </ExternalResourceLink>
-            {" "}— free to use under the Unsplash License
+            </ExternalResourceLink>{" "}
+            {t("marketing.photoLicense")}
           </p>
         </FadeUp>
       </SectionContainer>

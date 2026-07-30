@@ -93,32 +93,32 @@ export default function SettingsPage() {
         title={t("pages.settings.title")}
         description={t("pages.settings.description")}
       />
-      <HelpCorner content="Update company profile, carbon price, and emission factors. Saves persist to Supabase when available, otherwise localStorage for this workspace." />
+      <HelpCorner content={t("settingsPage.helpTip")} />
       <Card>
-        <CardHeader><CardTitle className="text-sm">Company settings</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">{t("settingsPage.companySettings")}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div><Label>Company name</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" /></div>
-          <div><Label>Industry</Label><Input value={industry} onChange={(e) => setIndustry(e.target.value)} className="mt-1" /></div>
+          <div><Label>{t("settingsPage.companyName")}</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" /></div>
+          <div><Label>{t("settingsPage.industry")}</Label><Input value={industry} onChange={(e) => setIndustry(e.target.value)} className="mt-1" /></div>
           <div className="grid grid-cols-2 gap-4">
-            <div><Label>Carbon price (€/tCO₂e)</Label><Input type="number" value={carbonPrice} onChange={(e) => setCarbonPrice(Number(e.target.value))} className="mt-1" /></div>
-            <div><Label>Employees</Label><Input type="number" value={employeeCount} onChange={(e) => setEmployeeCount(Number(e.target.value))} className="mt-1" /></div>
+            <div><Label>{t("settingsPage.carbonPrice")}</Label><Input type="number" value={carbonPrice} onChange={(e) => setCarbonPrice(Number(e.target.value))} className="mt-1" /></div>
+            <div><Label>{t("settingsPage.employees")}</Label><Input type="number" value={employeeCount} onChange={(e) => setEmployeeCount(Number(e.target.value))} className="mt-1" /></div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><Label>Baseline year</Label><Input type="number" value={baselineYear} onChange={(e) => setBaselineYear(Number(e.target.value))} className="mt-1" /></div>
-            <div><Label>Reporting year</Label><Input type="number" value={reportingYear} onChange={(e) => setReportingYear(Number(e.target.value))} className="mt-1" /></div>
+            <div><Label>{t("settingsPage.baselineYear")}</Label><Input type="number" value={baselineYear} onChange={(e) => setBaselineYear(Number(e.target.value))} className="mt-1" /></div>
+            <div><Label>{t("settingsPage.reportingYear")}</Label><Input type="number" value={reportingYear} onChange={(e) => setReportingYear(Number(e.target.value))} className="mt-1" /></div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div><Label>Units produced</Label><Input type="number" value={unitsProduced} onChange={(e) => setUnitsProduced(Number(e.target.value))} className="mt-1" /></div>
-            <div><Label>Revenue (EUR)</Label><Input type="number" value={revenueEUR} onChange={(e) => setRevenueEUR(Number(e.target.value))} className="mt-1" /></div>
+            <div><Label>{t("settingsPage.unitsProduced")}</Label><Input type="number" value={unitsProduced} onChange={(e) => setUnitsProduced(Number(e.target.value))} className="mt-1" /></div>
+            <div><Label>{t("settingsPage.revenue")}</Label><Input type="number" value={revenueEUR} onChange={(e) => setRevenueEUR(Number(e.target.value))} className="mt-1" /></div>
           </div>
-          <Button onClick={handleSave} disabled={saving}>{saving ? "Saving…" : "Save company settings"}</Button>
+          <Button onClick={handleSave} disabled={saving}>{saving ? t("common.saving") : t("settingsPage.saveCompanySettings")}</Button>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-sm">Global Warming Potential values</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">{t("settingsPage.gwpTitle")}</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-xs text-muted-foreground">Configurable GWP values (AR6). Used when converting non-CO₂ gases.</p>
+          <p className="text-xs text-muted-foreground">{t("settingsPage.gwpHint")}</p>
           {Object.entries(gwp).map(([gas, val]) => (
             <div key={gas} className="flex items-center gap-4">
               <Label className="w-16">{gas}</Label>
@@ -131,18 +131,22 @@ export default function SettingsPage() {
             disabled={saving}
             onClick={() => void saveSettings({ gwpValues: gwp })}
           >
-            {saving ? "Saving…" : "Save GWP values"}
+            {saving ? t("common.saving") : t("settingsPage.saveGwp")}
           </Button>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-sm">Emission factor library ({emissionFactors.length} factors)</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-sm">{t("settingsPage.factorLibrary", { count: emissionFactors.length })}</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b text-left text-muted-foreground">
-                <th className="p-2">Name</th><th className="p-2">Value</th><th className="p-2">Unit</th><th className="p-2">Source</th><th className="p-2">Year</th>
+                <th className="p-2">{t("settingsPage.colName")}</th>
+                <th className="p-2">{t("settingsPage.colValue")}</th>
+                <th className="p-2">{t("settingsPage.colUnit")}</th>
+                <th className="p-2">{t("settingsPage.colSource")}</th>
+                <th className="p-2">{t("settingsPage.colYear")}</th>
               </tr>
             </thead>
             <tbody>
@@ -159,15 +163,15 @@ export default function SettingsPage() {
           </table>
           {!showFactorForm ? (
             <Button variant="outline" size="sm" className="mt-4" onClick={() => setShowFactorForm(true)}>
-              Add custom factor
+              {t("settingsPage.addCustomFactor")}
             </Button>
           ) : (
             <div className="mt-4 space-y-3 rounded-lg border p-4">
-              <div><Label>Factor name</Label><Input className="mt-1" value={factorName} onChange={(e) => setFactorName(e.target.value)} /></div>
-              <div><Label>Value (kgCO₂e / unit)</Label><Input className="mt-1" type="number" step="any" value={factorValue} onChange={(e) => setFactorValue(e.target.value)} /></div>
+              <div><Label>{t("settingsPage.factorName")}</Label><Input className="mt-1" value={factorName} onChange={(e) => setFactorName(e.target.value)} /></div>
+              <div><Label>{t("settingsPage.factorValue")}</Label><Input className="mt-1" type="number" step="any" value={factorValue} onChange={(e) => setFactorValue(e.target.value)} /></div>
               <div className="flex gap-2">
-                <Button size="sm" onClick={handleAddFactor} disabled={saving}>Save factor</Button>
-                <Button size="sm" variant="ghost" onClick={() => setShowFactorForm(false)}>Cancel</Button>
+                <Button size="sm" onClick={handleAddFactor} disabled={saving}>{t("settingsPage.saveFactor")}</Button>
+                <Button size="sm" variant="ghost" onClick={() => setShowFactorForm(false)}>{t("common.cancel")}</Button>
               </div>
             </div>
           )}

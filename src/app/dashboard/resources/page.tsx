@@ -157,59 +157,68 @@ export default function ResourcesPage() {
     if (parsed.length) await addVehiclesBulk(parsed);
   };
 
+  const paybackYears = simplePaybackPeriod(42000, netAnnualSaving(8900, 1200)).toFixed(1);
+
   return (
     <div className="space-y-4">
       <PageHeader
         title={t("pages.resources.title")}
         description={t("pages.resources.description")}
-        tip="Master data is not the inventory. Use “Add to inventory” on vehicles/suppliers (or Data Collection) to create calculated emission records."
+        tip={t("resourcesPage.tip")}
       />
 
       <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
-        Facilities allocate activities. Vehicles and suppliers stay as master data until you click{" "}
-        <span className="font-medium">Add to inventory</span> (or enter an activity in Data Collection).
+        {t("resourcesPage.infoBannerBefore")}{" "}
+        <span className="font-medium">{t("resourcesPage.infoBannerAction")}</span>{" "}
+        {t("resourcesPage.infoBannerAfter")}
       </div>
       <Tabs defaultValue="facilities" className="space-y-4">
         <TabsList className="dash-tab-list h-auto w-full justify-start sm:w-auto">
-          <TabsTrigger value="facilities" className="dash-tab-trigger gap-1.5"><Building2 className="h-3.5 w-3.5" />Facilities ({facilities.length})</TabsTrigger>
-          <TabsTrigger value="vehicles" className="dash-tab-trigger gap-1.5"><Truck className="h-3.5 w-3.5" />Vehicles ({vehicles.length})</TabsTrigger>
-          <TabsTrigger value="suppliers" className="dash-tab-trigger gap-1.5"><Users className="h-3.5 w-3.5" />Suppliers ({suppliers.length})</TabsTrigger>
+          <TabsTrigger value="facilities" className="dash-tab-trigger gap-1.5">
+            <Building2 className="h-3.5 w-3.5" />{t("resourcesPage.facilities")} ({facilities.length})
+          </TabsTrigger>
+          <TabsTrigger value="vehicles" className="dash-tab-trigger gap-1.5">
+            <Truck className="h-3.5 w-3.5" />{t("resourcesPage.vehicles")} ({vehicles.length})
+          </TabsTrigger>
+          <TabsTrigger value="suppliers" className="dash-tab-trigger gap-1.5">
+            <Users className="h-3.5 w-3.5" />{t("resourcesPage.suppliers")} ({suppliers.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="facilities" className="space-y-4">
           <Button size="sm" className="h-9 gap-1.5" onClick={() => setShowFacility((v) => !v)}>
-            <Plus className="h-3.5 w-3.5" />Add facility
+            <Plus className="h-3.5 w-3.5" />{t("resourcesPage.addFacility")}
           </Button>
           {showFacility && (
             <div className="dash-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-5">
               <div className="space-y-1.5">
-                <Label>Name</Label>
-                <Input value={facName} onChange={(e) => setFacName(e.target.value)} placeholder="Munich HQ" />
+                <Label>{t("resourcesPage.name")}</Label>
+                <Input value={facName} onChange={(e) => setFacName(e.target.value)} placeholder={t("resourcesPage.placeholderMunichHq")} />
               </div>
               <div className="space-y-1.5">
-                <Label>Country</Label>
+                <Label>{t("resourcesPage.country")}</Label>
                 <Input value={facCountry} onChange={(e) => setFacCountry(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label>Type</Label>
-                <Input value={facType} onChange={(e) => setFacType(e.target.value)} placeholder="Plant / Office" />
+                <Label>{t("resourcesPage.type")}</Label>
+                <Input value={facType} onChange={(e) => setFacType(e.target.value)} placeholder={t("resourcesPage.placeholderPlantOffice")} />
               </div>
               <div className="space-y-1.5">
-                <Label>Floor area (m²)</Label>
+                <Label>{t("resourcesPage.floorArea")}</Label>
                 <Input type="number" value={facArea} onChange={(e) => setFacArea(e.target.value)} />
               </div>
               <div className="flex items-end gap-2">
                 <Button onClick={() => void handleAddFacility()} disabled={saving || !facName.trim()}>
-                  {saving ? "Saving…" : "Save"}
+                  {saving ? t("common.saving") : t("common.save")}
                 </Button>
-                <Button variant="ghost" onClick={() => setShowFacility(false)}>Cancel</Button>
+                <Button variant="ghost" onClick={() => setShowFacility(false)}>{t("common.cancel")}</Button>
               </div>
             </div>
           )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {facilities.map((f) => (
               <div key={f.id} className="dash-card relative p-5 pr-11 transition-all hover:shadow-[0_8px_30px_rgba(15,23,42,0.07)]">
-                <HelpCorner content={`${f.name}: ${f.type} facility in ${f.country} (${f.floorAreaM2.toLocaleString()} m²). Used to allocate Scope 1–2 activity data.`} />
+                <HelpCorner content={t("resourcesPage.facilityHelp", { name: f.name, type: f.type, country: f.country, area: f.floorAreaM2.toLocaleString() })} />
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand-dark">
                   <Building2 className="h-5 w-5" />
                 </div>
@@ -223,13 +232,13 @@ export default function ResourcesPage() {
 
         <TabsContent value="vehicles" className="space-y-4">
           <div className="flex flex-wrap items-center gap-3">
-            <Input placeholder="Search manufacturer, model, registration…" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm border-border/60 shadow-none" />
+            <Input placeholder={t("resourcesPage.searchVehicles")} value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm border-border/60 shadow-none" />
             <Button variant="outline" size="sm" className="h-9 gap-1.5" onClick={() => setView(view === "table" ? "grid" : "table")}>
               {view === "table" ? <LayoutGrid className="h-3.5 w-3.5" /> : <List className="h-3.5 w-3.5" />}
-              {view === "table" ? "Grid" : "Table"}
+              {view === "table" ? t("resourcesPage.grid") : t("resourcesPage.table")}
             </Button>
             <Button size="sm" className="h-9 gap-1.5" onClick={() => setShowAdd((v) => !v)}>
-              <Plus className="h-3.5 w-3.5" />Add vehicle
+              <Plus className="h-3.5 w-3.5" />{t("resourcesPage.addVehicle")}
             </Button>
             <Button
               variant="outline"
@@ -238,7 +247,7 @@ export default function ResourcesPage() {
               onClick={() => bulkRef.current?.click()}
               disabled={saving}
             >
-              <Upload className="h-3.5 w-3.5" />Bulk upload
+              <Upload className="h-3.5 w-3.5" />{t("resourcesPage.bulkUpload")}
             </Button>
             <input
               ref={bulkRef}
@@ -256,44 +265,44 @@ export default function ResourcesPage() {
           {showAdd && (
             <div className="dash-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-5">
               <div className="space-y-1.5">
-                <Label>Manufacturer</Label>
-                <Input value={manufacturer} onChange={(e) => setManufacturer(e.target.value)} placeholder="Volvo" />
+                <Label>{t("resourcesPage.manufacturer")}</Label>
+                <Input value={manufacturer} onChange={(e) => setManufacturer(e.target.value)} placeholder={t("resourcesPage.placeholderVolvo")} />
               </div>
               <div className="space-y-1.5">
-                <Label>Model</Label>
-                <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder="FH16" />
+                <Label>{t("resourcesPage.model")}</Label>
+                <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder={t("resourcesPage.placeholderModel")} />
               </div>
               <div className="space-y-1.5">
-                <Label>Registration</Label>
-                <Input value={registration} onChange={(e) => setRegistration(e.target.value)} placeholder="AB-123-CD" />
+                <Label>{t("resourcesPage.registration")}</Label>
+                <Input value={registration} onChange={(e) => setRegistration(e.target.value)} placeholder={t("resourcesPage.placeholderReg")} />
               </div>
               <div className="space-y-1.5">
-                <Label>Fuel type</Label>
-                <Input value={fuelType} onChange={(e) => setFuelType(e.target.value)} placeholder="Diesel" />
+                <Label>{t("resourcesPage.fuelType")}</Label>
+                <Input value={fuelType} onChange={(e) => setFuelType(e.target.value)} placeholder={t("resourcesPage.placeholderDiesel")} />
               </div>
               <div className="flex items-end gap-2">
                 <Button onClick={() => void handleAddVehicle()} disabled={saving || !manufacturer || !model}>
-                  {saving ? "Saving…" : "Save"}
+                  {saving ? t("common.saving") : t("common.save")}
                 </Button>
-                <Button variant="ghost" onClick={() => setShowAdd(false)}>Cancel</Button>
+                <Button variant="ghost" onClick={() => setShowAdd(false)}>{t("common.cancel")}</Button>
               </div>
               <p className="sm:col-span-2 lg:col-span-5 text-xs text-muted-foreground">
-                CSV bulk format: manufacturer,model,registration,fuelType,year,estimatedAnnualKm
+                {t("resourcesPage.csvFormat")}
               </p>
             </div>
           )}
 
           {view === "table" ? (
-            <DataTable tip="Fleet vehicles contributing to Scope 1 mobile combustion — use Add to inventory to push fuel/electricity into calculated emissions.">
+            <DataTable tip={t("resourcesPage.vehiclesTableTip")}>
               <table className="w-full">
                 <DataTableHeader>
-                  <DataTableHead>Vehicle</DataTableHead>
-                  <DataTableHead>Category</DataTableHead>
-                  <DataTableHead>Fuel</DataTableHead>
-                  <DataTableHead>Distance</DataTableHead>
-                  <DataTableHead>Fuel/Elec</DataTableHead>
-                  <DataTableHead>Est. emissions</DataTableHead>
-                  <DataTableHead>Action</DataTableHead>
+                  <DataTableHead>{t("resourcesPage.vehicle")}</DataTableHead>
+                  <DataTableHead>{t("resourcesPage.category")}</DataTableHead>
+                  <DataTableHead>{t("resourcesPage.fuel")}</DataTableHead>
+                  <DataTableHead>{t("resourcesPage.distance")}</DataTableHead>
+                  <DataTableHead>{t("resourcesPage.fuelElec")}</DataTableHead>
+                  <DataTableHead>{t("resourcesPage.estEmissions")}</DataTableHead>
+                  <DataTableHead>{t("resourcesPage.action")}</DataTableHead>
                 </DataTableHeader>
                 <DataTableBody>
                   {filteredVehicles.map((v) => {
@@ -317,7 +326,7 @@ export default function ResourcesPage() {
                             disabled={saving}
                             onClick={() => void logVehicleEmissions(v)}
                           >
-                            Add to inventory
+                            {t("resourcesPage.addToInventory")}
                           </Button>
                         </DataTableCell>
                       </DataTableRow>
@@ -330,12 +339,12 @@ export default function ResourcesPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredVehicles.map((v) => (
                 <div key={v.id} className="dash-card relative space-y-3 p-4 pr-11">
-                  <HelpCorner content={`${v.manufacturer} ${v.model} (${v.registration}): ${v.fuelType} fleet asset used for Scope 1 mobile combustion calculations.`} />
+                  <HelpCorner content={t("resourcesPage.vehicleHelp", { vehicle: `${v.manufacturer} ${v.model}`, registration: v.registration, fuel: v.fuelType })} />
                   <p className="font-semibold">{v.manufacturer} {v.model}</p>
                   <p className="text-xs text-muted-foreground">{v.registration}</p>
                   <Badge className="mt-2" variant={v.fuelType.includes("electric") ? "success" : "secondary"}>{v.fuelType}</Badge>
                   <Button size="sm" variant="outline" className="w-full" disabled={saving} onClick={() => void logVehicleEmissions(v)}>
-                    Add to inventory
+                    {t("resourcesPage.addToInventory")}
                   </Button>
                 </div>
               ))}
@@ -343,53 +352,53 @@ export default function ResourcesPage() {
           )}
 
           <div className="dash-card relative border-brand/20 bg-brand/5 p-5 pr-12">
-            <HelpCorner content="Example abatement opportunity: replacing a diesel van with a battery-electric equivalent, including estimated annual emission reduction and simple payback." />
-            <p className="font-semibold">EV replacement opportunity</p>
+            <HelpCorner content={t("resourcesPage.evOpportunityDesc", { years: paybackYears })} />
+            <p className="font-semibold">{t("resourcesPage.evOpportunity")}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Diesel van → Battery electric: est. 4.2 tCO₂e/yr reduction, payback {simplePaybackPeriod(42000, netAnnualSaving(8900, 1200)).toFixed(1)} years
+              {t("resourcesPage.evOpportunityDesc", { years: paybackYears })}
             </p>
           </div>
         </TabsContent>
 
         <TabsContent value="suppliers" className="space-y-4">
           <Button size="sm" className="h-9 gap-1.5" onClick={() => setShowSupplier((v) => !v)}>
-            <Plus className="h-3.5 w-3.5" />Add supplier
+            <Plus className="h-3.5 w-3.5" />{t("resourcesPage.addSupplier")}
           </Button>
           {showSupplier && (
             <div className="dash-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-5">
               <div className="space-y-1.5">
-                <Label>Name</Label>
-                <Input value={supName} onChange={(e) => setSupName(e.target.value)} placeholder="SteelCo GmbH" />
+                <Label>{t("resourcesPage.name")}</Label>
+                <Input value={supName} onChange={(e) => setSupName(e.target.value)} placeholder={t("resourcesPage.placeholderSteelCo")} />
               </div>
               <div className="space-y-1.5">
-                <Label>Country</Label>
+                <Label>{t("resourcesPage.country")}</Label>
                 <Input value={supCountry} onChange={(e) => setSupCountry(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label>Category</Label>
+                <Label>{t("resourcesPage.category")}</Label>
                 <Input value={supCategory} onChange={(e) => setSupCategory(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label>Scope 3 tCO₂e</Label>
+                <Label>{t("resourcesPage.scope3Tco2e")}</Label>
                 <Input type="number" step="any" value={supTco2e} onChange={(e) => setSupTco2e(e.target.value)} placeholder="120" />
               </div>
               <div className="flex items-end gap-2">
                 <Button onClick={() => void handleAddSupplier()} disabled={saving || !supName.trim()}>
-                  {saving ? "Saving…" : "Save"}
+                  {saving ? t("common.saving") : t("common.save")}
                 </Button>
-                <Button variant="ghost" onClick={() => setShowSupplier(false)}>Cancel</Button>
+                <Button variant="ghost" onClick={() => setShowSupplier(false)}>{t("common.cancel")}</Button>
               </div>
             </div>
           )}
-          <DataTable tip="Supplier list for Scope 3 Category 1 — Add to inventory posts reported tCO₂e into the calculated inventory.">
+          <DataTable tip={t("resourcesPage.suppliersTableTip")}>
             <table className="w-full">
               <DataTableHeader>
-                <DataTableHead>Supplier</DataTableHead>
-                <DataTableHead>Country</DataTableHead>
-                <DataTableHead>Category</DataTableHead>
-                <DataTableHead>Scope 3 tCO₂e</DataTableHead>
-                <DataTableHead>Data quality</DataTableHead>
-                <DataTableHead>Action</DataTableHead>
+                <DataTableHead>{t("resourcesPage.supplier")}</DataTableHead>
+                <DataTableHead>{t("resourcesPage.country")}</DataTableHead>
+                <DataTableHead>{t("resourcesPage.category")}</DataTableHead>
+                <DataTableHead>{t("resourcesPage.scope3Tco2e")}</DataTableHead>
+                <DataTableHead>{t("resourcesPage.dataQuality")}</DataTableHead>
+                <DataTableHead>{t("resourcesPage.action")}</DataTableHead>
               </DataTableHeader>
               <DataTableBody>
                 {suppliers.map((s) => (
@@ -405,10 +414,10 @@ export default function ResourcesPage() {
                         variant="outline"
                         className="h-7 text-[11px]"
                         disabled={saving || s.scope3TCO2e <= 0}
-                        title={s.scope3TCO2e <= 0 ? "Set Scope 3 tCO₂e first" : "Post to inventory"}
+                        title={s.scope3TCO2e <= 0 ? t("resourcesPage.setScope3First") : t("resourcesPage.postToInventory")}
                         onClick={() => void logSupplierEmissions(s)}
                       >
-                        Add to inventory
+                        {t("resourcesPage.addToInventory")}
                       </Button>
                     </DataTableCell>
                   </DataTableRow>

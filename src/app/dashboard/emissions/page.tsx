@@ -8,6 +8,7 @@ import { DataTable, DataTableBody, DataTableCell, DataTableHead, DataTableHeader
 import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { useT } from "@/components/i18n/locale-provider";
+import { useDomainT } from "@/lib/i18n/use-domain-t";
 import { activityToCalculation } from "@/lib/calculations/engine";
 import { CHART, CHART_AXIS, CHART_GRID } from "@/lib/chart-theme";
 import { Badge } from "@/components/ui/badge";
@@ -16,60 +17,100 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pi
 import { Factory, Zap, Cloud, BarChart3, Trash2 } from "lucide-react";
 import { formatCO2 } from "@/lib/utils";
 
-const SCOPE3_CATS = [
+const SCOPE3_CAT_KEYS = [
   "Category 1", "Category 2", "Category 3", "Category 4", "Category 5",
   "Category 6", "Category 7", "Category 8", "Category 9", "Category 10",
   "Category 11", "Category 12", "Category 13", "Category 14", "Category 15",
-];
+] as const;
 
 export default function EmissionsPage() {
   const { filteredActivities, metrics, openCalculation, deleteActivityRecord, saving } = useDashboard();
   const t = useT();
+  const d = useDomainT();
 
   const handleDelete = async (id: string, source: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm(`Delete activity “${source}”? This cannot be undone.`)) return;
+    if (!window.confirm(t("emissions.deleteConfirm", { source: d.source(source) }))) return;
     await deleteActivityRecord(id);
   };
 
-  const byCategory = SCOPE3_CATS.map((cat) => ({
-    category: cat,
-    emissions: filteredActivities.filter((a) => a.category === cat).reduce((s, a) => s + activityToCalculation(a).emissionsTCO2e, 0),
+  const byCategory = SCOPE3_CAT_KEYS.map((cat) => ({
+    categoryKey: cat,
+    category: d.category(cat),
+    emissions: filteredActivities
+      .filter((a) => a.category === cat)
+      .reduce((s, a) => s + activityToCalculation(a).emissionsTCO2e, 0),
   })).filter((c) => c.emissions > 0);
+
+  const pieData = [
+    { name: t("overview.scope1"), value: metrics.scope1 },
+    { name: t("overview.scope2"), value: metrics.scope2 },
+    { name: t("overview.scope3"), value: metrics.scope3 },
+  ];
 
   return (
     <div className="space-y-4">
       <PageHeader
         title={t("pages.emissions.title")}
         description={t("pages.emissions.description")}
-        tip="View Scope 1–3 totals, category charts, and activity-level records. Click a row to open the calculation drawer with full data lineage."
+        tip={t("emissions.tip")}
       />
 
       <FilterBar />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <MetricCard accent="scope1" icon={Factory} label="Scope 1" value={formatCO2(metrics.scope1)} tooltip="Direct — combustion, fleet, refrigerants, process" sub="Direct emissions" />
-        <MetricCard accent="scope2" icon={Zap} label="Scope 2" value={formatCO2(metrics.scope2)} tooltip="Purchased electricity, heating, cooling, steam" sub="Energy indirect" />
-        <MetricCard accent="scope3" icon={Cloud} label="Scope 3" value={formatCO2(metrics.scope3)} tooltip="Value chain — 15 GHG Protocol categories" sub="Value chain" />
+        <MetricCard
+          accent="scope1"
+          icon={Factory}
+          label={t("overview.scope1")}
+          value={formatCO2(metrics.scope1)}
+          tooltip={t("emissions.tipScope1")}
+          sub={t("emissions.directEmissions")}
+        />
+        <MetricCard
+          accent="scope2"
+          icon={Zap}
+          label={t("overview.scope2")}
+          value={formatCO2(metrics.scope2)}
+          tooltip={t("emissions.tipScope2")}
+          sub={t("emissions.energyIndirect")}
+        />
+        <MetricCard
+          accent="scope3"
+          icon={Cloud}
+          label={t("overview.scope3")}
+          value={formatCO2(metrics.scope3)}
+          tooltip={t("emissions.tipScope3")}
+          sub={t("emissions.valueChain")}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <ChartCard title="Scope 3 categories" tip="Emissions by GHG Protocol category" icon={BarChart3}>
+        <ChartCard title={t("emissions.scope3Categories")} tip={t("emissions.scope3Tip")} icon={BarChart3}>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={byCategory} layout="vertical">
               <CartesianGrid {...CHART_GRID} />
               <XAxis type="number" {...CHART_AXIS} />
-              <YAxis dataKey="category" type="category" width={80} tick={{ fontSize: 10, fill: CHART.tick }} />
+              <YAxis dataKey="category" type="category" width={90} tick={{ fontSize: 10, fill: CHART.tick }} />
               <Tooltip formatter={(v: number) => [`${v.toFixed(1)} tCO₂e`, ""]} />
               <Bar dataKey="emissions" fill={CHART.scope3} radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
-        <ChartCard title="Scope split" tip="Proportional breakdown across scopes" icon={Cloud}>
+        <ChartCard title={t("emissions.scopeSplit")} tip={t("emissions.scopeSplitTip")} icon={Cloud}>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
-              <Pie data={[{ name: "Scope 1", value: metrics.scope1 }, { name: "Scope 2", value: metrics.scope2 }, { name: "Scope 3", value: metrics.scope3 }]} dataKey="value" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                <Cell fill={CHART.scope1} /><Cell fill={CHART.scope2} /><Cell fill={CHART.scope3} />
+              <Pie
+                data={pieData}
+                dataKey="value"
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                <Cell fill={CHART.scope1} />
+                <Cell fill={CHART.scope2} />
+                <Cell fill={CHART.scope3} />
               </Pie>
               <Tooltip formatter={(v: number) => `${v.toFixed(1)} tCO₂e`} />
             </PieChart>
@@ -77,29 +118,41 @@ export default function EmissionsPage() {
         </ChartCard>
       </div>
 
-      <ChartCard title="Activity records" tip="Click any row to open the calculation breakdown drawer." description={`${filteredActivities.length} records matching current filters`}>
+      <ChartCard
+        title={t("emissions.activityRecords")}
+        tip={t("emissions.activityRecordsTip")}
+        description={t("emissions.recordsMatching", { count: filteredActivities.length })}
+      >
         <DataTable>
           <table className="w-full">
             <DataTableHeader>
-              <DataTableHead>Scope</DataTableHead>
-              <DataTableHead>Category</DataTableHead>
-              <DataTableHead>Subcategory</DataTableHead>
-              <DataTableHead>Source</DataTableHead>
-              <DataTableHead>Activity</DataTableHead>
+              <DataTableHead>{t("emissions.colScope")}</DataTableHead>
+              <DataTableHead>{t("emissions.colCategory")}</DataTableHead>
+              <DataTableHead>{t("emissions.colSubcategory")}</DataTableHead>
+              <DataTableHead>{t("emissions.colSource")}</DataTableHead>
+              <DataTableHead>{t("emissions.colActivity")}</DataTableHead>
               <DataTableHead>tCO₂e</DataTableHead>
-              <DataTableHead>Method</DataTableHead>
-              <DataTableHead className="w-[72px]">Actions</DataTableHead>
+              <DataTableHead>{t("emissions.colMethod")}</DataTableHead>
+              <DataTableHead className="w-[72px]">{t("emissions.colActions")}</DataTableHead>
             </DataTableHeader>
             <DataTableBody>
               {filteredActivities.map((a) => (
                 <DataTableRow key={a.id} onClick={() => openCalculation(a)}>
-                  <DataTableCell><ScopeBadge scope={a.scope} /></DataTableCell>
-                  <DataTableCell>{a.category}</DataTableCell>
-                  <DataTableCell className="text-muted-foreground">{a.subcategory}</DataTableCell>
-                  <DataTableCell className="font-medium">{a.source}</DataTableCell>
-                  <DataTableCell>{a.activityValue} {a.activityUnit}</DataTableCell>
+                  <DataTableCell>
+                    <ScopeBadge scope={a.scope} />
+                  </DataTableCell>
+                  <DataTableCell>{d.category(a.category)}</DataTableCell>
+                  <DataTableCell className="text-muted-foreground">{d.subcategory(a.subcategory)}</DataTableCell>
+                  <DataTableCell className="font-medium">{d.source(a.source)}</DataTableCell>
+                  <DataTableCell>
+                    {a.activityValue} {d.unit(a.activityUnit)}
+                  </DataTableCell>
                   <DataTableCell className="dash-num">{activityToCalculation(a).emissionsTCO2e.toFixed(3)}</DataTableCell>
-                  <DataTableCell><Badge variant="secondary" className="text-[10px]">{a.method.replace(/_/g, " ")}</Badge></DataTableCell>
+                  <DataTableCell>
+                    <Badge variant="secondary" className="text-[10px]">
+                      {d.method(a.method)}
+                    </Badge>
+                  </DataTableCell>
                   <DataTableCell>
                     <Button
                       type="button"
@@ -110,7 +163,7 @@ export default function EmissionsPage() {
                       onClick={(e) => void handleDelete(a.id, a.source, e)}
                     >
                       <Trash2 className="mr-1 h-3.5 w-3.5" />
-                      Delete
+                      {t("emissions.delete")}
                     </Button>
                   </DataTableCell>
                 </DataTableRow>
