@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HelpCorner } from "@/components/ui/tooltip";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
-import { Download, FileText, Eye, Clock, X } from "lucide-react";
+import { Download, FileText, Eye, Clock, X, Scale } from "lucide-react";
+import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
 import { cn, formatCO2, formatCurrency } from "@/lib/utils";
 import { buildCsrdPdf } from "@/lib/reports/csrd-pdf";
@@ -245,6 +246,19 @@ export default function ReportsPage() {
         description={t("pages.reports.description")}
         tip={t("reportsPage.tip")}
       />
+
+      <div className="dash-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-medium tracking-tight">{t("reportsPage.complianceLinkTitle")}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t("reportsPage.complianceLinkBody")}</p>
+        </div>
+        <Button asChild variant="outline" size="sm" className="shrink-0">
+          <Link href="/dashboard/compliance">
+            <Scale className="mr-1.5 h-3.5 w-3.5" />
+            {t("reportsPage.openCompliance")}
+          </Link>
+        </Button>
+      </div>
 
       <div className="flex flex-wrap gap-2">
         <Button

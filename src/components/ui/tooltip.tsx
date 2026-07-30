@@ -14,15 +14,18 @@ const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
 >(({ className, sideOffset = 6, ...props }, ref) => (
-  <TooltipPrimitive.Content
-    ref={ref}
-    sideOffset={sideOffset}
-    className={cn(
-      "z-50 max-w-xs rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs leading-relaxed text-foreground shadow-lg animate-in fade-in-0 zoom-in-95",
-      className
-    )}
-    {...props}
-  />
+  <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Content
+      ref={ref}
+      sideOffset={sideOffset}
+      collisionPadding={12}
+      className={cn(
+        "z-[100] max-w-xs rounded-lg border border-border bg-background px-3.5 py-2.5 text-xs leading-relaxed text-foreground shadow-lg animate-in fade-in-0 zoom-in-95",
+        className
+      )}
+      {...props}
+    />
+  </TooltipPrimitive.Portal>
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
@@ -63,7 +66,7 @@ function InfoTip({
 function HelpCorner({
   content,
   className,
-  side = "left",
+  side = "bottom",
 }: {
   content: string;
   className?: string;

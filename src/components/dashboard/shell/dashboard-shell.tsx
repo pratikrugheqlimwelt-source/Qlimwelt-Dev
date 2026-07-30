@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   LayoutDashboard, Cloud, Database, Boxes, Brain, Target, Flag,
   FileText, ShieldCheck, Settings, ChevronLeft, ChevronRight, Menu, X,
-  Bell, Search, Calendar, ChevronDown, Users, ClipboardList,
+  Bell, Search, Calendar, ChevronDown, Users, ClipboardList, Scale,
 } from "lucide-react";
 import { Logo } from "@/components/marketing/logo";
 import { cn } from "@/lib/utils";
@@ -49,6 +49,12 @@ const NAV_GROUP_DEFS = [
     labelKey: "dashNav.reporting",
     items: [
       { href: "/dashboard/reports", labelKey: "dashNav.reports", icon: FileText },
+      { href: "/dashboard/compliance", labelKey: "dashNav.compliance", icon: Scale },
+    ],
+  },
+  {
+    labelKey: "dashNav.administration",
+    items: [
       { href: "/dashboard/team", labelKey: "dashNav.team", icon: Users },
       { href: "/dashboard/settings", labelKey: "dashNav.settings", icon: Settings },
     ],

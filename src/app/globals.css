@@ -141,7 +141,8 @@
     letter-spacing: -0.01em;
   }
   .dash-label {
-    @apply font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground;
+    @apply font-sans text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground;
+    word-spacing: 0.45em;
   }
   .dash-card {
     @apply rounded-2xl border border-white/60 bg-white/95 shadow-[0_1px_3px_rgba(15,23,42,0.04),0_8px_24px_rgba(15,23,42,0.06)] backdrop-blur-sm;

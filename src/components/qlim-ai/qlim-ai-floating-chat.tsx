@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { Leaf } from "lucide-react";
 import { QlimAiChat } from "@/components/qlim-ai/qlim-ai-chat";
 import { useT } from "@/components/i18n/locale-provider";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,7 @@ type QlimAiFloatingChatProps = {
   className?: string;
 };
 
-/** Floating leaf launcher — expands into the same interactive Qlim AI chat. */
+/** Floating Qlimwelt mark launcher — expands into the interactive Qlim AI chat. */
 export function QlimAiFloatingChat({ className }: QlimAiFloatingChatProps) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -86,11 +86,14 @@ export function QlimAiFloatingChat({ className }: QlimAiFloatingChatProps) {
                 "group-focus-visible:ring-2 group-focus-visible:ring-[#82D153] group-focus-visible:ring-offset-2"
               )}
             >
-              <Leaf
-                className="h-7 w-7 text-[#3d8b2e] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={2}
-                fill="currentColor"
-                fillOpacity={0.18}
+              <Image
+                src="/logo-mark.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain transition-transform duration-300 group-hover:scale-110"
+                aria-hidden
+                priority
               />
             </span>
           </motion.button>
