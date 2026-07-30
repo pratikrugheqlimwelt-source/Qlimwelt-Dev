@@ -47,7 +47,7 @@ function QuoteCarousel() {
   return (
     <div className="border border-border px-5 py-10 text-center sm:px-8">
       <MetaLabel>
-        {t("marketing.insightLabel")} // {String(index + 1).padStart(2, "0")}
+        {`${t("marketing.insightLabel")} // ${String(index + 1).padStart(2, "0")}`}
       </MetaLabel>
       <AnimatePresence mode="wait">
         <motion.p
