@@ -1,30 +1,51 @@
 "use client";
 
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  Area, BarChart, Bar, Line, Cell,
   Treemap, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  ComposedChart, Scatter, ScatterChart, ZAxis, ReferenceLine,
+  ComposedChart, Scatter, ScatterChart, ZAxis, ReferenceLine, LabelList,
 } from "recharts";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { useT } from "@/components/i18n/locale-provider";
 import { activityToCalculation } from "@/lib/calculations/engine";
 import { ChartCard } from "@/components/dashboard/shared/chart-card";
 import { SectionHeader } from "@/components/dashboard/shared/section-header";
-import { DataTable, DataTableBody, DataTableCell, DataTableHead, DataTableHeader, DataTableRow } from "@/components/dashboard/shared/data-table";
-import { CHART, CHART_AXIS, CHART_GRID, GRADIENT_IDS, qualityColor, BAR_PALETTE } from "@/lib/chart-theme";
-import { ChartGradients } from "@/components/dashboard/charts/chart-gradients";
+import { DataTableBody, DataTableCell, DataTableHead, DataTableHeader, DataTableRow } from "@/components/dashboard/shared/data-table";
+import { CHART, CHART_AXIS, CHART_GRID, qualityColor, BAR_PALETTE, formatChartValue } from "@/lib/chart-theme";
+import { useChartGradients } from "@/components/dashboard/charts/chart-gradients";
 import { ChartTooltip, ChartLegendInline } from "@/components/dashboard/charts/chart-tooltip";
 import { TrendTooltip } from "@/components/dashboard/charts/trend-tooltip";
+import { AdvancedScopeDonut } from "@/components/dashboard/charts/advanced-scope-donut";
+import { TreemapTile } from "@/components/dashboard/charts/treemap-tile";
+import { WaterfallChart } from "@/components/dashboard/charts/waterfall-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Fragment, useMemo, useState } from "react";
 import { TrendingUp, PieChart as PieIcon, Brain, Database } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatCO2 } from "@/lib/utils";
 import { MetricFigure } from "@/components/ui/metric-figure";
+
+function opportunityColor(score: number): string {
+  if (score >= 70) return CHART.brand;
+  if (score >= 55) return CHART.actual;
+  return CHART.projected;
+}
+
+function riskLevelPct(levelKey: "high" | "medium" | "low"): number {
+  if (levelKey === "high") return 88;
+  if (levelKey === "medium") return 55;
+  return 28;
+}
 
 export function OverviewCharts() {
   const { filteredActivities, monthlyTrend, metrics, facilities, openCalculation, company } = useDashboard();
   const t = useT();
   const [trendMode, setTrendMode] = useState<"current" | "previous" | "baseline" | "target">("current");
+  const trendG = useChartGradients("trend");
+  const pathG = useChartGradients("path");
+  const intensityG = useChartGradients("intensity");
+  const facilityG = useChartGradients("facility");
+  const scenarioG = useChartGradients("scenario");
+  const factorG = useChartGradients("factor");
 
   const treemapData = useMemo(() => {
     const map = new Map<string, number>();
@@ -32,8 +53,20 @@ export function OverviewCharts() {
       const key = `${a.scope} / ${a.category}`;
       map.set(key, (map.get(key) ?? 0) + activityToCalculation(a).emissionsTCO2e);
     }
-    return Array.from(map.entries()).map(([name, value]) => ({ name, size: value }));
-  }, [filteredActivities]);
+    const rows = Array.from(map.entries())
+      .map(([name, value]) => ({ name, size: value }))
+      .sort((a, b) => b.size - a.size);
+    const total = rows.reduce((s, r) => s + r.size, 0) || 1;
+    const significant = rows.filter((r) => r.size / total >= 0.04);
+    const tiny = rows.filter((r) => r.size / total < 0.04);
+    if (tiny.length > 1) {
+      const otherSize = tiny.reduce((s, r) => s + r.size, 0);
+      significant.push({ name: t("overview.charts.otherSources"), size: otherSize });
+    } else if (tiny.length === 1) {
+      significant.push(tiny[0]);
+    }
+    return significant.map((r) => ({ ...r, pct: (r.size / total) * 100 }));
+  }, [filteredActivities, t]);
 
   const byFacility = useMemo(() => {
     const map = new Map<string, number>();
@@ -41,7 +74,9 @@ export function OverviewCharts() {
       const fac = facilities.find((f) => f.id === a.facilityId)?.name ?? a.facilityId;
       map.set(fac, (map.get(fac) ?? 0) + activityToCalculation(a).emissionsTCO2e);
     }
-    return Array.from(map.entries()).map(([name, emissions]) => ({ name, emissions }));
+    return Array.from(map.entries())
+      .map(([name, emissions]) => ({ name, emissions }))
+      .sort((a, b) => b.emissions - a.emissions);
   }, [filteredActivities, facilities]);
 
   const byCountry = useMemo(() => {
@@ -49,7 +84,9 @@ export function OverviewCharts() {
     for (const a of filteredActivities) {
       map.set(a.country, (map.get(a.country) ?? 0) + activityToCalculation(a).emissionsTCO2e);
     }
-    return Array.from(map.entries()).map(([name, emissions]) => ({ name, emissions }));
+    return Array.from(map.entries())
+      .map(([name, emissions]) => ({ name, emissions }))
+      .sort((a, b) => b.emissions - a.emissions);
   }, [filteredActivities]);
 
   const waterfall = useMemo(() => [
@@ -75,7 +112,7 @@ export function OverviewCharts() {
       months.map((m) => {
         const acts = filteredActivities.filter((a) => a.category === cat && a.period.endsWith(m));
         const avg = acts.length ? acts.reduce((s, a) => s + a.dataQualityScore, 0) / acts.length : 0;
-        return { category: cat.slice(0, 12), month: m, score: Math.round(avg) };
+        return { category: cat, month: m, score: Math.round(avg) };
       })
     );
   }, [filteredActivities]);
@@ -85,7 +122,7 @@ export function OverviewCharts() {
     return methods.map((m) => ({
       method: m.replace(/_/g, " "),
       count: filteredActivities.filter((a) => a.method === m || (m === "estimated" && a.isEstimated)).length,
-    }));
+    })).filter((m) => m.count > 0 || filteredActivities.length === 0);
   }, [filteredActivities]);
 
   const scope3Matrix = useMemo(() => [
@@ -104,11 +141,32 @@ export function OverviewCharts() {
     return [Math.max(0, min - pad), max + pad] as [number, number];
   }, [monthlyTrend]);
 
-  const scenarios = useMemo(() => [
-    { name: t("overview.charts.scenarioBau"), y2024: metrics.totalTCO2e * 12, y2027: metrics.totalTCO2e * 12 * 1.08, y2030: metrics.totalTCO2e * 12 * 1.15 },
-    { name: t("overview.charts.scenarioModerate"), y2024: metrics.totalTCO2e * 12, y2027: metrics.totalTCO2e * 12 * 0.92, y2030: metrics.totalTCO2e * 12 * 0.78 },
-    { name: t("overview.charts.scenarioAmbitious"), y2024: metrics.totalTCO2e * 12, y2027: metrics.totalTCO2e * 12 * 0.85, y2030: metrics.totalTCO2e * 12 * 0.58 },
-  ], [metrics, t]);
+  const scenarios = useMemo(() => {
+    const y2024 = metrics.totalTCO2e * 12;
+    return [
+      {
+        name: t("overview.charts.scenarioBau"),
+        y2024,
+        y2027: y2024 * 1.08,
+        y2030: y2024 * 1.15,
+        delta2030: ((y2024 * 1.15 - y2024) / y2024) * 100,
+      },
+      {
+        name: t("overview.charts.scenarioModerate"),
+        y2024,
+        y2027: y2024 * 0.92,
+        y2030: y2024 * 0.78,
+        delta2030: ((y2024 * 0.78 - y2024) / y2024) * 100,
+      },
+      {
+        name: t("overview.charts.scenarioAmbitious"),
+        y2024,
+        y2027: y2024 * 0.85,
+        y2030: y2024 * 0.58,
+        delta2030: ((y2024 * 0.58 - y2024) / y2024) * 100,
+      },
+    ];
+  }, [metrics, t]);
 
   const trendStats = useMemo(() => {
     const totals = monthlyTrend.map((m) => m.total);
@@ -121,6 +179,38 @@ export function OverviewCharts() {
     const variance = Math.max(...totals) - Math.min(...totals);
     return { avg, peak, low, ytdTotal, ytdYoy, variance };
   }, [monthlyTrend]);
+
+  const pathwayData = useMemo(
+    () =>
+      monthlyTrend.map((m, i) => {
+        const actual = m.total * 12;
+        const baseline = m.baseline * 12;
+        const target = m.target * 12;
+        const projected = m.total * 12 * (1 + i * 0.005);
+        return {
+          month: m.month,
+          actual,
+          baseline,
+          target,
+          projected,
+          bandLow: Math.min(baseline, target),
+          bandSpan: Math.abs(baseline - target),
+          gap: actual - target,
+        };
+      }),
+    [monthlyTrend]
+  );
+
+  const latestGap = pathwayData[pathwayData.length - 1]?.gap ?? 0;
+
+  const intensityWithMarker = useMemo(
+    () =>
+      monthlyTrend.map((m, i) => ({
+        ...m,
+        lastIntensity: i === monthlyTrend.length - 1 ? m.intensity : null,
+      })),
+    [monthlyTrend]
+  );
 
   const trendOverlays = useMemo(() => {
     if (trendMode === "current") {
@@ -147,7 +237,6 @@ export function OverviewCharts() {
 
       <TabsContent value="trends" className="mt-0 space-y-4">
         <ChartCard title={t("overview.charts.emissionTrendTitle")} tip={t("overview.charts.emissionTrendTip")} icon={TrendingUp} accent="brand">
-          {/* Summary stats */}
           <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
             {[
               { label: t("overview.charts.ytdTotal"), value: `${trendStats.ytdTotal.toFixed(0)} t`, sub: t("overview.charts.allScopes") },
@@ -164,10 +253,7 @@ export function OverviewCharts() {
             ].map((stat) => (
               <div key={stat.label} className="rounded-xl border border-border/50 bg-gradient-to-br from-muted/30 to-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</p>
-                <p className={cn(
-                  "mt-0.5",
-                  "positive" in stat ? (stat.positive ? "text-green-600" : "text-red-600") : "text-foreground"
-                )}>
+                <p className="mt-0.5">
                   <MetricFigure size="md" className={cn("positive" in stat ? (stat.positive ? "text-green-600" : "text-red-600") : "text-foreground")}>
                     {String(stat.value)}
                   </MetricFigure>
@@ -198,10 +284,15 @@ export function OverviewCharts() {
           <div className="min-h-[320px] w-full">
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={monthlyTrend} margin={{ top: 12, right: 12, left: 4, bottom: 4 }}>
-              <ChartGradients />
+              <trendG.Defs />
               <CartesianGrid {...CHART_GRID} />
               <XAxis dataKey="monthLabel" {...CHART_AXIS} />
-              <YAxis {...CHART_AXIS} width={36} tickFormatter={(v) => v.toFixed(0)} />
+              <YAxis
+                {...CHART_AXIS}
+                width={42}
+                tickFormatter={(v) => formatChartValue(v, 0)}
+                label={{ value: "tCO₂e", angle: -90, position: "insideLeft", offset: 8, style: { fontSize: 10, fill: CHART.tick } }}
+              />
               <Tooltip
                 cursor={{ stroke: CHART.grid, strokeWidth: 1 }}
                 content={({ active, payload, label }) => {
@@ -222,16 +313,16 @@ export function OverviewCharts() {
                   );
                 }}
               />
-              <Area type="monotone" dataKey="scope1" stackId="1" fill={`url(#${GRADIENT_IDS.scope1})`} stroke={CHART.scope1} strokeWidth={1.5} name={t("overview.scope1")} animationDuration={800} />
-              <Area type="monotone" dataKey="scope2" stackId="1" fill={`url(#${GRADIENT_IDS.scope2})`} stroke={CHART.scope2} strokeWidth={1.5} name={t("overview.scope2")} animationDuration={900} />
-              <Area type="monotone" dataKey="scope3" stackId="1" fill={`url(#${GRADIENT_IDS.scope3})`} stroke={CHART.scope3} strokeWidth={1.5} name={t("overview.scope3")} animationDuration={1000} />
+              <Area type="monotone" dataKey="scope1" stackId="1" fill={`url(#${trendG.ids.scope1})`} stroke={CHART.scope1} strokeWidth={1.5} name={t("overview.scope1")} animationDuration={800} />
+              <Area type="monotone" dataKey="scope2" stackId="1" fill={`url(#${trendG.ids.scope2})`} stroke={CHART.scope2} strokeWidth={1.5} name={t("overview.scope2")} animationDuration={900} />
+              <Area type="monotone" dataKey="scope3" stackId="1" fill={`url(#${trendG.ids.scope3})`} stroke={CHART.scope3} strokeWidth={1.5} name={t("overview.scope3")} animationDuration={1000} />
               <Line
                 type="monotone"
                 dataKey="total"
                 stroke={CHART.scope1}
-                strokeWidth={2}
-                dot={{ r: 3, fill: CHART.scope1, strokeWidth: 2, stroke: "#fff" }}
-                activeDot={{ r: 6, fill: CHART.brand, stroke: "#fff", strokeWidth: 2 }}
+                strokeWidth={2.5}
+                dot={{ r: 3.5, fill: CHART.scope1, strokeWidth: 2, stroke: "#fff" }}
+                activeDot={{ r: 7, fill: CHART.brand, stroke: "#fff", strokeWidth: 2 }}
                 name={t("overview.charts.total")}
               />
               {(trendMode === "current" || trendMode === "previous") && (
@@ -246,39 +337,60 @@ export function OverviewCharts() {
               {trendMode === "current" && (
                 <Line type="monotone" dataKey="rollingAvg" stroke={CHART.actual} strokeWidth={1.5} strokeDasharray="2 3" dot={false} name={t("overview.charts.threeMoAvg")} />
               )}
-              <ReferenceLine y={trendStats.avg} stroke={CHART.brand} strokeDasharray="3 6" strokeOpacity={0.4} label={{ value: t("overview.charts.avg"), position: "insideTopRight", fontSize: 10, fill: CHART.tick }} />
+              <ReferenceLine y={trendStats.avg} stroke={CHART.brand} strokeDasharray="3 6" strokeOpacity={0.45} label={{ value: t("overview.charts.avg"), position: "insideTopRight", fontSize: 10, fill: CHART.tick }} />
             </ComposedChart>
           </ResponsiveContainer>
           </div>
         </ChartCard>
 
-        <ChartCard title={t("overview.charts.targetPathwayTitle")} tip={t("overview.charts.targetPathwayTip")} accent="blue">
+        <ChartCard
+          title={t("overview.charts.targetPathwayTitle")}
+          tip={t("overview.charts.targetPathwayTip")}
+          accent="blue"
+          action={
+            <div className={cn(
+              "rounded-full px-3 py-1 text-[11px] font-semibold",
+              latestGap <= 0 ? "bg-green-100 text-green-700" : "bg-red-50 text-red-600"
+            )}>
+              {t("overview.charts.gapToTarget")}: {latestGap >= 0 ? "+" : ""}{formatChartValue(latestGap, 0)} t
+            </div>
+          }
+        >
           <ChartLegendInline className="mb-4" items={[
-            { label: t("overview.charts.baseline"), color: CHART.baseline },
+            { label: t("overview.charts.baseline"), color: CHART.baseline, dashed: true },
             { label: t("overview.charts.actual"), color: CHART.actual },
-            { label: t("overview.charts.target"), color: CHART.target },
+            { label: t("overview.charts.target"), color: CHART.target, dashed: true },
             { label: t("overview.charts.projected"), color: CHART.projected },
           ]} />
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={monthlyTrend.map((m, i) => ({ month: m.month, actual: m.total * 12, baseline: m.baseline * 12, target: m.target * 12, projected: m.total * 12 * (1 + i * 0.005) }))}>
-              <ChartGradients />
+          <ResponsiveContainer width="100%" height={280}>
+            <ComposedChart data={pathwayData} margin={{ top: 8, right: 12, left: 4, bottom: 4 }}>
+              <pathG.Defs />
               <CartesianGrid {...CHART_GRID} />
               <XAxis dataKey="month" {...CHART_AXIS} />
-              <YAxis {...CHART_AXIS} />
+              <YAxis {...CHART_AXIS} tickFormatter={(v) => formatChartValue(v, 0)} width={44} />
               <Tooltip content={<ChartTooltip unit="tCO₂e/yr" />} />
-              <Line dataKey="baseline" stroke={CHART.baseline} strokeDasharray="4 4" strokeWidth={2} dot={false} name={t("overview.charts.baseline")} />
-              <Line dataKey="actual" stroke={CHART.actual} strokeWidth={2.5} dot={false} name={t("overview.charts.actual")} />
-              <Line dataKey="target" stroke={CHART.target} strokeDasharray="4 4" strokeWidth={2} dot={false} name={t("overview.charts.target")} />
-              <Line dataKey="projected" stroke={CHART.projected} strokeDasharray="2 2" strokeWidth={2} dot={false} name={t("overview.charts.projected")} />
-            </LineChart>
+              <Area type="monotone" dataKey="bandLow" stackId="band" stroke="none" fill="transparent" legendType="none" />
+              <Area type="monotone" dataKey="bandSpan" stackId="band" stroke="none" fill={`url(#${pathG.ids.targetBand})`} name={t("overview.charts.targetPathway")} />
+              <Area type="monotone" dataKey="projected" fill={`url(#${pathG.ids.projected})`} stroke={CHART.projected} strokeWidth={1.5} strokeDasharray="4 3" name={t("overview.charts.projected")} />
+              <Line dataKey="baseline" stroke={CHART.baseline} strokeDasharray="5 4" strokeWidth={2} dot={false} name={t("overview.charts.baseline")} />
+              <Line
+                dataKey="actual"
+                stroke={CHART.actual}
+                strokeWidth={2.75}
+                dot={{ r: 3, fill: CHART.actual, stroke: "#fff", strokeWidth: 1.5 }}
+                activeDot={{ r: 6 }}
+                name={t("overview.charts.actual")}
+              />
+              <Line dataKey="target" stroke={CHART.target} strokeDasharray="5 4" strokeWidth={2} dot={false} name={t("overview.charts.target")} />
+            </ComposedChart>
           </ResponsiveContainer>
         </ChartCard>
 
         <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard title={t("overview.charts.intensityTrendTitle")} tip={t("overview.charts.intensityTrendTip")} accent="teal">
-            <ResponsiveContainer width="100%" height={240}>
-              <ComposedChart data={monthlyTrend}>
-                <ChartGradients />
+            <ResponsiveContainer width="100%" height={260}>
+              <ComposedChart data={intensityWithMarker} margin={{ top: 12, right: 12, left: 4, bottom: 4 }}>
+                <intensityG.Defs />
                 <CartesianGrid {...CHART_GRID} />
                 <XAxis dataKey="monthLabel" {...CHART_AXIS} />
                 <YAxis {...CHART_AXIS} domain={intensityDomain} tickFormatter={(v) => v.toFixed(2)} width={48} />
@@ -288,7 +400,7 @@ export function OverviewCharts() {
                     return (
                       <TrendTooltip
                         active={active}
-                        payload={payload?.map((p) => ({ name: t("overview.charts.intensity"), value: p.value as number, color: CHART.teal }))}
+                        payload={payload?.filter((p) => p.dataKey === "intensity").map((p) => ({ name: t("overview.charts.intensity"), value: p.value as number, color: CHART.teal }))}
                         label={label}
                         unit="t/€M"
                         row={row ? { monthLabel: row.monthLabel, momChange: row.momChange } : undefined}
@@ -299,73 +411,131 @@ export function OverviewCharts() {
                 <Area
                   type="monotone"
                   dataKey="intensity"
-                  fill={`url(#${GRADIENT_IDS.teal})`}
+                  fill={`url(#${intensityG.ids.teal})`}
                   stroke={CHART.teal}
-                  strokeWidth={2}
+                  strokeWidth={2.25}
+                  name={t("overview.charts.intensity")}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="intensity"
+                  stroke={CHART.teal}
+                  strokeWidth={0}
                   dot={{ r: 2.5, fill: CHART.teal, strokeWidth: 0 }}
                   activeDot={{ r: 5, fill: CHART.teal, stroke: "#fff", strokeWidth: 2 }}
-                  name={t("overview.charts.intensity")}
+                  legendType="none"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="lastIntensity"
+                  stroke="none"
+                  dot={{ r: 6, fill: CHART.brandDark, stroke: "#fff", strokeWidth: 2 }}
+                  activeDot={false}
+                  legendType="none"
                 />
               </ComposedChart>
             </ResponsiveContainer>
           </ChartCard>
           <ChartCard title={t("overview.charts.waterfallTitle")} tip={t("overview.charts.waterfallTip")} accent="purple">
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={waterfall}>
-                <CartesianGrid {...CHART_GRID} />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: CHART.tick }} />
-                <YAxis {...CHART_AXIS} />
-                <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {waterfall.map((entry, i) => (
-                    <Cell key={i} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <WaterfallChart data={waterfall} height={260} />
           </ChartCard>
         </div>
       </TabsContent>
 
       <TabsContent value="breakdown" className="mt-0 space-y-4">
         <div className="grid gap-4 lg:grid-cols-2">
-          <ChartCard title={t("overview.charts.scopeComparisonTitle")} tip={t("overview.charts.scopeComparisonTip")} icon={PieIcon} accent="brand">
-            <ResponsiveContainer width="100%" height={260}>
-              <PieChart>
-                <Pie data={[{ name: t("overview.scope1"), value: metrics.scope1 }, { name: t("overview.scope2"), value: metrics.scope2 }, { name: t("overview.scope3"), value: metrics.scope3 }]} dataKey="value" cx="50%" cy="50%" innerRadius={60} outerRadius={95} paddingAngle={3} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                  <Cell fill={CHART.scope1} /><Cell fill={CHART.scope2} /><Cell fill={CHART.scope3} />
-                </Pie>
-                <Tooltip content={<ChartTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+          <ChartCard
+            title={t("overview.charts.scopeComparisonTitle")}
+            description={t("overview.charts.scopeComparisonTip")}
+            tip={t("overview.charts.scopeComparisonTip")}
+            icon={PieIcon}
+            accent="brand"
+          >
+            <AdvancedScopeDonut scope1={metrics.scope1} scope2={metrics.scope2} scope3={metrics.scope3} height={260} />
           </ChartCard>
-          <ChartCard title={t("overview.charts.sourceBreakdownTitle")} tip={t("overview.charts.sourceBreakdownTip")} accent="teal">
-            <ResponsiveContainer width="100%" height={260}>
-              <Treemap data={treemapData} dataKey="size" nameKey="name" stroke="#fff" fill={CHART.scope2} />
+          <ChartCard
+            title={t("overview.charts.sourceBreakdownTitle")}
+            description={t("overview.charts.sourceBreakdownTip")}
+            tip={t("overview.charts.hoverForDetails")}
+            accent="teal"
+          >
+            <ChartLegendInline className="mb-3" items={[
+              { label: t("overview.scope1"), color: CHART.scope1 },
+              { label: t("overview.scope2"), color: CHART.scope2 },
+              { label: t("overview.scope3"), color: CHART.scope3 },
+            ]} />
+            <ResponsiveContainer width="100%" height={280}>
+              <Treemap
+                data={treemapData}
+                dataKey="size"
+                nameKey="name"
+                stroke="#fff"
+                fill={CHART.scope2}
+                content={<TreemapTile />}
+                isAnimationActive
+              >
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.[0]) return null;
+                    const d = payload[0].payload as (typeof treemapData)[0];
+                    return (
+                      <div className="min-w-[200px] rounded-xl border border-slate-200/80 bg-white/95 px-4 py-3 shadow-[0_12px_40px_rgba(15,23,42,0.16)] backdrop-blur-sm">
+                        <p className="text-sm font-bold text-slate-900">{d.name}</p>
+                        <div className="mt-2 space-y-1 text-xs">
+                          <div className="flex justify-between gap-6">
+                            <span className="text-muted-foreground">{t("overview.charts.tco2e")}</span>
+                            <span className="dash-num">{formatCO2(d.size)}</span>
+                          </div>
+                          <div className="flex justify-between gap-6">
+                            <span className="text-muted-foreground">{t("overview.charts.shareOfTotal")}</span>
+                            <span className="dash-num">{d.pct.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }}
+                />
+              </Treemap>
             </ResponsiveContainer>
           </ChartCard>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
-          <ChartCard title={t("overview.charts.byFacilityTitle")} tip={t("overview.charts.byFacilityTip")} accent="blue">
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={byFacility} layout="vertical">
-                <CartesianGrid {...CHART_GRID} />
-                <XAxis type="number" {...CHART_AXIS} />
-                <YAxis dataKey="name" type="category" width={90} tick={{ fontSize: 10, fill: CHART.tick }} />
-                <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="emissions" fill={CHART.actual} radius={[0, 6, 6, 0]} />
+          <ChartCard
+            title={t("overview.charts.byFacilityTitle")}
+            description={t("overview.charts.byFacilityTip")}
+            tip={t("overview.charts.byFacilityTip")}
+            accent="blue"
+          >
+            <ResponsiveContainer width="100%" height={Math.max(260, byFacility.length * 40)}>
+              <BarChart data={byFacility} layout="vertical" margin={{ top: 4, right: 44, left: 8, bottom: 4 }}>
+                <facilityG.Defs />
+                <CartesianGrid {...CHART_GRID} horizontal={false} />
+                <XAxis type="number" {...CHART_AXIS} tickFormatter={(v) => formatChartValue(v, 0)} />
+                <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 11, fill: CHART.tick, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(15,23,42,0.04)" }} />
+                <Bar dataKey="emissions" fill={`url(#${facilityG.ids.barActual})`} radius={[0, 6, 6, 0]} maxBarSize={22} name={t("overview.charts.tco2e")}>
+                  <LabelList dataKey="emissions" position="right" formatter={(v: number) => formatChartValue(v, 1)} style={{ fontSize: 10, fill: CHART.tick, fontWeight: 600 }} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title={t("overview.charts.byCountryTitle")} tip={t("overview.charts.byCountryTip")} accent="brand">
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={byCountry}>
+          <ChartCard
+            title={t("overview.charts.byCountryTitle")}
+            description={t("overview.charts.byCountryTip")}
+            tip={t("overview.charts.byCountryTip")}
+            accent="brand"
+          >
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={byCountry} margin={{ top: 20, right: 12, left: 8, bottom: 8 }}>
                 <CartesianGrid {...CHART_GRID} />
-                <XAxis dataKey="name" {...CHART_AXIS} />
-                <YAxis {...CHART_AXIS} />
-                <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="emissions" radius={[6, 6, 0, 0]}>
-                  {byCountry.map((_, i) => <Cell key={i} fill={BAR_PALETTE[i % BAR_PALETTE.length]} />)}
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: CHART.tick, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <YAxis {...CHART_AXIS} tickFormatter={(v) => formatChartValue(v, 0)} width={44} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(15,23,42,0.04)" }} />
+                <Bar dataKey="emissions" radius={[8, 8, 0, 0]} maxBarSize={52} name={t("overview.charts.tco2e")}>
+                  {byCountry.map((_, i) => (
+                    <Cell key={i} fill={BAR_PALETTE[i % BAR_PALETTE.length]} fillOpacity={0.92} />
+                  ))}
+                  <LabelList dataKey="emissions" position="top" formatter={(v: number) => formatChartValue(v, 0)} style={{ fontSize: 10, fill: CHART.tick, fontWeight: 600 }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -375,46 +545,221 @@ export function OverviewCharts() {
 
       <TabsContent value="analysis" className="mt-0 space-y-4">
         <div className="grid gap-4 lg:grid-cols-2">
-          <ChartCard title={t("overview.charts.macTitle")} tip={t("overview.charts.macTip")}>
-            <ResponsiveContainer width="100%" height={220}>
-              <ScatterChart><CartesianGrid /><XAxis dataKey="reduction" name="tCO₂e/yr" tick={{ fontSize: 10 }} /><YAxis dataKey="cost" name={t("overview.charts.costEuro")} tick={{ fontSize: 10 }} /><ZAxis dataKey="size" range={[40, 400]} /><Tooltip cursor={{ strokeDasharray: "3 3" }} /><Scatter data={macCurve} fill="#82D153" /></ScatterChart>
+          <ChartCard title={t("overview.charts.macTitle")} description={t("overview.charts.macTip")} tip={t("overview.charts.macTip")} accent="brand">
+            <ChartLegendInline className="mb-3" items={[
+              { label: t("overview.charts.costSavingZone"), color: CHART.brand },
+              { label: t("overview.charts.investmentZone"), color: CHART.actual },
+            ]} />
+            <ResponsiveContainer width="100%" height={300}>
+              <ScatterChart margin={{ top: 36, right: 36, left: 16, bottom: 44 }}>
+                <CartesianGrid {...CHART_GRID} />
+                <XAxis
+                  type="number"
+                  dataKey="reduction"
+                  name={t("overview.charts.reductionPotential")}
+                  tick={{ fontSize: 12, fill: "#475569", fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => formatChartValue(v, 0)}
+                  padding={{ left: 16, right: 16 }}
+                  label={{ value: `${t("overview.charts.reductionPotential")} (tCO₂e/yr)`, position: "insideBottom", offset: -24, style: { fontSize: 12, fill: "#334155", fontWeight: 600, fontFamily: "var(--font-sans), system-ui, sans-serif" } }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="cost"
+                  name={t("overview.charts.costEuro")}
+                  tick={{ fontSize: 12, fill: "#475569", fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => formatChartValue(v, 0)}
+                  width={58}
+                  label={{ value: t("overview.charts.costEuro"), angle: -90, position: "insideLeft", offset: 4, style: { fontSize: 12, fill: "#334155", fontWeight: 600, fontFamily: "var(--font-sans), system-ui, sans-serif" } }}
+                />
+                <ZAxis type="number" dataKey="size" range={[80, 260]} />
+                <ReferenceLine y={0} stroke={CHART.brand} strokeDasharray="4 4" strokeOpacity={0.7} label={{ value: "€0", position: "insideTopRight", fontSize: 10, fill: CHART.tick }} />
+                <Tooltip
+                  cursor={{ strokeDasharray: "3 3", stroke: CHART.grid }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.[0]) return null;
+                    const d = payload[0].payload as (typeof macCurve)[0];
+                    const costPerT = d.reduction ? d.cost / d.reduction : 0;
+                    return (
+                      <div className="min-w-[200px] rounded-xl border border-slate-200/80 bg-white/95 px-4 py-3 shadow-[0_12px_40px_rgba(15,23,42,0.16)] backdrop-blur-sm">
+                        <p className="font-sans text-sm font-bold text-slate-900">{d.name}</p>
+                        <div className="mt-2 space-y-1 text-xs">
+                          <div className="flex justify-between gap-4">
+                            <span className="text-muted-foreground">{t("overview.charts.reductionPotential")}</span>
+                            <span className="dash-num">{d.reduction.toFixed(0)} t</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-muted-foreground">{t("overview.charts.costEuro")}</span>
+                            <span className="dash-num">€{formatChartValue(d.cost, 0)}</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-muted-foreground">{t("overview.charts.costPerTonne")}</span>
+                            <span className="dash-num">{costPerT.toFixed(0)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }}
+                />
+                <Scatter data={macCurve} name="MAC">
+                  {macCurve.map((entry, i) => (
+                    <Cell key={i} fill={entry.cost < 0 ? CHART.brand : CHART.actual} fillOpacity={0.92} stroke="#fff" strokeWidth={2.5} />
+                  ))}
+                </Scatter>
+              </ScatterChart>
             </ResponsiveContainer>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {macCurve.map((entry) => (
+                <span
+                  key={entry.name}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white px-3 py-1.5 font-sans text-xs font-semibold text-slate-700 shadow-sm"
+                >
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.cost < 0 ? CHART.brand : CHART.actual }} />
+                  {entry.name}
+                </span>
+              ))}
+            </div>
           </ChartCard>
-          <ChartCard title={t("overview.charts.scope3MatrixTitle")} tip={t("overview.charts.scope3MatrixTip")}>
-            <ResponsiveContainer width="100%" height={220}>
-              <ScatterChart><CartesianGrid /><XAxis dataKey="quality" name={t("overview.charts.quality")} domain={[0, 100]} /><YAxis dataKey="volume" name={t("overview.charts.volumeTco2e")} /><ZAxis dataKey="opportunity" range={[50, 400]} /><Tooltip /><Scatter data={scope3Matrix} fill="#2563eb" /></ScatterChart>
-            </ResponsiveContainer>
+          <ChartCard title={t("overview.charts.scope3MatrixTitle")} description={t("overview.charts.scope3MatrixTip")} tip={t("overview.charts.hoverForDetails")} accent="blue">
+            <ChartLegendInline className="mb-3" items={[
+              { label: `${t("overview.charts.opportunity")} ≥70`, color: CHART.brand },
+              { label: `${t("overview.charts.opportunity")} 55–69`, color: CHART.actual },
+              { label: `${t("overview.charts.opportunity")} <55`, color: CHART.projected },
+            ]} />
+            <p className="mb-3 text-xs font-medium text-slate-600">{t("overview.charts.bubbleSizeHint")}</p>
+            <div className="overflow-visible">
+              <ResponsiveContainer width="100%" height={300}>
+                <ScatterChart margin={{ top: 36, right: 36, left: 20, bottom: 48 }}>
+                  <CartesianGrid {...CHART_GRID} />
+                  <XAxis
+                    type="number"
+                    dataKey="quality"
+                    name={t("overview.charts.quality")}
+                    domain={[40, 85]}
+                    tick={{ fontSize: 12, fill: "#475569", fontWeight: 600 }}
+                    axisLine={false}
+                    tickLine={false}
+                    padding={{ left: 24, right: 24 }}
+                    label={{ value: t("overview.charts.qualityScoreAxis"), position: "insideBottom", offset: -28, style: { fontSize: 12, fill: "#334155", fontWeight: 600, fontFamily: "var(--font-sans), system-ui, sans-serif" } }}
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="volume"
+                    name={t("overview.charts.volumeTco2e")}
+                    domain={[0, Math.ceil(Math.max(...scope3Matrix.map((d) => d.volume), 1) * 1.2)]}
+                    tick={{ fontSize: 12, fill: "#475569", fontWeight: 600 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => formatChartValue(v, 0)}
+                    width={62}
+                    label={{ value: t("overview.charts.volumeTco2e"), angle: -90, position: "insideLeft", offset: 8, style: { fontSize: 12, fill: "#334155", fontWeight: 600, fontFamily: "var(--font-sans), system-ui, sans-serif" } }}
+                  />
+                  <ZAxis type="number" dataKey="opportunity" range={[90, 280]} />
+                  <Tooltip
+                    cursor={{ strokeDasharray: "3 3", stroke: CHART.grid }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.[0]) return null;
+                      const d = payload[0].payload as (typeof scope3Matrix)[0];
+                      return (
+                        <div className="min-w-[200px] rounded-xl border border-slate-200/80 bg-white/95 px-4 py-3 shadow-[0_12px_40px_rgba(15,23,42,0.16)] backdrop-blur-sm">
+                          <p className="font-sans text-sm font-bold text-slate-900">{d.category}</p>
+                          <div className="mt-2 space-y-1 text-xs">
+                            <div className="flex justify-between gap-4"><span className="text-muted-foreground">{t("overview.charts.volumeTco2e")}</span><span className="dash-num">{d.volume.toLocaleString()}</span></div>
+                            <div className="flex justify-between gap-4"><span className="text-muted-foreground">{t("overview.charts.quality")}</span><span className="dash-num">{d.quality}</span></div>
+                            <div className="flex justify-between gap-4"><span className="text-muted-foreground">{t("overview.charts.influence")}</span><span className="dash-num">{d.influence}</span></div>
+                            <div className="flex justify-between gap-4"><span className="text-muted-foreground">{t("overview.charts.opportunity")}</span><span className="dash-num">{d.opportunity}</span></div>
+                          </div>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Scatter data={scope3Matrix} name="S3">
+                    {scope3Matrix.map((entry, i) => (
+                      <Cell
+                        key={i}
+                        fill={opportunityColor(entry.opportunity)}
+                        fillOpacity={0.92}
+                        stroke="#fff"
+                        strokeWidth={2.5}
+                      />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {scope3Matrix.map((entry) => (
+                <span
+                  key={entry.category}
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white px-3 py-1.5 font-sans text-xs font-semibold text-slate-700 shadow-sm"
+                >
+                  <span className="h-2.5 w-2.5 rounded-full ring-2 ring-white" style={{ backgroundColor: opportunityColor(entry.opportunity) }} />
+                  {entry.category}
+                  <span className="dash-num text-[11px] text-slate-500">{entry.volume.toLocaleString()} t</span>
+                </span>
+              ))}
+            </div>
           </ChartCard>
         </div>
         <ChartCard title={t("overview.charts.scenarioTitle")} tip={t("overview.charts.scenarioTip")} accent="purple">
-          <ChartLegendInline className="mb-4" items={[
-            { label: t("overview.charts.projection2027"), color: CHART.baseline },
-            { label: t("overview.charts.projection2030"), color: CHART.scope2 },
-          ]} />
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={scenarios}>
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <ChartLegendInline items={[
+              { label: t("overview.charts.projection2027"), color: CHART.baseline },
+              { label: t("overview.charts.projection2030"), color: CHART.scope2 },
+            ]} />
+            <div className="ml-auto flex flex-wrap gap-2">
+              {scenarios.map((s) => (
+                <span
+                  key={s.name}
+                  className={cn(
+                    "rounded-full px-2.5 py-1 text-[10px] font-semibold",
+                    s.delta2030 <= 0 ? "bg-green-100 text-green-700" : "bg-amber-50 text-amber-700"
+                  )}
+                >
+                  {s.name} {t("overview.charts.vs2024")}: {s.delta2030 >= 0 ? "+" : ""}{s.delta2030.toFixed(0)}%
+                </span>
+              ))}
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={scenarios} barGap={6} margin={{ top: 16, right: 12, left: 8, bottom: 8 }}>
+              <scenarioG.Defs />
               <CartesianGrid {...CHART_GRID} />
-              <XAxis dataKey="name" {...CHART_AXIS} />
-              <YAxis {...CHART_AXIS} />
-              <Tooltip content={<ChartTooltip unit="tCO₂e/yr" />} />
-              <Bar dataKey="y2027" fill={CHART.baseline} name={t("overview.charts.year2027")} radius={[6, 6, 0, 0]} />
-              <Bar dataKey="y2030" fill={CHART.scope2} name={t("overview.charts.year2030")} radius={[6, 6, 0, 0]} />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: CHART.tick, fontWeight: 600 }} axisLine={false} tickLine={false} />
+              <YAxis {...CHART_AXIS} tickFormatter={(v) => formatChartValue(v, 0)} width={48} />
+              <Tooltip content={<ChartTooltip unit="tCO₂e/yr" />} cursor={{ fill: "rgba(15,23,42,0.04)" }} />
+              <Bar dataKey="y2027" fill={CHART.baseline} name={t("overview.charts.year2027")} radius={[6, 6, 0, 0]} maxBarSize={44} />
+              <Bar dataKey="y2030" fill={`url(#${scenarioG.ids.barScope3})`} name={t("overview.charts.year2030")} radius={[6, 6, 0, 0]} maxBarSize={44}>
+                <LabelList dataKey="y2030" position="top" formatter={(v: number) => formatChartValue(v, 0)} style={{ fontSize: 10, fill: CHART.tick, fontWeight: 600 }} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
         <ChartCard title={t("overview.charts.climateRiskTitle")} tip={t("overview.charts.climateRiskTip")} icon={Brain} accent="amber">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { risk: t("overview.charts.transitionRisk"), level: t("overview.charts.riskMedium"), levelKey: "medium" as const, detail: t("overview.charts.transitionDetail"), color: "from-amber-50 to-orange-50 border-amber-200/60" },
-              { risk: t("overview.charts.energyPriceExposure"), level: t("overview.charts.riskHigh"), levelKey: "high" as const, detail: t("overview.charts.energyDetail"), color: "from-red-50 to-rose-50 border-red-200/60" },
-              { risk: t("overview.charts.carbonPriceExposure"), level: t("overview.charts.riskMedium"), levelKey: "medium" as const, detail: t("overview.charts.carbonDetail", { amount: metrics.carbonCostExposure.toFixed(0), price: company.carbonPricePerTonne }), color: "from-amber-50 to-yellow-50 border-amber-200/60" },
-              { risk: t("overview.charts.supplierRisk"), level: t("overview.charts.riskHigh"), levelKey: "high" as const, detail: t("overview.charts.supplierDetail"), color: "from-red-50 to-orange-50 border-red-200/60" },
-              { risk: t("overview.charts.operationalRisk"), level: t("overview.charts.riskLow"), levelKey: "low" as const, detail: t("overview.charts.operationalDetail"), color: "from-green-50 to-emerald-50 border-green-200/60" },
+              { risk: t("overview.charts.transitionRisk"), level: t("overview.charts.riskMedium"), levelKey: "medium" as const, detail: t("overview.charts.transitionDetail"), color: "from-amber-50 to-orange-50 border-amber-200/60", bar: "bg-amber-500" },
+              { risk: t("overview.charts.energyPriceExposure"), level: t("overview.charts.riskHigh"), levelKey: "high" as const, detail: t("overview.charts.energyDetail"), color: "from-red-50 to-rose-50 border-red-200/60", bar: "bg-red-500" },
+              { risk: t("overview.charts.carbonPriceExposure"), level: t("overview.charts.riskMedium"), levelKey: "medium" as const, detail: t("overview.charts.carbonDetail", { amount: metrics.carbonCostExposure.toFixed(0), price: company.carbonPricePerTonne }), color: "from-amber-50 to-yellow-50 border-amber-200/60", bar: "bg-amber-500" },
+              { risk: t("overview.charts.supplierRisk"), level: t("overview.charts.riskHigh"), levelKey: "high" as const, detail: t("overview.charts.supplierDetail"), color: "from-red-50 to-orange-50 border-red-200/60", bar: "bg-red-500" },
+              { risk: t("overview.charts.operationalRisk"), level: t("overview.charts.riskLow"), levelKey: "low" as const, detail: t("overview.charts.operationalDetail"), color: "from-green-50 to-emerald-50 border-green-200/60", bar: "bg-green-500" },
             ].map((r) => (
               <div key={r.risk} className={cn("rounded-xl border bg-gradient-to-br p-4", r.color)}>
                 <p className="text-sm font-semibold">{r.risk}</p>
                 <p className={cn("mt-1 text-xs font-bold uppercase tracking-wide", r.levelKey === "high" ? "text-red-600" : r.levelKey === "medium" ? "text-amber-600" : "text-green-700")}>{r.level}</p>
                 <p className="mt-2 text-xs text-muted-foreground">{r.detail}</p>
+                <div className="mt-3">
+                  <div className="mb-1 flex justify-between text-[10px] font-medium text-muted-foreground">
+                    <span>{t("overview.charts.riskSeverity")}</span>
+                    <span>{riskLevelPct(r.levelKey)}%</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-black/5">
+                    <div className={cn("h-full rounded-full transition-all duration-700", r.bar)} style={{ width: `${riskLevelPct(r.levelKey)}%` }} />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -422,18 +767,45 @@ export function OverviewCharts() {
       </TabsContent>
 
       <TabsContent value="data" className="mt-0 space-y-4">
-        <ChartCard title={t("overview.charts.qualityHeatmapTitle")} tip={t("overview.charts.qualityHeatmapTip")}>
+        <ChartCard title={t("overview.charts.qualityHeatmapTitle")} description={t("overview.charts.qualityHeatmapTip")} tip={t("overview.charts.hoverForDetails")} accent="teal">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">{t("overview.charts.quality")}</span>
+            {[
+              { label: t("overview.charts.qualityPoor"), color: "#ef4444" },
+              { label: t("overview.charts.qualityFair"), color: "#f59e0b" },
+              { label: t("overview.charts.qualityGood"), color: "#82D153" },
+              { label: t("overview.charts.qualityExcellent"), color: "#16a34a" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-md" style={{ backgroundColor: item.color }} />
+                <span className="text-xs font-medium text-slate-600">{item.label}</span>
+              </div>
+            ))}
+          </div>
           <div className="overflow-x-auto">
-            <div className="inline-grid gap-1" style={{ gridTemplateColumns: "repeat(13, minmax(36px, 1fr))" }}>
-              <div className="text-[10px] font-mono">{t("overview.charts.catMo")}</div>
-              {["01","02","03","04","05","06","07","08","09","10","11","12"].map((m) => <div key={m} className="text-center text-[10px]">{m}</div>)}
+            <div className="inline-grid min-w-full gap-1.5" style={{ gridTemplateColumns: "minmax(150px, 1.4fr) repeat(12, minmax(44px, 1fr))" }}>
+              <div className="flex items-end pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-600">{t("overview.charts.catMo")}</div>
+              {["01","02","03","04","05","06","07","08","09","10","11","12"].map((m) => (
+                <div key={m} className="pb-1 text-center text-[11px] font-bold text-slate-600">{m}</div>
+              ))}
               {[...new Set(qualityHeatmap.map((h) => h.category))].map((cat) => (
                 <Fragment key={cat}>
-                  <div className="truncate text-[10px]">{cat}</div>
+                  <div className="flex items-center pr-3 text-xs font-semibold leading-snug text-slate-800" title={cat}>
+                    <span className="line-clamp-2">{cat}</span>
+                  </div>
                   {["01","02","03","04","05","06","07","08","09","10","11","12"].map((m) => {
                     const cell = qualityHeatmap.find((h) => h.category === cat && h.month === m);
                     const s = cell?.score ?? 0;
-                    return <div key={`${cat}-${m}`} className="flex h-9 items-center justify-center rounded-md text-[10px] font-semibold text-white shadow-sm" style={{ backgroundColor: qualityColor(s), opacity: s ? 1 : 0.15 }}>{s || "—"}</div>;
+                    return (
+                      <div
+                        key={`${cat}-${m}`}
+                        className="flex h-11 cursor-default items-center justify-center rounded-lg text-[11px] font-bold text-white shadow-sm ring-1 ring-black/5 transition-transform hover:z-10 hover:scale-105 hover:ring-2 hover:ring-slate-400/40"
+                        style={{ backgroundColor: qualityColor(s), opacity: s ? 1 : 0.18 }}
+                        title={`${cat} · ${m}: ${s || "—"}`}
+                      >
+                        {s || "—"}
+                      </div>
+                    );
                   })}
                 </Fragment>
               ))}
@@ -441,12 +813,31 @@ export function OverviewCharts() {
           </div>
         </ChartCard>
         <div className="grid gap-4 lg:grid-cols-2">
-          <ChartCard title={t("overview.charts.factorCoverageTitle")} tip={t("overview.charts.factorCoverageTip")}>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={factorCoverage}><XAxis dataKey="method" tick={{ fontSize: 9 }} /><YAxis /><Tooltip /><Bar dataKey="count" fill="#5cb832" /></BarChart>
+          <ChartCard title={t("overview.charts.factorCoverageTitle")} description={t("overview.charts.factorCoverageTip")} tip={t("overview.charts.factorCoverageTip")} accent="brand">
+            <ResponsiveContainer width="100%" height={Math.max(240, factorCoverage.length * 48)}>
+              <BarChart data={factorCoverage} layout="vertical" margin={{ top: 8, right: 48, left: 8, bottom: 8 }}>
+                <factorG.Defs />
+                <CartesianGrid {...CHART_GRID} horizontal={false} />
+                <XAxis type="number" {...CHART_AXIS} allowDecimals={false} />
+                <YAxis
+                  type="category"
+                  dataKey="method"
+                  width={128}
+                  tick={{ fontSize: 11, fill: "#334155", fontWeight: 600 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  content={<ChartTooltip unit={t("overview.charts.records")} formatter={(v) => `${v}`} />}
+                  cursor={{ fill: "rgba(15,23,42,0.04)" }}
+                />
+                <Bar dataKey="count" fill={`url(#${factorG.ids.barBrand})`} radius={[0, 8, 8, 0]} maxBarSize={26} name={t("overview.charts.records")}>
+                  <LabelList dataKey="count" position="right" style={{ fontSize: 12, fill: "#0f172a", fontWeight: 700 }} />
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </ChartCard>
-          <ChartCard title={t("overview.charts.activityRecordsTitle")} tip={t("overview.charts.activityRecordsTip")} icon={Database} noPadding>
+          <ChartCard title={t("overview.charts.activityRecordsTitle")} description={t("overview.charts.activityRecordsTip")} tip={t("overview.charts.activityRecordsTip")} icon={Database} noPadding accent="slate">
             <div className="max-h-72 overflow-auto">
               <table className="w-full text-xs">
                 <DataTableHeader>
@@ -465,7 +856,14 @@ export function OverviewCharts() {
                       <DataTableCell className="capitalize">{a.scope}</DataTableCell>
                       <DataTableCell className="dash-num">{activityToCalculation(a).emissionsTCO2e.toFixed(3)}</DataTableCell>
                       <DataTableCell className="capitalize">{a.method.replace(/_/g, " ")}</DataTableCell>
-                      <DataTableCell>{a.dataQualityScore}%</DataTableCell>
+                      <DataTableCell>
+                        <span
+                          className="inline-flex min-w-[2.25rem] justify-center rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white"
+                          style={{ backgroundColor: qualityColor(a.dataQualityScore) }}
+                        >
+                          {a.dataQualityScore}%
+                        </span>
+                      </DataTableCell>
                     </DataTableRow>
                   ))}
                 </DataTableBody>

@@ -191,6 +191,19 @@
   }
 }
 
+/* Expanded chart modal — enlarge charts without a frame/box */
+.chart-expand-view .recharts-responsive-container {
+  width: 100% !important;
+}
+
+.chart-expand-view .recharts-wrapper {
+  width: 100% !important;
+}
+
+.chart-expand-view .advanced-scope-donut > .aspect-square {
+  max-width: 360px !important;
+}
+
 @layer utilities {
   .font-serif {
     font-family: var(--font-serif), Georgia, serif;
