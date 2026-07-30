@@ -1,4 +1,4 @@
-import { dataQualityScore } from "@/lib/calculations/engine";
+import { activityToCalculation, dataQualityScore } from "@/lib/calculations/engine";
 import type { EmissionActivity } from "@/types/carbon";
 import type {
   ComplianceDashboardPayload,
@@ -35,6 +35,10 @@ function scoreActivity(a: EmissionActivity) {
   });
 }
 
+function hasScopeEmissions(activities: EmissionActivity[], scope: EmissionActivity["scope"]) {
+  return activities.some((a) => a.scope === scope && activityToCalculation(a).emissionsTCO2e > 0);
+}
+
 const FALLBACK_SEED_TITLES = [
   "Organizational Boundary Defined",
   "Reporting Period Configured",
@@ -50,9 +54,9 @@ export function computeLiveComplianceSignals(
   seed: ComplianceDashboardPayload,
   t: TranslateFn = (k) => k
 ): LiveComplianceSignals {
-  const hasScope1 = activities.some((a) => a.scope === "scope1" && a.emissionsTCO2e > 0);
-  const hasScope2 = activities.some((a) => a.scope === "scope2" && a.emissionsTCO2e > 0);
-  const hasScope3 = activities.some((a) => a.scope === "scope3" && a.emissionsTCO2e > 0);
+  const hasScope1 = hasScopeEmissions(activities, "scope1");
+  const hasScope2 = hasScopeEmissions(activities, "scope2");
+  const hasScope3 = hasScopeEmissions(activities, "scope3");
 
   const scores = activities.map(scoreActivity);
   const avgDataQuality = scores.length
