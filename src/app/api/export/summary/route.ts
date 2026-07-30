@@ -4,6 +4,7 @@ import {
   requireCompanyAuth,
   toCsv,
 } from "@/lib/export/auth";
+import { brandedCsvPreamble } from "@/lib/reports/branded-pdf";
 import { sumByScope, sumEmissionsTCO2e } from "@/lib/calculations/engine";
 import { mapActivity, mapTarget } from "@/services/carbon/mappers";
 import type { EmissionActivity } from "@/types/carbon";
@@ -57,8 +58,16 @@ export async function GET(request: NextRequest) {
   }
 
   const rows = [
+    ...brandedCsvPreamble({
+      reportTitle: "Corporate GHG Inventory Summary",
+      companyName: summary.companyName,
+      industry: summary.industry,
+      periodLabel: summary.period,
+      generatedAt: summary.generatedAt,
+    }),
     ["metric", "value"],
     ["company", summary.companyName],
+    ["industry", summary.industry],
     ["period", summary.period],
     ["generated_at", summary.generatedAt],
     ["activity_count", summary.activityCount],

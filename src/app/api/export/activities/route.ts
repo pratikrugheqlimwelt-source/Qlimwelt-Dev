@@ -4,6 +4,7 @@ import {
   requireCompanyAuth,
   toCsv,
 } from "@/lib/export/auth";
+import { brandedCsvPreamble } from "@/lib/reports/branded-pdf";
 import { activityToCalculation } from "@/lib/calculations/engine";
 import { mapActivity } from "@/services/carbon/mappers";
 import type { EmissionActivity } from "@/types/carbon";
@@ -26,9 +27,12 @@ export async function GET(request: NextRequest) {
     query = query.eq("period", period);
   }
 
-  const { data, error } = await query;
+  const [{ data, error }, { data: company }] = await Promise.all([
+    query,
+    supabase.from("companies").select("name, industry").eq("id", companyId).maybeSingle(),
+  ]);
+
   if (error) {
-    // Fallback empty when tables missing
     return attachmentResponse(
       format === "json" ? "[]" : "id,period,scope,category,source,activity_value,unit,tco2e\n",
       `activities.${format === "json" ? "json" : "csv"}`,
@@ -37,16 +41,34 @@ export async function GET(request: NextRequest) {
   }
 
   const activities = (data ?? []).map((row) => mapActivity(row as Record<string, unknown>)) as EmissionActivity[];
+  const generatedAt = new Date().toISOString();
+  const periodLabel = period ?? "all";
 
   if (format === "json") {
-    const payload = activities.map((a) => ({
-      ...a,
-      tCO2e: activityToCalculation(a).emissionsTCO2e,
-    }));
+    const payload = {
+      meta: {
+        platform: "Qlimwelt Climate Intelligence",
+        company: company?.name ?? "",
+        industry: company?.industry ?? "",
+        period: periodLabel,
+        generatedAt,
+      },
+      activities: activities.map((a) => ({
+        ...a,
+        tCO2e: activityToCalculation(a).emissionsTCO2e,
+      })),
+    };
     return attachmentResponse(JSON.stringify(payload, null, 2), "activities.json", "json");
   }
 
   const rows: (string | number)[][] = [
+    ...brandedCsvPreamble({
+      reportTitle: "Activity Emissions Ledger",
+      companyName: company?.name ?? "",
+      industry: company?.industry ?? "",
+      periodLabel,
+      generatedAt,
+    }),
     ["id", "period", "scope", "category", "source", "activity_value", "unit", "factor", "tco2e", "facility_id"],
     ...activities.map((a) => {
       const t = activityToCalculation(a).emissionsTCO2e;

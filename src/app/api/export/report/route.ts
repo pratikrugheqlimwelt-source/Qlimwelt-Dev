@@ -4,6 +4,7 @@ import {
   requireCompanyAuth,
   toCsv,
 } from "@/lib/export/auth";
+import { brandedCsvPreamble } from "@/lib/reports/branded-pdf";
 import { activityToCalculation, sumByScope, sumEmissionsTCO2e } from "@/lib/calculations/engine";
 import { mapActivity, mapFacility, mapInitiative, mapTarget, mapVehicle } from "@/services/carbon/mappers";
 import type { EmissionActivity } from "@/types/carbon";
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
     supabase.from("vehicles").select("*").eq("company_id", companyId),
     supabase.from("reduction_initiatives").select("*").eq("company_id", companyId),
     supabase.from("climate_targets").select("*").eq("company_id", companyId).limit(1).maybeSingle(),
-    supabase.from("companies").select("name").eq("id", companyId).maybeSingle(),
+    supabase.from("companies").select("name, industry").eq("id", companyId).maybeSingle(),
   ]);
 
   const activities = (actData ?? []).map((r) => mapActivity(r as Record<string, unknown>)) as EmissionActivity[];
@@ -55,6 +56,18 @@ export async function GET(request: NextRequest) {
   const target = targetRow ? mapTarget(targetRow as Record<string, unknown>) : null;
   const total = sumEmissionsTCO2e(activities);
   const scopes = sumByScope(activities);
+  const companyName = company?.name ?? "";
+  const industry = (company as { industry?: string } | null)?.industry ?? "";
+  const generatedAt = new Date().toISOString();
+  const periodLabel = period ?? "all";
+
+  const cover = brandedCsvPreamble({
+    reportTitle: `Corporate report — ${type}`,
+    companyName,
+    industry,
+    periodLabel,
+    generatedAt,
+  });
 
   let rows: (string | number)[][] = [];
   let jsonPayload: unknown = {};
@@ -62,16 +75,18 @@ export async function GET(request: NextRequest) {
   switch (type) {
     case "scope":
       rows = [
+        ...cover,
         ["scope", "tco2e"],
         ["scope1", Number(scopes.scope1.toFixed(6))],
         ["scope2", Number(scopes.scope2.toFixed(6))],
         ["scope3", Number(scopes.scope3.toFixed(6))],
         ["total", Number(total.toFixed(6))],
       ];
-      jsonPayload = { scopes, total };
+      jsonPayload = { company: companyName, industry, period: periodLabel, generatedAt, scopes, total };
       break;
     case "facility":
       rows = [
+        ...cover,
         ["facility_id", "name", "country", "type", "floor_area_m2", "activity_tco2e"],
         ...facilities.map((f) => {
           const t = activities
@@ -80,10 +95,11 @@ export async function GET(request: NextRequest) {
           return [f.id, f.name, f.country, f.type, f.floorAreaM2, Number(t.toFixed(6))];
         }),
       ];
-      jsonPayload = { facilities, activitiesByFacility: rows.slice(1) };
+      jsonPayload = { company: companyName, industry, period: periodLabel, generatedAt, facilities, activitiesByFacility: rows.slice(cover.length + 1) };
       break;
     case "fleet":
       rows = [
+        ...cover,
         ["id", "name", "registration", "fuel_type", "distance_km", "fuel_litres", "electricity_kwh", "emission_factor"],
         ...vehicles.map((v) => [
           v.id,
@@ -96,12 +112,13 @@ export async function GET(request: NextRequest) {
           v.emissionFactor,
         ]),
       ];
-      jsonPayload = { vehicles };
+      jsonPayload = { company: companyName, industry, period: periodLabel, generatedAt, vehicles };
       break;
     case "target":
       rows = [
+        ...cover,
         ["field", "value"],
-        ["company", company?.name ?? ""],
+        ["company", companyName],
         ["name", target?.name ?? ""],
         ["baseline_year", target?.baselineYear ?? ""],
         ["target_year", target?.targetYear ?? ""],
@@ -110,10 +127,11 @@ export async function GET(request: NextRequest) {
         ["type", target?.type ?? ""],
         ["current_filtered_tco2e", Number(total.toFixed(6))],
       ];
-      jsonPayload = { target, currentTCO2e: total };
+      jsonPayload = { company: companyName, industry, period: periodLabel, generatedAt, target, currentTCO2e: total };
       break;
     case "reduction":
       rows = [
+        ...cover,
         ["id", "name", "status", "category", "annual_reduction_tco2e", "implementation_cost", "difficulty"],
         ...initiatives.map((i) => [
           i.id,
@@ -125,16 +143,18 @@ export async function GET(request: NextRequest) {
           i.difficulty,
         ]),
       ];
-      jsonPayload = { initiatives };
+      jsonPayload = { company: companyName, industry, period: periodLabel, generatedAt, initiatives };
       break;
     case "ghg":
     default:
       rows = [
+        ...cover,
         ["metric", "value"],
-        ["company", company?.name ?? ""],
+        ["company", companyName],
+        ["industry", industry],
         ["report", "Corporate GHG Inventory"],
-        ["period", period ?? "all"],
-        ["generated_at", new Date().toISOString()],
+        ["period", periodLabel],
+        ["generated_at", generatedAt],
         ["total_tco2e", Number(total.toFixed(6))],
         ["scope1", Number(scopes.scope1.toFixed(6))],
         ["scope2", Number(scopes.scope2.toFixed(6))],
@@ -144,7 +164,10 @@ export async function GET(request: NextRequest) {
         ["vehicles", vehicles.length],
       ];
       jsonPayload = {
-        company: company?.name,
+        company: companyName,
+        industry,
+        period: periodLabel,
+        generatedAt,
         total,
         scopes,
         counts: {

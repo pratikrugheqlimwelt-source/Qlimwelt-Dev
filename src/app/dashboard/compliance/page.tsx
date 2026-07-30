@@ -48,6 +48,8 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { getComplianceDashboardSeed } from "@/data/compliance-data";
 import { mergeComplianceWithLive } from "@/lib/compliance/live-readiness";
+import { buildBrandedReportPdf } from "@/lib/reports/branded-pdf";
+import { activityToCalculation } from "@/lib/calculations/engine";
 import type {
   ComplianceDashboardPayload,
   ComplianceEvidence,
@@ -130,7 +132,15 @@ function ComplianceSkeleton() {
 export default function CompliancePage() {
   const t = useT();
   const { locale } = useLocale();
-  const { filteredActivities } = useDashboard();
+  const {
+    filteredActivities,
+    facilities,
+    reductionInitiatives,
+    climateTarget,
+    company,
+    metrics,
+    filters,
+  } = useDashboard();
   const [loading, setLoading] = useState(true);
   const [baseData, setBaseData] = useState<ComplianceDashboardPayload | null>(null);
   const [selected, setSelected] = useState<ComplianceFramework | null>(null);
@@ -178,18 +188,88 @@ export default function CompliancePage() {
 
   const queueReport = useCallback(
     async (templateId?: string, name?: string) => {
+      const reportName = name ?? t("compliancePage.csrdReport");
       try {
-        const res = await fetch("/api/report/generate", {
+        await fetch("/api/report/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ templateId: templateId ?? "csrd", name: name ?? t("compliancePage.csrdReport") }),
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "failed");
+          body: JSON.stringify({ templateId: templateId ?? "csrd", name: reportName }),
+        }).catch(() => null);
+
+        const byCat = new Map<string, number>();
+        for (const a of filteredActivities) {
+          byCat.set(a.category, (byCat.get(a.category) ?? 0) + activityToCalculation(a).emissionsTCO2e);
+        }
+        const byFac = new Map<string, { name: string; country: string; tCO2e: number }>();
+        for (const a of filteredActivities) {
+          const f = facilities.find((x) => x.id === a.facilityId);
+          const key = a.facilityId;
+          const cur = byFac.get(key) ?? {
+            name: f?.name ?? a.facilityId,
+            country: f?.country ?? a.country,
+            tCO2e: 0,
+          };
+          cur.tCO2e += activityToCalculation(a).emissionsTCO2e;
+          byFac.set(key, cur);
+        }
+
+        let logoBytes: Uint8Array | null = null;
+        try {
+          const logoRes = await fetch("/logo-mark.png");
+          if (logoRes.ok) logoBytes = new Uint8Array(await logoRes.arrayBuffer());
+        } catch {
+          logoBytes = null;
+        }
+
+        const pdfBytes = await buildBrandedReportPdf(
+          {
+            reportTitle: reportName,
+            companyName: company.name,
+            industry: company.industry,
+            employeeCount: company.employeeCount,
+            revenueEUR: company.revenueEUR,
+            currency: company.currency,
+            periodLabel: filters.period === "all" ? t("shell.fy2024") : filters.period,
+            generatedAt: new Date().toLocaleString(),
+            totalTCO2e: metrics.totalTCO2e,
+            scope1: metrics.scope1,
+            scope2: metrics.scope2,
+            scope3: metrics.scope3,
+            activityCount: filteredActivities.length,
+            verifiedPct: metrics.verifiedPct,
+            estimatedPct: metrics.estimatedPct,
+            carbonCostEUR: metrics.carbonCostExposure,
+            targetName: climateTarget.name,
+            targetYear: climateTarget.targetYear,
+            targetReductionPct: climateTarget.targetReductionPct,
+            baselineTCO2e: climateTarget.baselineEmissionsTCO2e,
+            baselineYear: climateTarget.baselineYear,
+            categories: [...byCat.entries()]
+              .sort((a, b) => b[1] - a[1])
+              .map(([catName, tCO2e]) => ({ name: catName, tCO2e })),
+            initiatives: reductionInitiatives.map((i) => ({
+              name: i.name,
+              status: i.status,
+              reduction: i.annualEmissionReductionTCO2e,
+            })),
+            facilities: [...byFac.values()].sort((a, b) => b.tCO2e - a.tCO2e),
+          },
+          logoBytes
+        );
+
+        const copy = new Uint8Array(pdfBytes);
+        const blob = new Blob([copy.buffer], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${reportName.replace(/\s+/g, "-").toLowerCase()}-qlimwelt.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+
         toast({
           title: t("compliancePage.toastReportQueued"),
-          description: json.message ?? t("compliancePage.toastReportQueuedDesc"),
+          description: t("compliancePage.toastReportQueuedDesc"),
           variant: "success",
         });
       } catch {
@@ -199,7 +279,16 @@ export default function CompliancePage() {
         });
       }
     },
-    [t]
+    [
+      t,
+      filteredActivities,
+      facilities,
+      reductionInitiatives,
+      climateTarget,
+      company,
+      metrics,
+      filters.period,
+    ]
   );
 
   const uploadFiles = useCallback(
