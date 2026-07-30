@@ -16,28 +16,53 @@ import {
   Leaf,
   Building2,
   Droplets,
+  CarFront,
+  TrainFront,
 } from "lucide-react";
+
+/** Explicit icons for Data Collection activity-type cards (by preset id). */
+const PRESET_ICONS: Record<string, LucideIcon> = {
+  mobile: Truck,
+  gas: Flame,
+  refrigerants: Snowflake,
+  electricity: Zap,
+  heat: Thermometer,
+  goods: ShoppingBag,
+  freight: Ship,
+  travel: Plane,
+  commuting: CarFront,
+  waste: Trash2,
+  custom: SlidersHorizontal,
+};
 
 /** Resolve a designer Lucide icon from preset id / category / factor name. */
 export function resolveActivityIcon(hint: string): LucideIcon {
-  const h = hint.toLowerCase();
+  const raw = hint.trim();
+  const id = raw.split(/\s+/)[0]?.toLowerCase() ?? "";
+  if (id && PRESET_ICONS[id]) return PRESET_ICONS[id];
 
-  if (/custom|manual|slider/.test(h)) return SlidersHorizontal;
-  if (/refrigerant|fugitive|coolant|snow|hfc|r-?134/.test(h)) return Snowflake;
-  if (/commuting|employee|bus/.test(h)) return Bus;
-  if (/freight|logistics|ship|downstream transport|upstream transport|cargo/.test(h)) return Ship;
-  if (/heat|steam|district|thermal|thermometer/.test(h)) return Thermometer;
-  if (/travel|flight|plane|aviation|passenger/.test(h)) return Plane;
-  if (/goods|spend|purchased goods|shopping|supplier|category 1/.test(h)) return ShoppingBag;
-  if (/waste|landfill|trash|category 5/.test(h)) return Trash2;
-  if (/electric|grid|power|kwh|scope.?2/.test(h)) return Zap;
-  if (/diesel|petrol|gasoline|mobile|fleet|vehicle|truck|fuel_based|litre/.test(h)) return Truck;
-  if (/natural gas|stationary|boiler|combustion|flame|gas/.test(h)) return Flame;
-  if (/fuel(?!_based)/.test(h)) return Fuel;
-  if (/water|droplet/.test(h)) return Droplets;
+  const h = raw.toLowerCase();
+
+  if (/\bcustom\b|\bmanual\b|slider/.test(h)) return SlidersHorizontal;
+  if (/refrigerant|fugitive|coolant|snow|\bhfc\b|r-?134/.test(h)) return Snowflake;
+  if (/\bcommuting\b|\bemployee commuting\b/.test(h)) return CarFront;
+  if (/\bfreight\b|logistics|\bship\b|downstream transport|upstream transport|\bcargo\b/.test(h))
+    return Ship;
+  if (/\bpurchased heat\b|\bdistrict\b|\bsteam\b|thermal|thermometer/.test(h)) return Thermometer;
+  if (/\btravel\b|\bflight\b|\bplane\b|aviation|passenger-km|business travel/.test(h)) return Plane;
+  if (/\brail\b|\btrain\b/.test(h)) return TrainFront;
+  if (/purchased goods|\bspend\b|shopping|\bsupplier\b|category 1/.test(h)) return ShoppingBag;
+  if (/\bwaste\b|landfill|\btrash\b|category 5/.test(h)) return Trash2;
+  if (/electric|\bgrid\b|\bpower\b|\bkwh\b|purchased electricity/.test(h)) return Zap;
+  if (/natural gas|stationary|boiler|\bflame\b|\bgas\b/.test(h)) return Flame;
+  if (/mobile combustion|\bdiesel\b|\bpetrol\b|gasoline|\bfleet\b|\bvehicle\b|\btruck\b|fuel_based|\blitre\b/.test(h))
+    return Truck;
+  if (/\bbus\b/.test(h)) return Bus;
+  if (/\bfuel\b/.test(h)) return Fuel;
+  if (/\bwater\b|droplet/.test(h)) return Droplets;
   if (/factory|process|industrial/.test(h)) return Factory;
   if (/building|office|facility/.test(h)) return Building2;
-  if (/bio|leaf|renewable/.test(h)) return Leaf;
+  if (/\bbio\b|\bleaf\b|renewable/.test(h)) return Leaf;
 
   return SlidersHorizontal;
 }

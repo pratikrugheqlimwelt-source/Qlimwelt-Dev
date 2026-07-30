@@ -14,7 +14,7 @@ import { HelpCorner } from "@/components/ui/tooltip";
 import { formatCO2, formatCurrency } from "@/lib/utils";
 import { MetricFigure } from "@/components/ui/metric-figure";
 import {
-  Activity, Cloud, Target, TrendingUp, ShieldCheck, Zap, DollarSign, BarChart3, Users, Factory,
+  Target, TrendingUp, ShieldCheck, DollarSign, BarChart3, Users,
   Leaf, CheckCircle2, AlertCircle, Database,
 } from "lucide-react";
 
@@ -41,9 +41,6 @@ export function OverviewPage() {
   const t = useT();
 
   const totalSpark = monthlyTrend.map((m) => m.total);
-  const s1Spark = monthlyTrend.map((m) => m.scope1);
-  const s2Spark = monthlyTrend.map((m) => m.scope2);
-  const s3Spark = monthlyTrend.map((m) => m.scope3);
   const total = metrics.scope1 + metrics.scope2 + metrics.scope3;
   const highRisks = climateInsights.filter((i) => i.priority === "high").length;
   const periodLabel =
@@ -132,6 +129,42 @@ export function OverviewPage() {
 
         <div className="relative mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
+            {
+              label: t("overview.totalEmissions"),
+              value: formatCO2(metrics.totalTCO2e),
+              sub:
+                metrics.changePct !== undefined
+                  ? `${metrics.changePct >= 0 ? "+" : ""}${metrics.changePct.toFixed(1)}% ${t("overview.vsPrior")}`
+                  : periodLabel,
+            },
+            {
+              label: t("overview.scope1"),
+              value: formatCO2(metrics.scope1),
+              sub: t("overview.ofTotal", { pct: pct(metrics.scope1) }),
+            },
+            {
+              label: t("overview.scope2"),
+              value: formatCO2(metrics.scope2),
+              sub: t("overview.ofTotal", { pct: pct(metrics.scope2) }),
+            },
+            {
+              label: t("overview.scope3"),
+              value: formatCO2(metrics.scope3),
+              sub: t("overview.ofTotal", { pct: pct(metrics.scope3) }),
+            },
+          ].map((stat) => (
+            <div key={stat.label} className="dash-hero-stat">
+              <MetricFigure size="md" className="text-white" unitClassName="opacity-55">
+                {stat.value}
+              </MetricFigure>
+              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/50">{stat.label}</p>
+              <p className="text-[10px] text-white/35">{stat.sub}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="relative mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
             { label: t("overview.targetProgress"), value: `${metrics.targetProgress.toFixed(0)}%`, sub: t("overview.sbt2030") },
             { label: t("overview.verifiedData"), value: `${metrics.verifiedPct.toFixed(0)}%`, sub: t("overview.auditReady") },
             { label: t("overview.carbonExposure"), value: formatCurrency(metrics.carbonCostExposure), sub: `@€${company.carbonPricePerTonne}/t` },
@@ -146,13 +179,6 @@ export function OverviewPage() {
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard size="hero" accent="brand" icon={Activity} label={t("overview.totalEmissions")} value={formatCO2(metrics.totalTCO2e)} tooltip={t("overview.tipTotal")} trend={metrics.changePct} sparkline={totalSpark} />
-        <MetricCard size="hero" accent="scope1" icon={Factory} label={t("overview.scope1")} value={formatCO2(metrics.scope1)} tooltip={t("overview.tipScope1")} sub={t("overview.ofTotal", { pct: pct(metrics.scope1) })} sparkline={s1Spark} />
-        <MetricCard size="hero" accent="scope2" icon={Zap} label={t("overview.scope2")} value={formatCO2(metrics.scope2)} tooltip={t("overview.tipScope2")} sub={t("overview.ofTotal", { pct: pct(metrics.scope2) })} sparkline={s2Spark} />
-        <MetricCard size="hero" accent="scope3" icon={Cloud} label={t("overview.scope3")} value={formatCO2(metrics.scope3)} tooltip={t("overview.tipScope3")} sub={t("overview.ofTotal", { pct: pct(metrics.scope3) })} sparkline={s3Spark} />
       </div>
 
       <FilterBar />
