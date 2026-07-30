@@ -90,7 +90,7 @@ interface MetricCardProps {
   trend?: number;
   icon?: LucideIcon;
   accent?: Accent;
-  size?: "default" | "hero";
+  size?: "default" | "hero" | "compact";
   sparkline?: number[];
   progress?: number;
   className?: string;
@@ -113,6 +113,7 @@ export function MetricCard({
 }: MetricCardProps) {
   const Comp = onClick ? "button" : "div";
   const styles = ACCENT_STYLES[accent];
+  const compact = size === "compact";
 
   return (
     <Comp
@@ -122,32 +123,45 @@ export function MetricCard({
         "dash-metric-card group relative overflow-hidden text-left bg-gradient-to-br",
         styles.bg,
         size === "hero" && "dash-metric-card-hero",
+        compact && "dash-metric-card-compact",
         onClick && "cursor-pointer",
         className
       )}
     >
-      <div className={cn("pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br opacity-80 blur-2xl", styles.glow)} />
-      <div className={cn("absolute left-0 top-0 h-full w-1", styles.bar)} />
-      {tooltip && <HelpCorner content={tooltip} className="right-2.5 top-2.5" />}
+      <div className={cn(
+        "pointer-events-none absolute rounded-full bg-gradient-to-br opacity-80 blur-2xl",
+        compact ? "-right-4 -top-4 h-16 w-16" : "-right-6 -top-6 h-24 w-24",
+        styles.glow
+      )} />
+      <div className={cn("absolute left-0 top-0 h-full", compact ? "w-0.5" : "w-1", styles.bar)} />
+      {tooltip && <HelpCorner content={tooltip} className={compact ? "right-1.5 top-1.5" : "right-2.5 top-2.5"} />}
 
-      <div className="relative pl-4 pr-8">
-        <div className="flex items-start justify-between gap-3">
+      <div className={cn("relative", compact ? "pl-3 pr-6" : "pl-4 pr-8")}>
+        <div className={cn("flex items-start justify-between", compact ? "gap-2" : "gap-3")}>
           <div className="min-w-0 flex-1">
-            <p className="dash-label">{label}</p>
+            <p className={cn("dash-label", compact && "text-[10px] tracking-[0.08em]")}>{label}</p>
             <MetricFigure
-              size={size === "hero" ? "xl" : "lg"}
-              className="mt-2 text-foreground"
+              size={size === "hero" ? "xl" : compact ? "md" : "lg"}
+              className={cn("text-foreground", compact ? "mt-1" : "mt-2")}
             >
               {value}
             </MetricFigure>
-            {sub && <p className="mt-1.5 text-xs leading-snug text-muted-foreground">{sub}</p>}
+            {sub && (
+              <p className={cn(
+                "leading-snug text-muted-foreground",
+                compact ? "mt-1 text-[11px]" : "mt-1.5 text-xs"
+              )}>
+                {sub}
+              </p>
+            )}
             {trend !== undefined && (
               <div className={cn(
-                "mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+                "inline-flex items-center gap-1 rounded-full font-semibold",
+                compact ? "mt-1.5 px-2 py-0.5 text-[10px]" : "mt-2 px-2.5 py-1 text-xs",
                 trend <= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
               )}>
                 {trend <= 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
-                <MetricFigure size="sm" className="!inline-flex text-[11px]">
+                <MetricFigure size="sm" className={cn("!inline-flex", compact ? "text-[10px]" : "text-[11px]")}>
                   {`${Math.abs(trend).toFixed(1)} %`}
                 </MetricFigure>
                 <span>vs prior</span>
@@ -156,21 +170,22 @@ export function MetricCard({
           </div>
           {Icon && (
             <div className={cn(
-              "mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-110",
+              "mr-1 flex shrink-0 items-center justify-center shadow-sm transition-transform group-hover:scale-110",
+              compact ? "h-8 w-8 rounded-lg" : "h-11 w-11 rounded-xl",
               styles.icon
             )}>
-              <Icon className="h-5 w-5" />
+              <Icon className={compact ? "h-3.5 w-3.5" : "h-5 w-5"} />
             </div>
           )}
         </div>
 
         {progress !== undefined && (
-          <div className="mt-4">
+          <div className={compact ? "mt-2.5" : "mt-4"}>
             <div className="mb-1 flex justify-between text-[10px] font-medium text-muted-foreground">
               <span>Progress</span>
               <span className="dash-num text-[10px]">{progress.toFixed(0)}%</span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-black/5">
+            <div className={cn("overflow-hidden rounded-full bg-black/5", compact ? "h-1" : "h-1.5")}>
               <div
                 className={cn("h-full rounded-full transition-all duration-700", styles.bar)}
                 style={{ width: `${Math.min(100, progress)}%` }}
@@ -180,8 +195,12 @@ export function MetricCard({
         )}
 
         {sparkline && sparkline.length > 1 && (
-          <div className="mt-3 -mb-1">
-            <Sparkline data={sparkline} color={styles.spark} height={size === "hero" ? 56 : 44} />
+          <div className={cn(compact ? "mt-2 -mb-0.5" : "mt-3 -mb-1")}>
+            <Sparkline
+              data={sparkline}
+              color={styles.spark}
+              height={size === "hero" ? 56 : compact ? 28 : 44}
+            />
           </div>
         )}
       </div>

@@ -20,9 +20,9 @@ import {
 
 function KpiSection({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-4">
+    <section className="space-y-3">
       <SectionHeader title={title} description={description} />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
     </section>
   );
 }
@@ -184,17 +184,17 @@ export function OverviewPage() {
       <FilterBar />
 
       <KpiSection title={t("overview.intensityTitle")} description={t("overview.intensityDesc")}>
-        <MetricCard accent="indigo" icon={TrendingUp} label={t("overview.periodChange")} value={`${metrics.changePct >= 0 ? "+" : ""}${metrics.changePct.toFixed(1)}%`} tooltip={t("overview.vsPriorPeriod")} trend={metrics.changePct} sparkline={totalSpark} />
-        <MetricCard accent="teal" icon={Users} label={t("overview.perEmployee")} value={`${metrics.perEmployee.toFixed(2)} t`} tooltip={t("overview.perEmployee")} sub={t("overview.employeesCount", { count: company.employeeCount })} />
-        <MetricCard accent="indigo" icon={BarChart3} label={t("overview.perRevenue")} value={`${metrics.perRevenue.toFixed(3)} t/€M`} tooltip={t("overview.perRevenue")} />
-        <MetricCard accent="success" icon={Target} label={t("overview.targetProgress")} value={`${metrics.targetProgress.toFixed(0)}%`} tooltip={t("overview.sbt2030")} progress={metrics.targetProgress} />
+        <MetricCard size="compact" accent="indigo" icon={TrendingUp} label={t("overview.periodChange")} value={`${metrics.changePct >= 0 ? "+" : ""}${metrics.changePct.toFixed(1)}%`} tooltip={t("overview.vsPriorPeriod")} trend={metrics.changePct} sparkline={totalSpark} />
+        <MetricCard size="compact" accent="teal" icon={Users} label={t("overview.perEmployee")} value={`${metrics.perEmployee.toFixed(2)} t`} tooltip={t("overview.perEmployee")} sub={t("overview.employeesCount", { count: company.employeeCount })} />
+        <MetricCard size="compact" accent="indigo" icon={BarChart3} label={t("overview.perRevenue")} value={`${metrics.perRevenue.toFixed(3)} t/€M`} tooltip={t("overview.perRevenue")} />
+        <MetricCard size="compact" accent="success" icon={Target} label={t("overview.targetProgress")} value={`${metrics.targetProgress.toFixed(0)}%`} tooltip={t("overview.sbt2030")} progress={metrics.targetProgress} />
       </KpiSection>
 
       <KpiSection title={t("overview.qualityTitle")} description={t("overview.qualityDesc")}>
-        <MetricCard accent="success" icon={ShieldCheck} label={t("overview.verifiedData")} value={`${metrics.verifiedPct.toFixed(0)}%`} tooltip={t("overview.auditReady")} progress={metrics.verifiedPct} />
-        <MetricCard accent="warning" label={t("overview.estimatedData")} value={`${metrics.estimatedPct.toFixed(0)}%`} tooltip={t("overview.estimatedData")} progress={metrics.estimatedPct} />
-        <MetricCard accent="brand" label={t("overview.reductionOpp")} value={formatCO2(metrics.reductionOpportunity)} tooltip={t("overview.reductionOpp")} sub={t("overview.fromInitiatives", { count: reductionInitiatives.length })} />
-        <MetricCard accent="indigo" icon={DollarSign} label={t("overview.carbonCost")} value={formatCurrency(metrics.carbonCostExposure)} tooltip={`€${company.carbonPricePerTonne}/t`} sub={t("overview.savings", { amount: formatCurrency(metrics.financialSavings) })} />
+        <MetricCard size="compact" accent="success" icon={ShieldCheck} label={t("overview.verifiedData")} value={`${metrics.verifiedPct.toFixed(0)}%`} tooltip={t("overview.auditReady")} progress={metrics.verifiedPct} />
+        <MetricCard size="compact" accent="warning" label={t("overview.estimatedData")} value={`${metrics.estimatedPct.toFixed(0)}%`} tooltip={t("overview.estimatedData")} progress={metrics.estimatedPct} />
+        <MetricCard size="compact" accent="brand" label={t("overview.reductionOpp")} value={formatCO2(metrics.reductionOpportunity)} tooltip={t("overview.reductionOpp")} sub={t("overview.fromInitiatives", { count: reductionInitiatives.length })} />
+        <MetricCard size="compact" accent="indigo" icon={DollarSign} label={t("overview.carbonCost")} value={formatCurrency(metrics.carbonCostExposure)} tooltip={`€${company.carbonPricePerTonne}/t`} sub={t("overview.savings", { amount: formatCurrency(metrics.financialSavings) })} />
       </KpiSection>
 
       <OverviewCharts />

@@ -149,6 +149,9 @@
   .dash-metric-card {
     @apply rounded-2xl border border-white/80 p-4 shadow-[0_2px_8px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(15,23,42,0.1)];
   }
+  .dash-metric-card-compact {
+    @apply rounded-xl p-3 shadow-[0_1px_4px_rgba(15,23,42,0.04),0_2px_10px_rgba(15,23,42,0.03)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.08)];
+  }
   .dash-metric-card-hero {
     @apply p-5;
   }
