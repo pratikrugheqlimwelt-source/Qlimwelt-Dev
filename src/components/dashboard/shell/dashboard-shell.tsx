@@ -17,6 +17,7 @@ import { useDashboard } from "@/components/dashboard/providers/dashboard-provide
 import { AccountMenu } from "@/components/dashboard/AccountMenu";
 import { LanguageToggle } from "@/components/i18n/language-toggle";
 import { useT } from "@/components/i18n/locale-provider";
+import { QlimAiFloatingChat } from "@/components/qlim-ai/qlim-ai-floating-chat";
 import { PERIODS } from "@/data/carbon";
 
 const NAV_GROUP_DEFS = [
@@ -429,6 +430,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <CalculationDrawer />
+      <QlimAiFloatingChat />
     </div>
   );
 }

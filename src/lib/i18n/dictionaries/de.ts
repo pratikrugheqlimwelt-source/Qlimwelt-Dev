@@ -31,6 +31,8 @@ const de: Dict = {
     chartDetails: "Über dieses Diagramm",
     chartExpanded: "Diagramm ist in der vergrößerten Ansicht geöffnet",
     close: "Schließen",
+    openQaiChat: "Qlim AI Chat öffnen",
+    qaiChatTitle: "Qlim AI — CO₂-Fußabdruck-Assistent",
   },
   marketingNav: {
     learn: "Lernen",

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bot, User, Send, Loader2 } from "lucide-react";
+import { Bot, User, Send, Loader2, X } from "lucide-react";
 import { TypewriterText } from "@/components/marketing/marketing-ui";
 import { ChatMarkdown } from "@/components/qlim-ai/chat-markdown";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export function QlimAiChat({
   className,
   messagesClassName,
   fill = false,
+  onClose,
 }: {
   messages: Message[];
   animateLast?: boolean;
@@ -25,6 +26,8 @@ export function QlimAiChat({
   messagesClassName?: string;
   /** Stretch to parent height (dashboard workspace). */
   fill?: boolean;
+  /** Optional close control in the chat header (floating widget). */
+  onClose?: () => void;
 }) {
   const [messages, setMessages] = React.useState<Message[]>(initialMessages);
   const [input, setInput] = React.useState("");
@@ -107,9 +110,21 @@ export function QlimAiChat({
             <p className="truncate text-xs text-muted-foreground">Climate Intelligence</p>
           </div>
         </div>
-        <span className="max-w-[9.5rem] shrink-0 truncate rounded-full bg-brand-light px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-brand-dark sm:max-w-[14rem]">
-          {interactive ? providerLabel : "Preview"}
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="max-w-[9.5rem] truncate rounded-full bg-brand-light px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-brand-dark sm:max-w-[14rem]">
+            {interactive ? providerLabel : "Preview"}
+          </span>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close chat"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div
