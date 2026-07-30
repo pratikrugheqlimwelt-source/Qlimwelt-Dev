@@ -254,12 +254,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <div className={cn("flex min-h-screen flex-col transition-[padding] duration-300", collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64")}>
         <header className="sticky top-0 z-30 border-b border-border/60 bg-white/90 backdrop-blur-md">
-          <div className="flex h-[4.25rem] items-center gap-3 px-4 lg:px-6">
+          <div className="flex min-h-[4.25rem] items-center gap-2 px-4 py-2 lg:gap-3 lg:px-6">
             <button type="button" className="rounded-lg p-2 hover:bg-muted lg:hidden" onClick={() => setMobileOpen(true)} aria-label={t("shell.openNav")}>
               <Menu className="h-5 w-5" />
             </button>
 
-            <div className="min-w-0 shrink-0 max-w-[42%] sm:max-w-[36%] lg:max-w-[28%]">
+            <div className="min-w-0 shrink-0 max-w-[9.5rem] sm:max-w-[11rem] lg:max-w-[12.5rem]">
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("overview.carbonIntelligence")}</p>
               <h1 className="truncate text-lg font-semibold tracking-tight">{pageTitle}</h1>
             </div>
@@ -268,10 +268,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
             <div className="flex shrink-0 items-center gap-2">
               <div className="relative hidden md:block" ref={searchRef}>
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder={t("common.search")}
-                  className="h-9 w-52 border-border/60 bg-muted/30 pl-9 text-xs shadow-none lg:w-64"
+                  className="h-8 w-28 border-border/60 bg-muted/30 pl-8 text-xs shadow-none lg:w-36"
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);

@@ -9,7 +9,7 @@ import { buildLiveScanFeed } from "@/lib/qlim-ai/live-scan-feed";
 import { cn } from "@/lib/utils";
 
 const TYPE_MS = 28;
-const HOLD_MS = 3200;
+const HOLD_MS = 3800;
 const CLEAR_MS = 280;
 
 /** Compact QAI notification ticker — types recommendation messages in the header. */
@@ -79,7 +79,7 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "group relative hidden min-w-0 max-w-xl flex-1 items-center md:flex",
+        "group relative hidden min-w-0 flex-1 items-center md:flex",
         className
       )}
       role="status"
@@ -93,13 +93,13 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
           else router.push("/dashboard/climate-intelligence");
         }}
         className={cn(
-          "relative flex w-full max-w-md items-center gap-2.5 overflow-hidden rounded-xl border px-2.5 py-1.5 text-left transition-all",
+          "relative flex w-full min-w-0 items-start gap-2.5 rounded-xl border px-2.5 py-1.5 text-left transition-all",
           "border-border/70 bg-gradient-to-r from-white via-[#f4fbf0] to-white",
           "hover:border-[#82D153]/60 hover:shadow-[0_0_0_3px_rgba(130,209,83,0.12)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#82D153]/40"
         )}
       >
-        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
+        <span className="relative mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center">
           <span
             className="absolute inset-0 rounded-full bg-[#82D153]/15 animate-pulse"
             aria-hidden
@@ -122,7 +122,7 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
             </span>
           </div>
 
-          <p className="mt-0.5 truncate text-xs font-medium text-foreground">
+          <p className="mt-0.5 whitespace-normal break-words text-xs font-medium leading-snug text-foreground">
             <span>{typed}</span>
             <span
               className={cn(
