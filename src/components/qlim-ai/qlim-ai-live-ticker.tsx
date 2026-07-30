@@ -12,7 +12,7 @@ const TYPE_MS = 28;
 const HOLD_MS = 3800;
 const CLEAR_MS = 280;
 
-/** Compact QAI notification ticker — types recommendation messages in the header. */
+/** Compact QAI notification ticker — fixed height so the header never shifts. */
 export function QlimAiLiveTicker({ className }: { className?: string }) {
   const t = useT();
   const router = useRouter();
@@ -79,7 +79,7 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "group relative hidden min-w-0 flex-1 items-center md:flex",
+        "relative hidden min-w-0 flex-1 items-center md:flex",
         className
       )}
       role="status"
@@ -88,45 +88,45 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
     >
       <button
         type="button"
+        title={fullText}
         onClick={() => {
           if (current.href) router.push(current.href);
           else router.push("/dashboard/climate-intelligence");
         }}
         className={cn(
-          "relative flex w-full min-w-0 items-start gap-2.5 rounded-xl border px-2.5 py-1.5 text-left transition-all",
+          "relative flex h-10 w-full min-w-0 max-w-full items-center gap-2 overflow-hidden rounded-xl border px-2 text-left transition-all",
           "border-border/70 bg-gradient-to-r from-white via-[#f4fbf0] to-white",
           "hover:border-[#82D153]/60 hover:shadow-[0_0_0_3px_rgba(130,209,83,0.12)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#82D153]/40"
         )}
       >
-        <span className="relative mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center">
+        <span className="relative flex h-7 w-7 shrink-0 items-center justify-center">
           <span
             className="absolute inset-0 rounded-full bg-[#82D153]/15 animate-pulse"
             aria-hidden
           />
-          <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-[#82D153]/35 bg-white shadow-sm">
+          <span className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-[#82D153]/35 bg-white shadow-sm">
             <Image
               src="/logo-mark.png"
               alt=""
-              width={22}
-              height={22}
-              className="h-[18px] w-[18px] object-contain"
+              width={18}
+              height={18}
+              className="h-4 w-4 object-contain"
             />
           </span>
         </span>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3d8b2e]">
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <div className="flex items-center gap-1.5 leading-none">
+            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3d8b2e]">
               {t("shell.aiTicker.agent")}
             </span>
           </div>
-
-          <p className="mt-0.5 whitespace-normal break-words text-xs font-medium leading-snug text-foreground">
+          <p className="mt-0.5 truncate text-xs font-medium leading-none text-foreground">
             <span>{typed}</span>
             <span
               className={cn(
-                "ml-px inline-block h-3 w-[2px] translate-y-[2px] bg-[#3d8b2e]",
+                "ml-px inline-block h-3 w-[2px] translate-y-px bg-[#3d8b2e]",
                 typing ? "animate-pulse" : "opacity-0"
               )}
               aria-hidden
