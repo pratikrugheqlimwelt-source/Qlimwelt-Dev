@@ -25,10 +25,10 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
   const t = useT();
 
   const homeAnchors: [string, string][] = [
-    ["#carbon-footprint", t("marketingNav.learn")],
-    ["#platform", t("marketingNav.platform")],
+    ["#capabilities", t("marketingNav.learn")],
+    ["#intelligence", t("marketingNav.platform")],
     ["#how-it-works", t("marketingNav.process")],
-    ["#insights", t("marketingNav.insights")],
+    ["#value", t("marketingNav.insights")],
     ["#pricing", t("marketingNav.pricing")],
   ];
 

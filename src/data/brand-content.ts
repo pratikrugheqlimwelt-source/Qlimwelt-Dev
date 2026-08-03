@@ -49,24 +49,24 @@ export const brand = {
   whyWeExist: {
     title: "Why We Exist",
     description:
-      "Climate responsibility should not be limited to large enterprises. Every organization deserves access to intelligent tools that simplify carbon accounting and unlock meaningful environmental progress.",
+      "Enterprises don't suffer from a reporting problem. They suffer from an intelligence problem—fragmented systems, weak context, and decisions made without continuous reasoning.",
   },
   cta: {
-    title: "Start measuring what matters.",
+    title: "Connect your systems. Activate intelligence.",
     options: [
-      "Take the first step toward smarter sustainability.",
-      "Build a business that grows with purpose.",
-      "See your carbon footprint with complete clarity.",
-      "Let's create measurable impact together.",
+      "Connect ERP, finance, procurement, and logistics into one intelligence layer.",
+      "Understand why emissions change—not just that they changed.",
+      "Get recommendations ranked by impact, value, and regulatory urgency.",
+      "Make sustainability an operational advantage.",
     ],
   },
   quotes: [
-    "Every number tells a story. Every insight creates an opportunity.",
-    "Better data leads to better decisions.",
-    "Sustainability begins with understanding.",
-    "The future belongs to businesses that care.",
-    "Your journey toward net zero starts with knowing where you stand.",
-    "Technology with purpose. Data with impact.",
-    "Together we can make every business part of the climate solution.",
+    "Software reports emissions. Intelligence changes decisions.",
+    "Better context leads to better decisions.",
+    "We don't replace your software. We connect everything together.",
+    "Climate intelligence for every business decision.",
+    "The operating system for climate intelligence.",
+    "Infrastructure—not another dashboard.",
+    "Explainable AI that sits between systems and decisions.",
   ],
 };

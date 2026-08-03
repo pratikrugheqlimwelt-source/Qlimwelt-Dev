@@ -21,9 +21,9 @@ export function MarketingFooter() {
           <div>
             <MetaLabel>{t("marketing.footerPlatform")}</MetaLabel>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <li><Link href="/platform" className="transition-colors hover:text-foreground">{t("marketing.footerFeatures")}</Link></li>
-              <li><Link href="/#carbon-footprint" className="transition-colors hover:text-foreground">{t("marketing.footerFootprintGuide")}</Link></li>
-              <li><Link href="/#insights" className="transition-colors hover:text-foreground">{t("marketing.footerInsights")}</Link></li>
+              <li><Link href="/#capabilities" className="transition-colors hover:text-foreground">{t("marketing.footerFeatures")}</Link></li>
+              <li><Link href="/#how-it-works" className="transition-colors hover:text-foreground">{t("marketing.footerFootprintGuide")}</Link></li>
+              <li><Link href="/#intelligence" className="transition-colors hover:text-foreground">{t("marketing.footerInsights")}</Link></li>
               <li><Link href="/#pricing" className="transition-colors hover:text-foreground">{t("marketing.footerPricing")}</Link></li>
               <li><Link href="/login" className="transition-colors hover:text-foreground">{t("marketing.footerDashboard")}</Link></li>
             </ul>
@@ -32,7 +32,7 @@ export function MarketingFooter() {
             <MetaLabel>{t("marketing.footerCompany")}</MetaLabel>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               <li><Link href="/#about" className="transition-colors hover:text-foreground">{t("marketing.footerAbout")}</Link></li>
-              <li><Link href="/#insights" className="transition-colors hover:text-foreground">{t("marketing.footerBlog")}</Link></li>
+              <li><Link href="/#value" className="transition-colors hover:text-foreground">{t("marketing.footerBlog")}</Link></li>
               <li><Link href="/#contact" className="transition-colors hover:text-foreground">{t("marketing.footerCareers")}</Link></li>
               <li><Link href="/#contact" className="transition-colors hover:text-foreground">{t("marketing.footerPress")}</Link></li>
             </ul>

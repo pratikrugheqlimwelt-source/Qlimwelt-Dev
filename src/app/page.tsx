@@ -1,9 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Network,
+  Activity,
+  SearchCode,
+  Lightbulb,
+  Scale,
+  Waypoints,
+  ArrowDown,
+} from "lucide-react";
 import { MarketingLayout } from "@/components/marketing/marketing-layout";
 import { QlimAiChat } from "@/components/qlim-ai/qlim-ai-chat";
 import { QlimAiOverlay } from "@/components/qlim-ai/qlim-ai-overlay";
@@ -14,19 +22,13 @@ import {
   MetaLabel,
   StatusBar,
   EditorialHeadline,
-  ThinRule,
-  MetricDark,
-  StatColumn,
-  EmissionsNetworkViz,
   FadeUp,
-  FadeUpStagger,
-  FadeUpItem,
   EditorialCta,
   SectionIntro,
 } from "@/components/marketing/editorial";
-import { AnimatedRule, PricingSelector, InteractiveSteps } from "@/components/marketing/motion-ui";
-import { CarbonFootprintSection, InsightsNewsSection } from "@/components/marketing/carbon-insights";
-import { MetricFigure } from "@/components/ui/metric-figure";
+import { AnimatedRule, PricingSelector } from "@/components/marketing/motion-ui";
+import { QaiIntelligenceLayerViz } from "@/components/marketing/qai-intelligence-layer-viz";
+import { QaiHowItWorksPipeline } from "@/components/marketing/qai-how-it-works";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
@@ -34,82 +36,49 @@ import { qlimAiDemo } from "@/data/marketing-data";
 import { useT } from "@/components/i18n/locale-provider";
 import { useLocalizedMarketing } from "@/lib/i18n/use-localized-marketing";
 import { useLocalizedBrand } from "@/lib/i18n/use-localized-brand";
+import { EASE_OUT } from "@/lib/motion";
 
-function QuoteCarousel() {
-  const t = useT();
-  const brand = useLocalizedBrand();
-  const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setIndex((i) => (i + 1) % brand.quotes.length), 5000);
-    return () => clearInterval(id);
-  }, [brand.quotes.length]);
+const CAPABILITIES = [
+  { key: "capConnect", icon: Network },
+  { key: "capContinuous", icon: Activity },
+  { key: "capRootCause", icon: SearchCode },
+  { key: "capDecision", icon: Lightbulb },
+  { key: "capCompliance", icon: Scale },
+  { key: "capGraph", icon: Waypoints },
+] as const;
 
-  return (
-    <div className="border border-border px-5 py-10 text-center sm:px-8">
-      <MetaLabel>
-        {`${t("marketing.insightLabel")} // ${String(index + 1).padStart(2, "0")}`}
-      </MetaLabel>
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={index}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.4 }}
-          className="mx-auto mt-6 max-w-2xl font-serif text-2xl italic leading-relaxed sm:text-3xl"
-        >
-          &ldquo;{brand.quotes[index]}&rdquo;
-        </motion.p>
-      </AnimatePresence>
-      <div className="mt-8 flex justify-center gap-2">
-        {brand.quotes.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setIndex(i)}
-            className={`h-px transition-all ${i === index ? "w-8 bg-foreground" : "w-4 bg-border"}`}
-            aria-label={t("marketing.quoteAria", { n: i + 1 })}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
+const VALUE_KEYS = [
+  "valueUnderstand",
+  "valuePredict",
+  "valueSupplier",
+  "valueCostCarbon",
+  "valueCompliance",
+  "valueAdvantage",
+] as const;
+
+const TRADITIONAL = [
+  "compareTrad1",
+  "compareTrad2",
+  "compareTrad3",
+  "compareTrad4",
+  "compareTrad5",
+] as const;
+
+const QAI_FLOW = [
+  "compareQai1",
+  "compareQai2",
+  "compareQai3",
+  "compareQai4",
+  "compareQai5",
+  "compareQai6",
+] as const;
 
 export default function HomePage() {
   const t = useT();
   const brand = useLocalizedBrand();
-  const {
-    heroStats,
-    howItWorksSteps,
-    platformFeatures,
-    pricingPlans,
-    storyCards,
-  } = useLocalizedMarketing();
+  const { pricingPlans } = useLocalizedMarketing();
   const [qlimAiOpen, setQlimAiOpen] = useState(false);
   const [demoSubmitting, setDemoSubmitting] = useState(false);
-  const now = new Date();
-  const timestamp = `${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}.${now.getFullYear()} // ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} UTC`;
-
-  const useCases = [
-    {
-      tag: t("marketing.uc1Tag"),
-      title: t("marketing.uc1Title"),
-      description: t("marketing.uc1Desc"),
-      stat: t("marketing.uc1Stat"),
-    },
-    {
-      tag: t("marketing.uc2Tag"),
-      title: t("marketing.uc2Title"),
-      description: t("marketing.uc2Desc"),
-      stat: t("marketing.uc2Stat"),
-    },
-    {
-      tag: t("marketing.uc3Tag"),
-      title: t("marketing.uc3Title"),
-      description: t("marketing.uc3Desc"),
-      stat: t("marketing.uc3Stat"),
-    },
-  ];
 
   const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -131,11 +100,7 @@ export default function HomePage() {
         body: JSON.stringify(payload),
       });
       const data = (await res.json()) as { error?: string };
-
-      if (!res.ok) {
-        throw new Error(data.error ?? t("marketing.demoFailedDesc"));
-      }
-
+      if (!res.ok) throw new Error(data.error ?? t("marketing.demoFailedDesc"));
       toast({
         title: t("marketing.demoRequestedTitle"),
         description: t("marketing.demoRequestedDesc"),
@@ -155,221 +120,256 @@ export default function HomePage() {
 
   return (
     <MarketingLayout navVariant="home">
-      {/* ── 01 HERO ── */}
-      <Section className="py-14 lg:py-16">
-        <SectionNumberWrap n="01" className="text-foreground/[0.025] lg:text-foreground/[0.03]" />
+      {/* ── HERO ── */}
+      <Section className="py-12 lg:py-16">
+        <SectionNumberWrap n="01" className="text-foreground/[0.025]" />
         <SectionContainer>
-          <FadeUp>
-            <StatusBar />
-          </FadeUp>
-          <div className="section-content-gap grid items-center gap-8 lg:grid-cols-2 lg:items-start lg:gap-10">
-            <FadeUp delay={0.1}>
+          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-10 xl:gap-12">
+            <FadeUp delay={0.06}>
+              <StatusBar />
+              <p className="mt-5 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#82D153]" aria-hidden />
+                {t("marketing.heroEyebrow")}
+              </p>
               <EditorialHeadline
                 as="h1"
+                className="mt-3 text-[2rem] sm:text-4xl lg:text-5xl xl:text-[3.25rem]"
                 lines={[
                   { text: t("marketing.heroLine1"), italic: true },
                   { text: t("marketing.heroLine2"), accent: true },
                 ]}
               />
-              <AnimatedRule className="mt-6 max-w-xs" />
-              <p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground">
-                {t("marketing.heroBody")}{" "}
-                <em className="text-foreground">{t("marketing.heroBodyAccent")}</em>{" "}
-                {t("marketing.heroBodyEnd")}
+              <AnimatedRule className="mt-5 max-w-xs" />
+              <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-slate-600">
+                {t("marketing.heroBody")}
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <EditorialCta href="#contact">{t("marketing.requestDemo")}</EditorialCta>
-                <Link
-                  href="/login"
-                  className="type-nav inline-flex items-center gap-2 px-2 py-4"
+              <p className="mt-3 max-w-md font-serif text-base italic leading-snug text-slate-800">
+                {t("marketing.heroCaption")}
+              </p>
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <EditorialCta href="#contact">{t("marketing.bookDemo")}</EditorialCta>
+                <button
+                  type="button"
+                  onClick={() => setQlimAiOpen(true)}
+                  className="type-nav inline-flex items-center gap-2 px-2 py-3 text-slate-700"
                 >
-                  {t("marketing.loginForFree")}
-                </Link>
+                  {t("marketing.seeQai")}
+                </button>
               </div>
             </FadeUp>
-            <FadeUp delay={0.2} className="w-full min-w-0 lg:pt-2">
-              <EmissionsNetworkViz />
+            <FadeUp delay={0.14} className="w-full min-w-0">
+              <QaiIntelligenceLayerViz compact />
             </FadeUp>
           </div>
         </SectionContainer>
       </Section>
 
-      {/* ── CENTER STATEMENT ── */}
+      {/* ── POSITIONING STATEMENT ── */}
       <Section>
-        <div className="watermark-text absolute inset-x-0 top-1/2 -translate-y-1/2 text-center">QLIMWELT</div>
+        <div className="watermark-text absolute inset-x-0 top-1/2 -translate-y-1/2 text-center">
+          QAI
+        </div>
         <SectionContainer narrow className="relative text-center">
           <FadeUp>
-            <MetaLabel className="text-center">{t("marketing.futureOf")}</MetaLabel>
-            <h2 className="mt-4 font-serif text-5xl font-bold sm:text-6xl lg:text-7xl">{t("marketing.carbon")}</h2>
-            <p className="mt-1 font-serif text-5xl italic sm:text-6xl lg:text-7xl">{t("marketing.intelligence")}</p>
-            <MetaLabel className="mt-8 text-center tracking-[0.3em]">{t("marketing.startsBefore")}</MetaLabel>
-            <p className="mt-3 font-serif text-4xl font-bold text-brand-dark sm:text-5xl">{t("marketing.theFirstAudit")}</p>
+            <MetaLabel className="text-center">{t("marketing.osLabel")}</MetaLabel>
+            <h2 className="mt-5 font-serif text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+              {t("marketing.osHeadline")}
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-600">
+              {t("marketing.osBody")}
+            </p>
+            <p className="mx-auto mt-5 max-w-xl font-serif text-xl italic text-[#2f6f24]">
+              {t("marketing.osCaption")}
+            </p>
           </FadeUp>
           <AnimatedRule className="section-content-gap" />
         </SectionContainer>
       </Section>
 
-      {/* ── 02 STEPS ── */}
-      <Section id="how-it-works">
+      {/* ── INTELLIGENCE CAPABILITIES ── */}
+      <Section id="capabilities">
         <SectionNumberWrap n="02" />
         <SectionContainer>
           <FadeUp>
             <SectionIntro
+              label={t("marketing.capabilitiesLabel")}
               lines={[
-                { text: t("marketing.threeSteps"), italic: true },
-                { text: t("marketing.toCsrdReady") },
+                { text: t("marketing.capabilitiesTitle1"), italic: true },
+                { text: t("marketing.capabilitiesTitle2") },
               ]}
             />
-            <MetaLabel className="mt-4">{t("marketing.workflowAutomated")}</MetaLabel>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
+              {t("marketing.capabilitiesCaption")}
+            </p>
           </FadeUp>
-          <div className="section-content-gap">
-            <InteractiveSteps
-              steps={howItWorksSteps.map((s) => ({
-                step: s.step,
-                title: s.title,
-                description: s.description,
-              }))}
-            />
-          </div>
-        </SectionContainer>
-      </Section>
-
-      {/* ── 03 CARBON FOOTPRINTING ── */}
-      <CarbonFootprintSection />
-
-      {/* ── 04 DARK METRICS ── */}
-      <Section dark>
-        <SectionNumberWrap n="04" align="left" className="text-white/[0.04]" />
-        <SectionContainer>
-          <FadeUp>
-            <SectionIntro
-              dark
-              lines={[
-                { text: t("marketing.numbersThat"), italic: true },
-                { text: t("marketing.driveDecisions") },
-              ]}
-            />
-          </FadeUp>
-          <div className="section-content-gap grid gap-8 sm:grid-cols-2 sm:gap-10 lg:gap-12">
-            <FadeUp delay={0.1}>
-              <MetricDark
-                index="METRIC_01"
-                value={heroStats[1].value.replace(",", "")}
-                label={t("marketing.metricProcessed")}
-                meta={[t("marketing.sensorsActive"), "CONFIDENCE: 99.9%", timestamp]}
-              />
-            </FadeUp>
-            <FadeUp delay={0.2}>
-              <MetricDark
-                index="METRIC_02"
-                value="97%"
-                label={t("marketing.metricReporting")}
-                meta={[t("marketing.csrdCompliance"), "CONFIDENCE: 98.4%", timestamp]}
-              />
-            </FadeUp>
-          </div>
-        </SectionContainer>
-      </Section>
-
-      {/* ── 05 INSIGHTS & NEWS ── */}
-      <InsightsNewsSection />
-
-      {/* ── 07 SPEED ── */}
-      <Section>
-        <SectionNumberWrap n="07" />
-        <SectionContainer>
-          <FadeUp>
-            <SectionIntro
-              lines={[
-                { text: t("marketing.whySpeed"), italic: true },
-                { text: t("marketing.isEverything") },
-              ]}
-            />
-          </FadeUp>
-          <FadeUpStagger className="section-content-gap grid gap-8 sm:grid-cols-3 sm:gap-6 lg:gap-8">
-            <FadeUpItem>
-              <StatColumn
-                value="3 hrs"
-                label={t("marketing.earlyDetection")}
-                description={t("marketing.earlyDetectionDesc")}
-              />
-            </FadeUpItem>
-            <FadeUpItem>
-              <StatColumn
-                value="97%"
-                label={t("marketing.fasterReporting")}
-                description={t("marketing.fasterReportingDesc")}
-              />
-            </FadeUpItem>
-            <FadeUpItem>
-              <StatColumn
-                value="24/7"
-                label={t("marketing.continuousMonitoring")}
-                description={t("marketing.continuousMonitoringDesc")}
-              />
-            </FadeUpItem>
-          </FadeUpStagger>
-        </SectionContainer>
-      </Section>
-
-      {/* ── PURPOSE ── */}
-      <Section id="purpose">
-        <SectionContainer tight className="text-center">
-          <FadeUp>
-            <MetaLabel>{brand.purpose.title.toUpperCase()}</MetaLabel>
-            <p className="section-content-gap font-serif text-2xl leading-relaxed sm:text-3xl">{brand.purpose.description}</p>
-          </FadeUp>
-        </SectionContainer>
-      </Section>
-
-      {/* ── MISSION / VISION / VALUES ── */}
-      <Section>
-        <SectionContainer>
-          <div className="grid gap-8 lg:grid-cols-3 lg:gap-10">
-            {[
-              { title: brand.mission.title, items: brand.mission.statements },
-              { title: brand.vision.title, items: brand.vision.statements },
-              { title: brand.values.title, items: brand.values.statements },
-            ].map((block, bi) => (
-              <FadeUp key={`mvv-${bi}`} delay={bi * 0.1} className="flex flex-col">
-                <MetaLabel>{block.title.toUpperCase()}</MetaLabel>
-                <h3 className="mt-3 font-serif text-3xl font-bold">{block.title}</h3>
-                <ThinRule className="mt-6" />
-                <ul className="mt-6 flex-1 space-y-4">
-                  {block.items.map((item, ii) => (
-                    <li key={`${bi}-${ii}`} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-dark" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </FadeUp>
+          <div className="section-content-gap grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {CAPABILITIES.map(({ key, icon: Icon }, i) => (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, delay: i * 0.05, ease: EASE_OUT }}
+                className="group relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#82D153]/40"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#82D153]/12 text-[#2f6f24] ring-1 ring-[#82D153]/25 transition-transform group-hover:scale-105">
+                    <Icon className="h-5 w-5" strokeWidth={2} />
+                  </span>
+                  <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-300">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3d8b2e]">
+                  {t(`marketing.${key}Caption`)}
+                </p>
+                <h3 className="mt-2 font-serif text-2xl font-bold tracking-tight text-slate-900">
+                  {t(`marketing.${key}Title`)}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  {t(`marketing.${key}Body`)}
+                </p>
+              </motion.div>
             ))}
           </div>
         </SectionContainer>
       </Section>
 
-      {/* ── PLATFORM ── */}
-      <Section id="platform">
+      {/* ── HOW QAI WORKS ── */}
+      <Section id="how-it-works" className="bg-slate-50/70">
+        <SectionNumberWrap n="03" />
         <SectionContainer>
           <FadeUp>
             <SectionIntro
-              label={t("marketing.platformModules")}
+              label={t("marketing.howLabel")}
               lines={[
-                { text: t("marketing.everythingYou"), italic: true },
-                { text: t("marketing.need") },
+                { text: t("marketing.howTitle1"), italic: true },
+                { text: t("marketing.howTitle2") },
               ]}
             />
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
+              {t("marketing.howBody")}
+            </p>
           </FadeUp>
-          <div className="section-content-gap divide-y divide-border">
-            {platformFeatures.map((f, i) => (
-              <FadeUp key={f.num} delay={i * 0.05}>
-                <div className="grid gap-4 py-7 sm:grid-cols-[4rem_minmax(0,1fr)] sm:items-start sm:gap-8 sm:py-8">
-                  <p className="font-serif text-4xl font-bold tabular-nums text-foreground/20">{f.num}</p>
-                  <div className="min-w-0">
-                    <h3 className="font-serif text-xl font-bold">{f.title}</h3>
-                    <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">{f.description}</p>
-                  </div>
+          <div className="section-content-gap">
+            <QaiHowItWorksPipeline />
+          </div>
+        </SectionContainer>
+      </Section>
+
+      {/* ── COMPARISON ── */}
+      <Section id="intelligence">
+        <SectionNumberWrap n="04" />
+        <SectionContainer>
+          <FadeUp>
+            <SectionIntro
+              label={t("marketing.compareLabel")}
+              lines={[
+                { text: t("marketing.compareTitle1"), italic: true },
+                { text: t("marketing.compareTitle2") },
+              ]}
+            />
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
+              {t("marketing.compareCaption")}
+            </p>
+          </FadeUp>
+          <div className="section-content-gap grid gap-6 lg:grid-cols-2">
+            <FadeUp>
+              <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+                <MetaLabel>{t("marketing.compareTradLabel")}</MetaLabel>
+                <h3 className="mt-3 font-serif text-2xl font-bold text-slate-900">
+                  {t("marketing.compareTradTitle")}
+                </h3>
+                <ul className="mt-8 space-y-0">
+                  {TRADITIONAL.map((key, i) => (
+                    <li key={key} className="flex flex-col items-start">
+                      <div className="flex w-full items-center gap-3 rounded-lg bg-slate-50 px-3 py-3 text-sm font-medium text-slate-700">
+                        <span className="font-mono text-[10px] text-slate-400">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        {t(`marketing.${key}`)}
+                      </div>
+                      {i < TRADITIONAL.length - 1 && (
+                        <ArrowDown className="my-1.5 ml-5 h-3.5 w-3.5 text-slate-300" aria-hidden />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </FadeUp>
+            <FadeUp delay={0.1}>
+              <div className="h-full rounded-2xl border border-[#82D153]/35 bg-gradient-to-b from-[#f4fbf0] to-white p-6 sm:p-8">
+                <MetaLabel className="text-[#3d8b2e]">{t("marketing.compareQaiLabel")}</MetaLabel>
+                <h3 className="mt-3 font-serif text-2xl font-bold text-slate-900">
+                  {t("marketing.compareQaiTitle")}
+                </h3>
+                <ul className="mt-8 space-y-0">
+                  {QAI_FLOW.map((key, i) => (
+                    <li key={key} className="flex flex-col items-start">
+                      <div className="flex w-full items-center gap-3 rounded-lg border border-[#82D153]/20 bg-white/80 px-3 py-3 text-sm font-medium text-slate-800">
+                        <span className="font-mono text-[10px] text-[#3d8b2e]">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        {t(`marketing.${key}`)}
+                      </div>
+                      {i < QAI_FLOW.length - 1 && (
+                        <ArrowDown className="my-1.5 ml-5 h-3.5 w-3.5 text-[#82D153]" aria-hidden />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </FadeUp>
+          </div>
+        </SectionContainer>
+      </Section>
+
+      {/* ── WHY QAI EXISTS ── */}
+      <Section className="bg-slate-950 text-white">
+        <SectionContainer narrow className="py-4 text-center">
+          <FadeUp>
+            <MetaLabel className="text-center text-white/40">{t("marketing.whyLabel")}</MetaLabel>
+            <blockquote className="mt-8 font-serif text-3xl font-bold leading-snug tracking-tight sm:text-4xl lg:text-5xl">
+              {t("marketing.whyQuote1")}
+              <br />
+              <span className="italic text-[#82D153]">{t("marketing.whyQuote2")}</span>
+            </blockquote>
+            <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-white/65">
+              {t("marketing.whyBody")}
+            </p>
+            <p className="mx-auto mt-6 max-w-xl font-serif text-lg italic text-[#82D153]/90">
+              {t("marketing.whyCaption")}
+            </p>
+          </FadeUp>
+        </SectionContainer>
+      </Section>
+
+      {/* ── CUSTOMER VALUE ── */}
+      <Section id="value">
+        <SectionNumberWrap n="05" />
+        <SectionContainer>
+          <FadeUp>
+            <SectionIntro
+              label={t("marketing.valueLabel")}
+              lines={[
+                { text: t("marketing.valueTitle1"), italic: true },
+                { text: t("marketing.valueTitle2") },
+              ]}
+            />
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
+              {t("marketing.valueCaption")}
+            </p>
+          </FadeUp>
+          <div className="section-content-gap grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {VALUE_KEYS.map((key, i) => (
+              <FadeUp key={key} delay={i * 0.04}>
+                <div className="flex h-full items-start gap-4 rounded-xl border border-slate-200 bg-white px-5 py-5 transition-colors hover:border-[#82D153]/35">
+                  <span className="mt-0.5 font-mono text-[11px] font-semibold text-[#82D153]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <p className="font-serif text-lg font-semibold leading-snug tracking-tight text-slate-900">
+                    {t(`marketing.${key}`)}
+                  </p>
                 </div>
               </FadeUp>
             ))}
@@ -377,85 +377,45 @@ export default function HomePage() {
         </SectionContainer>
       </Section>
 
-      {/* ── AI SECTION ── */}
-      <Section>
+      {/* ── QAI IN ACTION ── */}
+      <Section id="qai" className="bg-slate-50/70">
+        <SectionNumberWrap n="06" />
         <SectionContainer>
-          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
+          <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-14">
             <FadeUp>
-              <MetaLabel className="text-brand-dark">{t("marketing.qlimAiLabel")}</MetaLabel>
-              <h2 className="section-headline-gap font-serif text-4xl font-bold text-foreground sm:text-5xl">
-                {t("marketing.qlimAiHeadline")}{" "}
-                <span className="font-normal italic">{t("marketing.qlimAiHeadlineAccent")}</span>
-              </h2>
-              <ThinRule className="mt-8" />
-              <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+              <SectionIntro
+                label={t("marketing.qlimAiLabel")}
+                lines={[
+                  { text: t("marketing.qlimAiHeadline"), italic: true },
+                  { text: t("marketing.qlimAiHeadlineAccent"), accent: true },
+                ]}
+              />
+              <p className="mt-5 max-w-lg text-sm leading-relaxed text-slate-600">
                 {t("marketing.qlimAiBody")}
               </p>
-              <ul className="mt-6 space-y-4">
-                {[t("marketing.qlimAiBullet1"), t("marketing.qlimAiBullet2"), t("marketing.qlimAiBullet3")].map(
-                  (item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-dark" />
-                    <span>{item}</span>
+              <ul className="mt-6 space-y-3">
+                {(["qlimAiBullet1", "qlimAiBullet2", "qlimAiBullet3"] as const).map((k) => (
+                  <li key={k} className="flex gap-3 text-sm text-slate-700">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#82D153]" />
+                    {t(`marketing.${k}`)}
                   </li>
-                )
-                )}
+                ))}
               </ul>
               <button
                 type="button"
                 onClick={() => setQlimAiOpen(true)}
-                className="motion-safe:transition-all type-cta mt-10 border border-foreground px-6 py-3 text-foreground hover:bg-foreground hover:text-background active:scale-[0.98]"
+                className="type-cta mt-8 inline-block border border-foreground px-5 py-3 transition-colors hover:bg-foreground hover:text-background"
               >
                 {t("marketing.openQlimAi")}
               </button>
             </FadeUp>
-            <FadeUp delay={0.15} className="lg:pt-2">
-              <button
-                type="button"
-                onClick={() => setQlimAiOpen(true)}
-                className="block w-full text-left shadow-sm"
-                aria-label={t("marketing.openQlimAi")}
-              >
-                <QlimAiChat messages={qlimAiDemo.slice(0, 2)} animateLast={false} />
-              </button>
+            <FadeUp delay={0.1}>
+              <QlimAiChat
+                messages={qlimAiDemo.slice(0, 2)}
+                className="shadow-lg"
+              />
             </FadeUp>
           </div>
-        </SectionContainer>
-      </Section>
-
-      {/* ── USE CASES ── */}
-      <Section id="use-cases">
-        <SectionContainer>
-          <FadeUp>
-            <SectionIntro
-              label={t("marketing.solutionsLabel")}
-              lines={[
-                { text: t("marketing.builtFor"), italic: true },
-                { text: t("marketing.europeanBusiness") },
-              ]}
-            />
-          </FadeUp>
-          <div className="section-content-gap divide-y divide-border">
-            {useCases.map((uc, i) => (
-              <FadeUp key={`uc-${i}`} delay={i * 0.08}>
-                <div className="grid gap-4 py-7 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-start sm:gap-8 sm:py-8">
-                  <MetaLabel className="pt-1">{uc.tag}</MetaLabel>
-                  <div className="min-w-0">
-                    <h3 className="font-serif text-2xl font-bold">{uc.title}</h3>
-                    <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">{uc.description}</p>
-                    <p className="mt-4 font-mono text-xs uppercase tracking-wider text-brand-dark">{uc.stat}</p>
-                  </div>
-                </div>
-              </FadeUp>
-            ))}
-          </div>
-        </SectionContainer>
-      </Section>
-
-      {/* ── QUOTES ── */}
-      <Section>
-        <SectionContainer narrow>
-          <QuoteCarousel />
         </SectionContainer>
       </Section>
 
@@ -489,16 +449,7 @@ export default function HomePage() {
               ]}
             />
           </FadeUp>
-          <div className="section-content-gap grid gap-8 sm:grid-cols-3">
-            {storyCards.map((card, i) => (
-              <FadeUp key={`story-${i}`} delay={i * 0.1}>
-                <MetricFigure size="hero">{card.stat}</MetricFigure>
-                <MetaLabel className="mt-3">{card.label}</MetaLabel>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{card.text}</p>
-              </FadeUp>
-            ))}
-          </div>
-          <FadeUp delay={0.2}>
+          <FadeUp delay={0.1}>
             <div className="section-content-gap border border-border p-6 lg:p-8">
               <div className="grid items-start gap-8 lg:grid-cols-[8rem_minmax(0,1fr)] lg:items-center lg:gap-10">
                 <div className="flex h-32 w-32 shrink-0 items-center justify-center border border-border font-serif text-4xl font-bold text-brand-dark">
@@ -538,7 +489,7 @@ export default function HomePage() {
                 ))}
               </ul>
             </FadeUp>
-            <FadeUp delay={0.15}>
+            <FadeUp delay={0.1}>
               <div className="border border-border p-8 lg:p-10">
                 <MetaLabel>{t("marketing.requestDemoLabel")}</MetaLabel>
                 <form onSubmit={handleDemoSubmit} className="section-content-gap space-y-5">
@@ -547,26 +498,47 @@ export default function HomePage() {
                       <Label htmlFor="firstName" className="type-label">
                         {t("marketing.firstName")}
                       </Label>
-                      <Input id="firstName" name="firstName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        required
+                        className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0"
+                      />
                     </div>
                     <div>
                       <Label htmlFor="lastName" className="type-label">
                         {t("marketing.lastName")}
                       </Label>
-                      <Input id="lastName" name="lastName" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        required
+                        className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0"
+                      />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="email" className="type-label">
                       {t("marketing.email")}
                     </Label>
-                    <Input id="email" name="email" type="email" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="company" className="type-label">
                       {t("marketing.company")}
                     </Label>
-                    <Input id="company" name="company" required className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0" />
+                    <Input
+                      id="company"
+                      name="company"
+                      required
+                      className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="message" className="type-label">
@@ -584,17 +556,16 @@ export default function HomePage() {
                     disabled={demoSubmitting}
                     className="type-cta w-full border border-foreground py-4 transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {demoSubmitting ? t("marketing.sending") : t("marketing.requestDemo")}
+                    {demoSubmitting ? t("marketing.sending") : t("marketing.bookDemo")}
                   </button>
-                  <p className="text-center type-label">
-                    {t("marketing.noSpam")}
-                  </p>
+                  <p className="text-center type-label">{t("marketing.noSpam")}</p>
                 </form>
               </div>
             </FadeUp>
           </div>
         </SectionContainer>
       </Section>
+
       <QlimAiOverlay open={qlimAiOpen} onClose={() => setQlimAiOpen(false)} chatExpanded />
     </MarketingLayout>
   );

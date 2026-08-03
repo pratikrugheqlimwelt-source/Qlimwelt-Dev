@@ -80,20 +80,23 @@ export const qlimAiCapabilities = [
 ] as const;
 
 export const qlimAiDemo = [
-  { role: "user" as const, content: "Why did our Scope 3 emissions increase 8% this quarter?" },
+  {
+    role: "user" as const,
+    content: "Why did our Scope 3 emissions increase 8% this quarter?",
+  },
   {
     role: "assistant" as const,
     content:
-      "Your Scope 3 increase is primarily driven by ChemBase AG (+18% vs Q3). They account for 13% of your Category 1 purchased goods emissions.\n\nSecondary factor: LogiCargo EU freight volumes increased 12% following the Rotterdam expansion.",
+      "Root cause across your knowledge graph: ChemBase AG (+18% vs Q3) drives 13% of Category 1. Secondary signal: LogiCargo EU freight +12% after Rotterdam.\n\nRecommended action (ranked): request primary data from ChemBase, then renegotiate freight lanes — estimated −4.2% Scope 3 and €180k cost avoidance.",
   },
   {
     role: "user" as const,
-    content: "Draft a supplier outreach email to ChemBase AG requesting primary emissions data.",
+    content: "Rank the next actions by carbon impact, financial value, and regulatory urgency.",
   },
   {
     role: "assistant" as const,
     content:
-      "Subject: Request for Primary Emissions Data — CSRD Compliance\n\nDear ChemBase AG Sustainability Team,\n\nAs part of our CSRD reporting obligations under ESRS E1, we are requesting primary greenhouse gas emissions data for the goods and services supplied to Nordic Manufacturing Group during FY2024...",
+      "1. ChemBase primary-data outreach — high carbon impact, high CSRD urgency\n2. Rotterdam freight lane optimization — medium carbon, high financial value\n3. CBAM exposure scan on Tier-1 metals — rising regulatory urgency\n\nI can open each recommendation with full lineage from ERP → procurement → logistics.",
   },
 ];
 

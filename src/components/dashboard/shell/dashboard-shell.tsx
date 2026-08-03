@@ -4,9 +4,28 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
-  LayoutDashboard, Cloud, Database, Boxes, Brain, Target, Flag,
-  FileText, ShieldCheck, Settings, ChevronLeft, ChevronRight, Menu, X,
-  Bell, Search, Calendar, ChevronDown, Users, ClipboardList, Scale,
+  Gauge,
+  Factory,
+  BadgeCheck,
+  ListChecks,
+  DatabaseZap,
+  Layers2,
+  BrainCircuit,
+  TrendingDown,
+  Milestone,
+  FileChartColumn,
+  Scale,
+  Settings2,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  X,
+  Bell,
+  Search,
+  Calendar,
+  ChevronDown,
+  UsersRound,
+  Settings,
 } from "lucide-react";
 import { Logo } from "@/components/marketing/logo";
 import { cn } from "@/lib/utils";
@@ -20,47 +39,64 @@ import { useT } from "@/components/i18n/locale-provider";
 import { QlimAiFloatingChat } from "@/components/qlim-ai/qlim-ai-floating-chat";
 import { QlimAiLiveTicker } from "@/components/qlim-ai/qlim-ai-live-ticker";
 import { PERIODS } from "@/data/carbon";
+import type { LucideIcon } from "lucide-react";
 
 const NAV_GROUP_DEFS = [
   {
     labelKey: "dashNav.analytics",
     items: [
-      { href: "/dashboard/overview", labelKey: "dashNav.overview", icon: LayoutDashboard },
-      { href: "/dashboard/emissions", labelKey: "dashNav.emissions", icon: Cloud },
-      { href: "/dashboard/data-quality", labelKey: "dashNav.dataQuality", icon: ShieldCheck },
+      { href: "/dashboard/overview", labelKey: "dashNav.overview", icon: Gauge },
+      { href: "/dashboard/emissions", labelKey: "dashNav.emissions", icon: Factory },
+      { href: "/dashboard/data-quality", labelKey: "dashNav.dataQuality", icon: BadgeCheck },
     ],
   },
   {
     labelKey: "dashNav.operations",
     items: [
-      { href: "/dashboard/assessments", labelKey: "dashNav.assessments", icon: ClipboardList },
-      { href: "/dashboard/data-collection", labelKey: "dashNav.dataCollection", icon: Database },
-      { href: "/dashboard/resources", labelKey: "dashNav.resources", icon: Boxes },
+      { href: "/dashboard/assessments", labelKey: "dashNav.assessments", icon: ListChecks },
+      { href: "/dashboard/data-collection", labelKey: "dashNav.dataCollection", icon: DatabaseZap },
+      { href: "/dashboard/resources", labelKey: "dashNav.resources", icon: Layers2 },
     ],
   },
   {
     labelKey: "dashNav.planning",
     items: [
-      { href: "/dashboard/climate-intelligence", labelKey: "dashNav.climateIntelligence", icon: Brain },
-      { href: "/dashboard/reduction-planner", labelKey: "dashNav.reductionPlanner", icon: Target },
-      { href: "/dashboard/targets", labelKey: "dashNav.targets", icon: Flag },
+      { href: "/dashboard/climate-intelligence", labelKey: "dashNav.climateIntelligence", icon: BrainCircuit },
+      { href: "/dashboard/reduction-planner", labelKey: "dashNav.reductionPlanner", icon: TrendingDown },
+      { href: "/dashboard/targets", labelKey: "dashNav.targets", icon: Milestone },
     ],
   },
   {
     labelKey: "dashNav.reporting",
     items: [
-      { href: "/dashboard/reports", labelKey: "dashNav.reports", icon: FileText },
+      { href: "/dashboard/reports", labelKey: "dashNav.reports", icon: FileChartColumn },
       { href: "/dashboard/compliance", labelKey: "dashNav.compliance", icon: Scale },
     ],
   },
   {
     labelKey: "dashNav.administration",
     items: [
-      { href: "/dashboard/team", labelKey: "dashNav.team", icon: Users },
-      { href: "/dashboard/settings", labelKey: "dashNav.settings", icon: Settings },
+      { href: "/dashboard/team", labelKey: "dashNav.team", icon: UsersRound },
+      { href: "/dashboard/settings", labelKey: "dashNav.settings", icon: Settings2 },
     ],
   },
 ];
+
+function NavIcon({ icon: Icon, active }: { icon: LucideIcon; active: boolean }) {
+  return (
+    <span
+      className={cn(
+        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+        active
+          ? "bg-gradient-to-br from-[#82D153]/30 to-emerald-500/15 text-[#2f6f24] shadow-[inset_0_0_0_1px_rgba(130,209,83,0.45),0_1px_2px_rgba(61,139,46,0.12)]"
+          : "bg-slate-100/90 text-slate-500 ring-1 ring-slate-200/70 group-hover:bg-[#82D153]/12 group-hover:text-[#3d8b2e] group-hover:ring-[#82D153]/25"
+      )}
+      aria-hidden
+    >
+      <Icon className="h-[17px] w-[17px]" strokeWidth={2.15} />
+    </span>
+  );
+}
 
 const PERIOD_KEYS: Record<string, string> = {
   all: "shell.fy2024",
@@ -222,7 +258,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       href={href}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                        "group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium transition-all",
                         active
                           ? "bg-gradient-to-r from-[#82D153]/15 to-emerald-500/10 text-[#3d8b2e] shadow-sm ring-1 ring-[#82D153]/20"
                           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -230,8 +266,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       )}
                       title={collapsed ? label : undefined}
                     >
-                      {active && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-brand-dark" />}
-                      <Icon className={cn("h-4 w-4 shrink-0", active && "text-brand-dark")} />
+                      {active && <span className="absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-r bg-brand-dark" />}
+                      <NavIcon icon={Icon} active={active} />
                       {!collapsed && <span className="truncate">{label}</span>}
                     </Link>
                   );

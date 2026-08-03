@@ -51,24 +51,24 @@ export const brandDe = {
   whyWeExist: {
     title: "Warum wir existieren",
     description:
-      "Klimaverantwortung darf nicht Großunternehmen vorbehalten sein. Jede Organisation verdient intelligente Tools, die CO₂-Buchhaltung vereinfachen und echten Umweltfortschritt ermöglichen.",
+      "Unternehmen haben kein Reporting-Problem. Sie haben ein Intelligence-Problem — fragmentierte Systeme, schwacher Kontext und Entscheidungen ohne kontinuierliches Reasoning.",
   },
   cta: {
-    title: "Messen Sie, was zählt.",
+    title: "Systeme verbinden. Intelligence aktivieren.",
     options: [
-      "Machen Sie den ersten Schritt zu smarter Nachhaltigkeit.",
-      "Bauen Sie ein Unternehmen, das mit Zweck wächst.",
-      "Sehen Sie Ihren CO₂-Fußabdruck mit voller Klarheit.",
-      "Lassen Sie uns gemeinsam messbare Wirkung schaffen.",
+      "Verbinden Sie ERP, Finance, Procurement und Logistik zu einer Intelligence Layer.",
+      "Verstehen Sie, warum Emissionen sich ändern — nicht nur, dass sie sich ändern.",
+      "Erhalten Sie Empfehlungen nach Impact, Wert und regulatorischer Dringlichkeit.",
+      "Machen Sie Nachhaltigkeit zum operativen Vorteil.",
     ],
   },
   quotes: [
-    "Jede Zahl erzählt eine Geschichte. Jede Erkenntnis schafft eine Chance.",
-    "Bessere Daten führen zu besseren Entscheidungen.",
-    "Nachhaltigkeit beginnt mit Verstehen.",
-    "Die Zukunft gehört Unternehmen, die sich kümmern.",
-    "Ihr Weg zu Net Zero beginnt damit zu wissen, wo Sie stehen.",
-    "Technologie mit Zweck. Daten mit Wirkung.",
-    "Gemeinsam kann jedes Unternehmen Teil der Klimalösung sein.",
+    "Software reportet Emissionen. Intelligence verändert Entscheidungen.",
+    "Besserer Kontext führt zu besseren Entscheidungen.",
+    "Wir ersetzen Ihre Software nicht. Wir verbinden alles.",
+    "Climate Intelligence für jede Geschäftsentscheidung.",
+    "Das Betriebssystem für Climate Intelligence.",
+    "Infrastruktur — kein weiteres Dashboard.",
+    "Explainable AI zwischen Systemen und Entscheidungen.",
   ],
 };
