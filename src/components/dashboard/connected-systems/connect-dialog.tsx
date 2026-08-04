@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConnectorIcon } from "@/components/dashboard/connected-systems/connector-icon";
 import { useT } from "@/components/i18n/locale-provider";
 import { defaultEndpointFor } from "@/lib/connected-systems/adapters";
 import type { AuthMethod, ConnectPayload, ConnectorDef } from "@/lib/connected-systems/types";
@@ -81,10 +82,19 @@ export function ConnectDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[min(96vw,560px)]">
         <DialogHeader>
-          <DialogTitle className="type-title text-xl">
-            {t("connectedSystemsPage.connectTitle", { name: connector.name })}
-          </DialogTitle>
-          <DialogDescription>{t("connectedSystemsPage.connectDesc")}</DialogDescription>
+          <div className="flex items-start gap-3">
+            <ConnectorIcon
+              connectorId={connector.id}
+              mark={connector.mark}
+              name={connector.name}
+            />
+            <div className="min-w-0">
+              <DialogTitle className="type-title text-xl">
+                {t("connectedSystemsPage.connectTitle", { name: connector.name })}
+              </DialogTitle>
+              <DialogDescription>{t("connectedSystemsPage.connectDesc")}</DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
@@ -174,7 +184,8 @@ export function ConnectDialog({
             {t("connectedSystemsPage.testConnection")}
           </Button>
           <Button
-            variant="brand"
+            variant="default"
+            className="border border-black bg-white text-black shadow-none hover:border-[#82D153] hover:bg-[#82D153] hover:text-black"
             disabled={busy}
             onClick={async () => {
               setBusy(true);

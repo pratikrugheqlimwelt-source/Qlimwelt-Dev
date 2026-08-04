@@ -9,6 +9,7 @@ import {
   DataTableHeader,
   DataTableRow,
 } from "@/components/dashboard/shared/data-table";
+import { ConnectorIcon } from "@/components/dashboard/connected-systems/connector-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -86,9 +87,17 @@ export function ConnectionsTable({
             return (
               <DataTableRow key={c.id}>
                 <DataTableCell>
-                  <div>
-                    <p className="font-semibold text-foreground">{c.connectionName}</p>
-                    <p className="text-xs text-muted-foreground">{c.connectorName}</p>
+                  <div className="flex items-center gap-3">
+                    <ConnectorIcon
+                      connectorId={c.connectorId}
+                      mark={c.connectorName.slice(0, 2).toUpperCase()}
+                      name={c.connectorName}
+                      size="sm"
+                    />
+                    <div>
+                      <p className="font-semibold text-foreground">{c.connectionName}</p>
+                      <p className="text-xs text-muted-foreground">{c.connectorName}</p>
+                    </div>
                   </div>
                 </DataTableCell>
                 <DataTableCell className="capitalize">{c.connectorType}</DataTableCell>

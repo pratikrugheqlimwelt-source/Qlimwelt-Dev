@@ -1,0 +1,208 @@
+Qlimwelt — Active Functions & Tasks
+=====================================
+Last updated: 2026-08-04
+Product: AI-powered carbon / climate intelligence platform
+
+This file lists active capabilities the project can carry out today
+(UI + APIs + local/demo fallbacks). Some vendor integrations sync in
+simulated mode until live partner APIs are wired.
+
+
+------------------------------------------------------------------------------
+1. PUBLIC / MARKETING
+------------------------------------------------------------------------------
+- Landing page with QAI positioning, capabilities, how-it-works, integrations
+  (tech stack), intelligence comparison, value, QAI section, pricing, about,
+  contact / demo request
+- Platform page (product deep-dive)
+- What's New page
+- EN / DE language toggle across marketing and dashboard
+- Demo request API (contact form)
+
+
+------------------------------------------------------------------------------
+2. AUTHENTICATION & ONBOARDING
+------------------------------------------------------------------------------
+- Login / authentication (Supabase)
+- Auth callback handling
+- Company onboarding flow
+- Protected dashboard routes (middleware)
+- Demo / local mode when cloud tables are unavailable
+
+
+------------------------------------------------------------------------------
+3. DASHBOARD — ANALYTICS
+------------------------------------------------------------------------------
+Overview
+- Executive snapshot of carbon footprint, KPIs, and trends
+- Period / facility filters in shell
+- Notifications and unread indicators
+
+Emissions
+- Full inventory by scope, category, and activity line
+- View and manage emission activity records
+- Open calculation detail drawer
+
+Data Quality
+- Audit-readiness / data-quality scores
+- Highlight records that need attention (completeness, evidence)
+
+
+------------------------------------------------------------------------------
+4. DASHBOARD — OPERATIONS
+------------------------------------------------------------------------------
+Assessments
+- Create guided carbon assessments (e.g. Corporate Carbon Footprint)
+- Screening and module-gated data collection
+- Open / manage assessment by ID
+
+Data Collection
+- Manual emission activity entry from templates
+- Factor selection (library or manual)
+- Live tCO2e calculation preview
+- Save activities to inventory
+- Optional evidence upload
+
+Connected Systems
+- Connect existing enterprise systems to Qlimwelt (catalog of ERP, accounting,
+  procurement, cloud, energy, logistics, HR, travel, manufacturing, documents,
+  ecosystem partners)
+- Company brand icons on connectors
+- Connect modal: connection name, auth method (API key / OAuth / client secret),
+  endpoint, region, description
+- Test Connection and Save (credentials encrypted server-side; never re-shown)
+- Active connections table: status, last/next sync, owner, health, sync,
+  disconnect
+- Connection health (healthy / warning / disconnected / failed) with diagnostics
+- Data-flow visualization
+- QAI Connector Assistant (opens floating QAI chat with starter prompts)
+- Sync management (realtime / hourly / daily / weekly / manual) + metrics
+- Import Center: drag-drop CSV / Excel / PDF / JSON / XML, preview, validate,
+  confirm import
+- API Center: generate / revoke API keys, webhook URL, example REST request,
+  copy helpers
+- Security panel (encryption, TLS, RBAC, SOC2/GDPR messaging, residency)
+- Ecosystem connectors (Salesforce, HubSpot, Stripe, registries, etc.)
+
+Resources
+- Manage facilities, vehicles, and suppliers
+- Link master data to emission activities
+- Log vehicle / supplier emissions into inventory
+
+
+------------------------------------------------------------------------------
+5. DASHBOARD — PLANNING
+------------------------------------------------------------------------------
+Climate Intelligence
+- Ask Qlim AI about hotspots and next steps from inventory
+- AI-assisted climate insights
+
+Reduction Planner
+- Reduction initiatives planning and status updates
+- Track mitigation actions
+
+Targets
+- Climate targets (baseline, reporting year, progress)
+- Save / update company climate targets
+
+
+------------------------------------------------------------------------------
+6. DASHBOARD — REPORTING
+------------------------------------------------------------------------------
+Reports
+- Generate / export reports
+- Branded PDF and related export flows
+
+Compliance
+- Compliance Center: frameworks, readiness scores, gaps
+- Evidence upload and verification workflows
+- Progress checklists and AI compliance assistant prompts
+- Generate compliance-oriented reports / evidence packs
+
+
+------------------------------------------------------------------------------
+7. DASHBOARD — ADMINISTRATION
+------------------------------------------------------------------------------
+Team
+- View team / membership context
+- Invite team members (send / accept invite APIs)
+
+Settings
+- Company settings (name, industry, employees, revenue, etc.)
+- Custom emission factors / GWP-related settings
+- Carbon price and related parameters
+
+
+------------------------------------------------------------------------------
+8. QLIM AI (QAI)
+------------------------------------------------------------------------------
+- Floating QAI chat on dashboard
+- Interactive chat against /api/qlim-ai/chat (Ollama / Groq when configured)
+- Live ticker in dashboard header
+- Try QAI Mobile: interactive mobile preview synced with web dashboard filters
+- Climate Intelligence and Connector Assistant entry points
+
+
+------------------------------------------------------------------------------
+9. API ENDPOINTS (ACTIVE)
+------------------------------------------------------------------------------
+Connected Systems
+- GET  /api/connectors
+- GET/POST /api/connections  (create connection; update sync schedule)
+- POST /api/connect
+- POST /api/test-connection
+- POST /api/disconnect
+- POST /api/sync
+- GET  /api/sync-logs
+- GET  /api/connection-health
+- POST /api/connector-interest
+- GET/POST /api/company-api-keys
+- POST /api/import
+
+Evidence & compliance
+- GET/POST /api/evidence
+- POST /api/evidence/upload
+- GET  /api/compliance
+- POST /api/compliance/evidence
+- GET  /api/frameworks
+- GET  /api/regulations
+- GET  /api/audit-log
+
+Export & reports
+- GET  /api/export/activities
+- GET  /api/export/summary
+- GET  /api/export/report
+- POST /api/report/generate
+
+AI & team
+- GET/POST /api/qlim-ai/chat
+- POST /api/team/invites/send
+- POST /api/team/invites/accept
+- POST /api/demo-request
+
+
+------------------------------------------------------------------------------
+10. CROSS-CUTTING PLATFORM TASKS
+------------------------------------------------------------------------------
+- Emission calculations engine (activity × factor → tCO2e)
+- Scope 1 / 2 / 3 classification support
+- Period filtering and trend metrics
+- Sample / demo data load for empty companies
+- LocalStorage persistence fallback for dashboard + connected systems
+- Supabase migrations for auth, carbon inventory, evidence, assessments,
+  connected systems (007_connected_systems.sql)
+- Responsive dashboard shell (sidebar nav, search, period, account menu)
+- EN/DE i18n dictionaries for marketing and dashboard
+
+
+------------------------------------------------------------------------------
+11. NOTES / LIMITS
+------------------------------------------------------------------------------
+- Connected Systems vendor syncs are simulated (timestamps + sync logs) until
+  live SAP/Oracle/OAuth partner APIs are integrated
+- Webhook delivery and external SDK packages are documented in UI, not full
+  production delivery pipelines
+- Apply Supabase migrations (including 007) for cloud persistence of
+  connections, sync logs, and API keys
+
+End of list.
