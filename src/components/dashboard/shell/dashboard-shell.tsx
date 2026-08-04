@@ -9,6 +9,7 @@ import {
   BadgeCheck,
   ListChecks,
   DatabaseZap,
+  Plug,
   Layers2,
   BrainCircuit,
   TrendingDown,
@@ -56,6 +57,7 @@ const NAV_GROUP_DEFS = [
     items: [
       { href: "/dashboard/assessments", labelKey: "dashNav.assessments", icon: ListChecks },
       { href: "/dashboard/data-collection", labelKey: "dashNav.dataCollection", icon: DatabaseZap },
+      { href: "/dashboard/connected-systems", labelKey: "dashNav.connectedSystems", icon: Plug },
       { href: "/dashboard/resources", labelKey: "dashNav.resources", icon: Layers2 },
     ],
   },

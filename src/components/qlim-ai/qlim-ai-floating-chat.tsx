@@ -5,6 +5,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { QlimAiChat } from "@/components/qlim-ai/qlim-ai-chat";
 import { useT } from "@/components/i18n/locale-provider";
+import { QAI_OPEN_EVENT } from "@/lib/connected-systems/client-api";
 import { cn } from "@/lib/utils";
 
 type QlimAiFloatingChatProps = {
@@ -15,6 +16,7 @@ type QlimAiFloatingChatProps = {
 export function QlimAiFloatingChat({ className }: QlimAiFloatingChatProps) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  const [draftPrompt, setDraftPrompt] = useState<string | undefined>();
 
   const welcomeMessages = useMemo(
     () => [
@@ -25,6 +27,16 @@ export function QlimAiFloatingChat({ className }: QlimAiFloatingChatProps) {
     ],
     [t]
   );
+
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const detail = (e as CustomEvent<{ prompt?: string }>).detail;
+      setDraftPrompt(detail?.prompt);
+      setOpen(true);
+    };
+    window.addEventListener(QAI_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(QAI_OPEN_EVENT, onOpen);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -55,7 +67,11 @@ export function QlimAiFloatingChat({ className }: QlimAiFloatingChatProps) {
               messages={welcomeMessages}
               interactive
               fill
-              onClose={() => setOpen(false)}
+              draftPrompt={draftPrompt}
+              onClose={() => {
+                setOpen(false);
+                setDraftPrompt(undefined);
+              }}
               className="h-full rounded-none border-0 shadow-none"
               messagesClassName="max-h-none"
             />

@@ -19,6 +19,7 @@ export function QlimAiChat({
   messagesClassName,
   fill = false,
   onClose,
+  draftPrompt,
 }: {
   messages: Message[];
   animateLast?: boolean;
@@ -30,10 +31,12 @@ export function QlimAiChat({
   fill?: boolean;
   /** Optional close control in the chat header (floating widget). */
   onClose?: () => void;
+  /** Prefill the composer (e.g. Connected Systems assistant). */
+  draftPrompt?: string;
 }) {
   const t = useT();
   const [messages, setMessages] = React.useState<Message[]>(initialMessages);
-  const [input, setInput] = React.useState("");
+  const [input, setInput] = React.useState(draftPrompt ?? "");
   const [sending, setSending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [providerKey, setProviderKey] = React.useState<"preview" | "notConfigured" | "offline" | "live">(
@@ -45,6 +48,10 @@ export function QlimAiChat({
   React.useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
+
+  React.useEffect(() => {
+    if (draftPrompt) setInput(draftPrompt);
+  }, [draftPrompt]);
 
   React.useEffect(() => {
     if (!interactive) {
