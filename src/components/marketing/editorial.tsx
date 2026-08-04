@@ -163,7 +163,7 @@ export function StepRow({
           <p className="mt-2 font-serif text-4xl font-bold sm:text-5xl">{num}</p>
         </div>
         <div className="min-w-0 max-w-xl">
-          <p className="font-serif text-xl font-bold sm:text-2xl">{title}</p>
+          <p className="type-title text-lg sm:text-xl">{title}</p>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{description}</p>
         </div>
         <div className="hidden items-start justify-end pt-1 sm:flex">

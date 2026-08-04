@@ -83,7 +83,7 @@ function ScopeCard({ topic }: { topic: ScopeTopic }) {
         <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
           <MetaLabel className="text-white/70">{topic.tag}</MetaLabel>
           <div className="mt-2 flex items-end justify-between gap-4">
-            <h3 className="max-w-[70%] font-serif text-xl font-bold leading-tight text-white sm:text-2xl">
+            <h3 className="type-title max-w-[70%] text-xl leading-tight text-white sm:text-2xl">
               {topic.title}
             </h3>
             <MetricFigure
@@ -266,7 +266,7 @@ export function InsightsNewsSection() {
                     <span>·</span>
                     <span>{article.readTime}</span>
                   </div>
-                  <h4 className="mt-3 font-serif text-lg font-bold leading-snug text-white group-hover:text-brand">
+                  <h4 className="type-title mt-3 text-lg leading-snug text-white group-hover:text-brand">
                     {article.title}
                   </h4>
                   <p className="mt-2 line-clamp-3 flex-1 text-xs leading-relaxed text-white/55 sm:text-sm">
@@ -308,7 +308,7 @@ export function InsightsNewsSection() {
                     </div>
                   </div>
                   <div className="p-5 sm:p-6">
-                    <h4 className="font-serif text-base font-bold leading-snug text-white group-hover:text-brand sm:text-lg">
+                    <h4 className="type-title text-base leading-snug text-white group-hover:text-brand sm:text-lg">
                       {item.headline}
                     </h4>
                     <p className="mt-2 text-xs leading-relaxed text-white/50 sm:text-sm">{item.summary}</p>

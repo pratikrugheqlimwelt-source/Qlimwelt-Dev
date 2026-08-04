@@ -26,8 +26,9 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
 
   const homeAnchors: [string, string][] = [
     ["#capabilities", t("marketingNav.learn")],
-    ["#intelligence", t("marketingNav.platform")],
     ["#how-it-works", t("marketingNav.process")],
+    ["#integrations", t("marketingNav.integrations")],
+    ["#intelligence", t("marketingNav.platform")],
     ["#value", t("marketingNav.insights")],
     ["#pricing", t("marketingNav.pricing")],
   ];

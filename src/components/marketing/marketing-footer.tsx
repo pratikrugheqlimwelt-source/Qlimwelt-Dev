@@ -23,6 +23,7 @@ export function MarketingFooter() {
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
               <li><Link href="/#capabilities" className="transition-colors hover:text-foreground">{t("marketing.footerFeatures")}</Link></li>
               <li><Link href="/#how-it-works" className="transition-colors hover:text-foreground">{t("marketing.footerFootprintGuide")}</Link></li>
+              <li><Link href="/#integrations" className="transition-colors hover:text-foreground">{t("marketing.footerIntegrations")}</Link></li>
               <li><Link href="/#intelligence" className="transition-colors hover:text-foreground">{t("marketing.footerInsights")}</Link></li>
               <li><Link href="/#pricing" className="transition-colors hover:text-foreground">{t("marketing.footerPricing")}</Link></li>
               <li><Link href="/login" className="transition-colors hover:text-foreground">{t("marketing.footerDashboard")}</Link></li>

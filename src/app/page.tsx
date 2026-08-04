@@ -29,6 +29,7 @@ import {
 import { AnimatedRule, PricingSelector } from "@/components/marketing/motion-ui";
 import { QaiIntelligenceLayerViz } from "@/components/marketing/qai-intelligence-layer-viz";
 import { QaiHowItWorksPipeline } from "@/components/marketing/qai-how-it-works";
+import { TechStackIntegrations } from "@/components/marketing/tech-stack-integrations";
 import { TryQaiMobileButton } from "@/components/qai-mobile/try-qai-mobile-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -226,7 +227,7 @@ export default function HomePage() {
                 <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3d8b2e]">
                   {t(`marketing.${key}Caption`)}
                 </p>
-                <h3 className="mt-2 font-serif text-2xl font-bold tracking-tight text-slate-900">
+                <h3 className="type-title mt-2 text-xl text-slate-900 sm:text-[1.35rem]">
                   {t(`marketing.${key}Title`)}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
@@ -260,9 +261,17 @@ export default function HomePage() {
         </SectionContainer>
       </Section>
 
+      {/* ── INTEGRATIONS / TECH STACK ── */}
+      <Section id="integrations">
+        <SectionNumberWrap n="04" />
+        <SectionContainer>
+          <TechStackIntegrations />
+        </SectionContainer>
+      </Section>
+
       {/* ── COMPARISON ── */}
       <Section id="intelligence">
-        <SectionNumberWrap n="04" />
+        <SectionNumberWrap n="05" />
         <SectionContainer>
           <FadeUp>
             <SectionIntro
@@ -280,7 +289,7 @@ export default function HomePage() {
             <FadeUp>
               <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
                 <MetaLabel>{t("marketing.compareTradLabel")}</MetaLabel>
-                <h3 className="mt-3 font-serif text-2xl font-bold text-slate-900">
+                <h3 className="type-title mt-3 text-xl text-slate-900 sm:text-[1.35rem]">
                   {t("marketing.compareTradTitle")}
                 </h3>
                 <ul className="mt-8 space-y-0">
@@ -303,7 +312,7 @@ export default function HomePage() {
             <FadeUp delay={0.1}>
               <div className="h-full rounded-2xl border border-[#82D153]/35 bg-gradient-to-b from-[#f4fbf0] to-white p-6 sm:p-8">
                 <MetaLabel className="text-[#3d8b2e]">{t("marketing.compareQaiLabel")}</MetaLabel>
-                <h3 className="mt-3 font-serif text-2xl font-bold text-slate-900">
+                <h3 className="type-title mt-3 text-xl text-slate-900 sm:text-[1.35rem]">
                   {t("marketing.compareQaiTitle")}
                 </h3>
                 <ul className="mt-8 space-y-0">
@@ -349,7 +358,7 @@ export default function HomePage() {
 
       {/* ── CUSTOMER VALUE ── */}
       <Section id="value">
-        <SectionNumberWrap n="05" />
+        <SectionNumberWrap n="06" />
         <SectionContainer>
           <FadeUp>
             <SectionIntro
@@ -370,7 +379,7 @@ export default function HomePage() {
                   <span className="mt-0.5 font-mono text-[11px] font-semibold text-[#82D153]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <p className="font-serif text-lg font-semibold leading-snug tracking-tight text-slate-900">
+                  <p className="type-title text-base leading-snug text-slate-900 sm:text-lg">
                     {t(`marketing.${key}`)}
                   </p>
                 </div>
@@ -382,7 +391,7 @@ export default function HomePage() {
 
       {/* ── QAI IN ACTION ── */}
       <Section id="qai" className="bg-slate-50/70">
-        <SectionNumberWrap n="06" />
+        <SectionNumberWrap n="07" />
         <SectionContainer>
           <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-14">
             <FadeUp>

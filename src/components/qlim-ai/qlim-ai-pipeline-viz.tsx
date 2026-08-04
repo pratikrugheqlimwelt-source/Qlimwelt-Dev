@@ -96,7 +96,7 @@ export function QlimAiPipelineViz({ compact = false }: { compact?: boolean }) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-medium text-brand-dark">{active.subtitle}</p>
-              <h4 className="mt-1 font-serif text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+              <h4 className="type-title mt-1 text-lg text-foreground sm:text-xl">
                 {active.title}
               </h4>
             </div>

@@ -101,7 +101,7 @@ export default function PlatformPage() {
             {capabilityMap.map((cap, i) => (
               <FadeUp key={cap.title} delay={i * 0.04}>
                 <div className="h-full bg-background p-6 sm:p-8">
-                  <h3 className="font-serif text-lg font-bold">{cap.title}</h3>
+                  <h3 className="type-title text-base sm:text-lg">{cap.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{cap.description}</p>
                 </div>
               </FadeUp>
@@ -182,7 +182,7 @@ export default function PlatformPage() {
                       <div className="flex min-w-0 gap-3">
                         <div className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${agentColors[agent.color]}`} />
                         <div className="min-w-0">
-                          <p className="font-serif font-bold">{agent.name}</p>
+                          <p className="type-title text-sm sm:text-base">{agent.name}</p>
                           <MetaLabel className="mt-1">{agent.role}</MetaLabel>
                         </div>
                       </div>

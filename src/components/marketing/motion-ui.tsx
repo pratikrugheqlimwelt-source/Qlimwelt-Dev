@@ -204,7 +204,7 @@ export function InteractiveSteps({ steps }: { steps: Step[] }) {
                   <motion.p
                     animate={reduced ? undefined : { opacity: isActive ? 1 : 0.55 }}
                     transition={{ duration: 0.25 }}
-                    className="font-serif text-xl font-bold sm:text-2xl"
+                    className="type-title text-lg sm:text-xl"
                   >
                     {step.title}
                   </motion.p>

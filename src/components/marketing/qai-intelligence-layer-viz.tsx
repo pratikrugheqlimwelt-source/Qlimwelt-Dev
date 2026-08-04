@@ -24,8 +24,9 @@ type GraphEdge = {
   to: string;
 };
 
-const VB_W = 880;
-const VB_H = 360;
+/** Wide enough for side labels; short enough for hero side column. */
+const VB_W = 900;
+const VB_H = 340;
 
 const SOURCE_KEYS = [
   "heroSourceErp",
@@ -51,43 +52,49 @@ const HIDDEN = [
   { id: "h-decide", titleKey: "heroGraphNeuronDecide" },
 ] as const;
 
+/** Column geometry — labels and nodes never share the same x-band. */
+const COL = {
+  leftLabelX: 132,
+  inX: 210,
+  hidX: 450,
+  outX: 690,
+  rightLabelX: 768,
+  bandW: 52,
+  top: 44,
+  bottom: VB_H - 20,
+} as const;
+
 function stackY(count: number, index: number, top: number, bottom: number) {
   if (count === 1) return (top + bottom) / 2;
   return top + ((bottom - top) * index) / (count - 1);
 }
 
 function buildNetwork(): { nodes: GraphNode[]; edges: GraphEdge[] } {
-  const top = 42;
-  const bottom = VB_H - 28;
-  const xIn = 230;
-  const xHid = 440;
-  const xOut = 650;
-
   const sources: GraphNode[] = SOURCE_KEYS.map((key, i) => ({
     id: key,
     labelKey: key,
     kind: "source",
-    x: xIn,
-    y: stackY(SOURCE_KEYS.length, i, top, bottom),
-    r: 11,
+    x: COL.inX,
+    y: stackY(SOURCE_KEYS.length, i, COL.top, COL.bottom),
+    r: 10,
   }));
 
   const hidden: GraphNode[] = HIDDEN.map((h, i) => ({
     id: h.id,
     kind: "hidden",
     titleKey: h.titleKey,
-    x: xHid,
-    y: stackY(HIDDEN.length, i, top + 36, bottom - 36),
-    r: 17,
+    x: COL.hidX,
+    y: stackY(HIDDEN.length, i, COL.top + 28, COL.bottom - 28),
+    r: 20,
   }));
 
   const outputs: GraphNode[] = OUTPUT_KEYS.map((key, i) => ({
     id: key,
     labelKey: key,
     kind: "output",
-    x: xOut,
-    y: stackY(OUTPUT_KEYS.length, i, top + 16, bottom - 16),
-    r: 11,
+    x: COL.outX,
+    y: stackY(OUTPUT_KEYS.length, i, COL.top + 12, COL.bottom - 12),
+    r: 10,
   }));
 
   const nodes = [...sources, ...hidden, ...outputs];
@@ -109,12 +116,11 @@ function buildNetwork(): { nodes: GraphNode[]; edges: GraphEdge[] } {
 
 function synapsePath(a: GraphNode, b: GraphNode) {
   const dx = b.x - a.x;
-  const c1x = a.x + dx * 0.42;
-  const c2x = a.x + dx * 0.58;
+  const c1x = a.x + dx * 0.4;
+  const c2x = a.x + dx * 0.6;
   return `M ${a.x + a.r} ${a.y} C ${c1x} ${a.y}, ${c2x} ${b.y}, ${b.x - b.r} ${b.y}`;
 }
 
-/** Highlight full forward/backward pathway for a hovered neuron. */
 function pathwayOf(nodeId: string, edges: GraphEdge[], byId: Map<string, GraphNode>) {
   const node = byId.get(nodeId);
   if (!node) return { nodes: new Set<string>(), edges: new Set<string>() };
@@ -161,7 +167,11 @@ function pathwayOf(nodeId: string, edges: GraphEdge[], byId: Map<string, GraphNo
   return { nodes: litNodes, edges: litEdges };
 }
 
-/** Neural-network diagram with live hover pathway highlighting. */
+function bandX(center: number) {
+  return center - COL.bandW / 2;
+}
+
+/** Compact neural-network diagram — labels never overlap synapses or nodes. */
 export function QaiIntelligenceLayerViz({
   className,
   compact = false,
@@ -185,14 +195,13 @@ export function QaiIntelligenceLayerViz({
   const onEnter = useCallback((id: string) => setHoverId(id), []);
   const onLeave = useCallback(() => setHoverId(null), []);
 
-  const LABEL_LEFT_X = 186;
-  const LABEL_RIGHT_X = 694;
+  const labelOf = (n: GraphNode) =>
+    n.kind === "hidden" ? t(`marketing.${n.titleKey}`) : t(`marketing.${n.labelKey}`);
 
   return (
     <div
       className={cn(
         "relative overflow-hidden rounded-2xl border border-slate-200 bg-white",
-        compact && "max-h-[min(420px,70vh)]",
         className
       )}
     >
@@ -200,42 +209,42 @@ export function QaiIntelligenceLayerViz({
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse 70% 50% at 50% 40%, rgba(130,209,83,0.05), transparent 70%)",
+            "radial-gradient(ellipse 70% 50% at 50% 42%, rgba(130,209,83,0.05), transparent 70%)",
         }}
         aria-hidden
       />
 
-      <div className={cn("relative px-4 pt-3 sm:px-5", compact ? "sm:pt-3.5" : "sm:pt-5")}>
+      <div className="relative flex items-baseline justify-between gap-3 px-4 pt-3 sm:px-5 sm:pt-3.5">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
           {t("marketing.heroVizLabel")}
         </p>
-        {!compact && (
-          <p className="mt-1 text-sm text-slate-500">{t("marketing.heroGraphHint")}</p>
-        )}
+        <p className="shrink-0 text-[10px] font-medium text-slate-400">
+          {t("marketing.heroVizCoreTitle")}
+        </p>
       </div>
 
-      <div className="relative w-full px-1 pb-2 sm:px-2 sm:pb-2.5">
+      <div className="relative w-full px-2 pb-2 sm:px-3 sm:pb-3">
         <svg
           viewBox={`0 0 ${VB_W} ${VB_H}`}
           className={cn(
-            "mx-auto h-auto w-full",
-            compact ? "max-h-[340px] min-h-[240px] lg:max-h-[360px]" : "min-h-[280px] sm:min-h-[340px]"
+            "mx-auto block h-auto w-full",
+            compact ? "max-h-[300px] sm:max-h-[320px]" : "max-h-[380px]"
           )}
           role="img"
           aria-label={t("marketing.heroVizLabel")}
         >
           <defs>
             <linearGradient id={`${uid}-syn`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#d4d4d8" stopOpacity="0.85" />
-              <stop offset="50%" stopColor="#86efac" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#d4d4d8" stopOpacity="0.85" />
+              <stop offset="0%" stopColor="#d4d4d8" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="#86efac" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#d4d4d8" stopOpacity="0.8" />
             </linearGradient>
             <linearGradient id={`${uid}-hot`} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#82D153" stopOpacity="0.5" />
+              <stop offset="0%" stopColor="#82D153" stopOpacity="0.45" />
               <stop offset="100%" stopColor="#3d8b2e" stopOpacity="0.95" />
             </linearGradient>
             <filter id={`${uid}-glow`} x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="2.5" result="b" />
+              <feGaussianBlur stdDeviation="2" result="b" />
               <feMerge>
                 <feMergeNode in="b" />
                 <feMergeNode in="SourceGraphic" />
@@ -247,39 +256,69 @@ export function QaiIntelligenceLayerViz({
             </radialGradient>
           </defs>
 
+          {/* Layer titles — centered on node columns only */}
           <text
-            x={230}
-            y={22}
+            x={COL.inX}
+            y={18}
             textAnchor="middle"
             fill="#94a3b8"
-            style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em" }}
+            style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em" }}
           >
             {t("marketing.heroGraphLegendSource").toUpperCase()}
           </text>
           <text
-            x={440}
-            y={22}
+            x={COL.hidX}
+            y={18}
             textAnchor="middle"
             fill="#3d8b2e"
-            style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.14em" }}
+            style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.14em" }}
           >
             QAI
           </text>
           <text
-            x={650}
-            y={22}
+            x={COL.outX}
+            y={18}
             textAnchor="middle"
             fill="#94a3b8"
-            style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em" }}
+            style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em" }}
           >
             {t("marketing.heroGraphLegendOutput").toUpperCase()}
           </text>
 
-          <rect x={200} y={30} width={60} height={VB_H - 48} rx={16} fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
-          <rect x={410} y={30} width={60} height={VB_H - 48} rx={16} fill="#f4fbf0" stroke="#82D153" strokeOpacity="0.3" strokeWidth="1.25" />
-          <rect x={620} y={30} width={60} height={VB_H - 48} rx={16} fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" />
+          {/* Soft column bands behind nodes only */}
+          <rect
+            x={bandX(COL.inX)}
+            y={26}
+            width={COL.bandW}
+            height={VB_H - 36}
+            rx={14}
+            fill="#f8fafc"
+            stroke="#e2e8f0"
+            strokeWidth="1"
+          />
+          <rect
+            x={bandX(COL.hidX)}
+            y={26}
+            width={COL.bandW}
+            height={VB_H - 36}
+            rx={14}
+            fill="#f4fbf0"
+            stroke="#82D153"
+            strokeOpacity="0.28"
+            strokeWidth="1.15"
+          />
+          <rect
+            x={bandX(COL.outX)}
+            y={26}
+            width={COL.bandW}
+            height={VB_H - 36}
+            rx={14}
+            fill="#f8fafc"
+            stroke="#e2e8f0"
+            strokeWidth="1"
+          />
 
-          {/* Synapses */}
+          {/* 1) Synapses under everything */}
           <g>
             {edges.map((e) => {
               const a = byId.get(e.from)!;
@@ -289,16 +328,21 @@ export function QaiIntelligenceLayerViz({
               const d = synapsePath(a, b);
 
               return (
-                <g key={e.id} style={{ opacity: dim ? 0.08 : hot ? 1 : 0.5, transition: "opacity 180ms ease" }}>
+                <g
+                  key={e.id}
+                  style={{
+                    opacity: dim ? 0.07 : hot ? 1 : 0.42,
+                    transition: "opacity 160ms ease",
+                  }}
+                >
                   <path
                     d={d}
                     fill="none"
                     stroke={hot ? `url(#${uid}-hot)` : `url(#${uid}-syn)`}
-                    strokeWidth={hot ? 1.8 : 0.95}
-                    style={{ transition: "stroke-width 180ms ease" }}
+                    strokeWidth={hot ? 1.7 : 0.9}
                   />
                   {hot && !reduced && (
-                    <circle r="2.2" fill="#82D153" filter={`url(#${uid}-glow)`}>
+                    <circle r="2" fill="#82D153" filter={`url(#${uid}-glow)`}>
                       <animateMotion dur="1.35s" repeatCount="indefinite" path={d} />
                     </circle>
                   )}
@@ -307,26 +351,20 @@ export function QaiIntelligenceLayerViz({
             })}
           </g>
 
-          {/* Neurons + labels */}
+          {/* 2) Neuron circles */}
           <g>
             {nodes.map((n, i) => {
-              const isHidden = n.kind === "hidden";
-              const label =
-                n.kind === "hidden"
-                  ? t(`marketing.${n.titleKey}`)
-                  : t(`marketing.${n.labelKey}`);
               const lit = pathway == null || pathway.nodes.has(n.id);
               const hot = hoverId === n.id;
+              const isHidden = n.kind === "hidden";
+              const label = labelOf(n);
 
               return (
                 <motion.g
                   key={n.id}
-                  initial={reduced ? false : { opacity: 0, y: 6 }}
-                  animate={{
-                    opacity: lit ? 1 : 0.2,
-                    scale: hot ? 1.06 : 1,
-                  }}
-                  transition={{ duration: 0.2, delay: i * 0.015, ease: EASE_OUT }}
+                  initial={reduced ? false : { opacity: 0, y: 4 }}
+                  animate={{ opacity: lit ? 1 : 0.22, scale: hot ? 1.05 : 1 }}
+                  transition={{ duration: 0.18, delay: i * 0.012, ease: EASE_OUT }}
                   style={{ transformOrigin: `${n.x}px ${n.y}px`, cursor: "pointer" }}
                   onMouseEnter={() => onEnter(n.id)}
                   onMouseLeave={onLeave}
@@ -336,24 +374,33 @@ export function QaiIntelligenceLayerViz({
                   role="button"
                   aria-label={label}
                 >
+                  {/* Invisible hit area so labels stay clickable too */}
+                  {!isHidden && (
+                    <rect
+                      x={n.kind === "source" ? COL.leftLabelX - 120 : n.x - n.r}
+                      y={n.y - 12}
+                      width={n.kind === "source" ? n.x - (COL.leftLabelX - 120) + n.r : COL.rightLabelX - n.x + 120}
+                      height={24}
+                      fill="transparent"
+                    />
+                  )}
+
                   {hot && !reduced && (
-                    <motion.circle
+                    <circle
                       cx={n.x}
                       cy={n.y}
-                      r={n.r + 7}
+                      r={n.r + 6}
                       fill="none"
                       stroke="#82D153"
                       strokeWidth="1"
-                      initial={{ opacity: 0.2 }}
-                      animate={{ opacity: [0.2, 0.55, 0.2] }}
-                      transition={{ duration: 1.6, repeat: Infinity }}
+                      opacity="0.35"
                     />
                   )}
 
                   <circle
                     cx={n.x}
                     cy={n.y}
-                    r={hot ? n.r + 1.5 : n.r}
+                    r={hot ? n.r + 1.25 : n.r}
                     fill={
                       isHidden
                         ? `url(#${uid}-hid)`
@@ -368,46 +415,24 @@ export function QaiIntelligenceLayerViz({
                           ? "#86efac"
                           : "#cbd5e1"
                     }
-                    strokeWidth={hot || isHidden ? 2 : 1.35}
+                    strokeWidth={hot || isHidden ? 1.85 : 1.25}
                     filter={hot ? `url(#${uid}-glow)` : undefined}
                   />
                   <circle
                     cx={n.x}
                     cy={n.y}
-                    r={isHidden ? 3.5 : 2.8}
-                    fill={hot || isHidden ? "#82D153" : n.kind === "output" ? "#4ade80" : "#94a3b8"}
+                    r={isHidden ? 0 : 2.6}
+                    fill={hot ? "#82D153" : n.kind === "output" ? "#4ade80" : "#94a3b8"}
                   />
 
-                  {isHidden ? (
+                  {/* QAI labels live INSIDE the hub nodes — no below-node collision */}
+                  {isHidden && (
                     <text
                       x={n.x}
-                      y={n.y + n.r + 10}
+                      y={n.y + 3.5}
                       textAnchor="middle"
-                      dominantBaseline="hanging"
-                      fill={hot ? "#0f172a" : "#334155"}
-                      style={{ fontSize: 10, fontWeight: 700 }}
-                    >
-                      {label}
-                    </text>
-                  ) : n.kind === "source" ? (
-                    <text
-                      x={LABEL_LEFT_X}
-                      y={n.y}
-                      textAnchor="end"
-                      dominantBaseline="central"
-                      fill={hot ? "#0f172a" : "#334155"}
-                      style={{ fontSize: 11, fontWeight: hot ? 700 : 600 }}
-                    >
-                      {label}
-                    </text>
-                  ) : (
-                    <text
-                      x={LABEL_RIGHT_X}
-                      y={n.y}
-                      textAnchor="start"
-                      dominantBaseline="central"
-                      fill={hot ? "#14532d" : "#166534"}
-                      style={{ fontSize: 11, fontWeight: hot ? 700 : 600 }}
+                      fill="#ffffff"
+                      style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: "0.02em" }}
                     >
                       {label}
                     </text>
@@ -417,15 +442,43 @@ export function QaiIntelligenceLayerViz({
             })}
           </g>
 
-          <text
-            x={440}
-            y={VB_H - 8}
-            textAnchor="middle"
-            fill="#64748b"
-            style={{ fontSize: 10, fontWeight: 600 }}
-          >
-            {t("marketing.heroVizCoreTitle")}
-          </text>
+          {/* 3) Side labels drawn last so they never sit under edges */}
+          <g style={{ pointerEvents: "none" }}>
+            {nodes
+              .filter((n) => n.kind !== "hidden")
+              .map((n) => {
+                const lit = pathway == null || pathway.nodes.has(n.id);
+                const hot = hoverId === n.id;
+                const label = labelOf(n);
+                const isSource = n.kind === "source";
+
+                return (
+                  <text
+                    key={`label-${n.id}`}
+                    x={isSource ? COL.leftLabelX : COL.rightLabelX}
+                    y={n.y}
+                    textAnchor={isSource ? "end" : "start"}
+                    dominantBaseline="central"
+                    fill={
+                      !lit
+                        ? "#94a3b8"
+                        : hot
+                          ? "#0f172a"
+                          : isSource
+                            ? "#334155"
+                            : "#166534"
+                    }
+                    style={{
+                      fontSize: 11,
+                      fontWeight: hot ? 700 : 600,
+                      opacity: lit ? 1 : 0.35,
+                    }}
+                  >
+                    {label}
+                  </text>
+                );
+              })}
+          </g>
         </svg>
       </div>
     </div>

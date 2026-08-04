@@ -35,7 +35,7 @@ export function QaiHowItWorksPipeline({ className }: { className?: string }) {
           <span className="font-mono text-[10px] font-semibold tracking-wider text-[#82D153]">
             {step.n}
           </span>
-          <p className="mt-2 font-serif text-base font-bold tracking-tight text-slate-900">
+          <p className="type-title mt-2 text-sm text-slate-900 sm:text-[0.95rem]">
             {t(`marketing.${step.key}`)}
           </p>
           <p className="mt-1.5 text-xs leading-relaxed text-slate-500">

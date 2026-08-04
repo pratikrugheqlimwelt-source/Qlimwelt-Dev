@@ -104,7 +104,7 @@ export default function WhatsNewPage() {
             {differentiators.map((d, i) => (
               <FadeUp key={d.title} delay={i * 0.06}>
                 <div className="h-full bg-background p-6 sm:p-8">
-                  <h3 className="font-serif text-lg font-bold">{d.title}</h3>
+                  <h3 className="type-title text-base sm:text-lg">{d.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{d.description}</p>
                 </div>
               </FadeUp>
@@ -134,7 +134,7 @@ export default function WhatsNewPage() {
                 <div className="grid gap-6 bg-[#0a0a0a] p-6 sm:grid-cols-[4rem_minmax(0,1fr)] sm:items-start sm:gap-10 sm:p-8">
                   <p className="font-serif text-4xl font-bold tabular-nums text-white/20">{step.step}</p>
                   <div className="min-w-0">
-                    <h3 className="font-serif text-xl font-bold text-white">{step.title}</h3>
+                    <h3 className="type-title text-lg text-white sm:text-xl">{step.title}</h3>
                     <p className="mt-3 text-sm leading-relaxed text-white/60">{step.description}</p>
                   </div>
                 </div>
@@ -159,7 +159,7 @@ export default function WhatsNewPage() {
             {safetyCards.map((card, i) => (
               <FadeUp key={card.title} delay={i * 0.06}>
                 <div className="h-full bg-background p-6 sm:p-8">
-                  <h3 className="font-serif text-lg font-bold">{card.title}</h3>
+                  <h3 className="type-title text-base sm:text-lg">{card.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{card.description}</p>
                 </div>
               </FadeUp>
@@ -191,7 +191,7 @@ export default function WhatsNewPage() {
               <FadeUp key={entry.date} delay={i * 0.06}>
                 <div className="border-l border-brand-dark pl-6">
                   <MetaLabel className="text-brand-dark">{entry.date}</MetaLabel>
-                  <h3 className="mt-2 font-serif text-xl font-bold">{entry.title}</h3>
+                  <h3 className="type-title mt-2 text-lg sm:text-xl">{entry.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{entry.description}</p>
                 </div>
               </FadeUp>

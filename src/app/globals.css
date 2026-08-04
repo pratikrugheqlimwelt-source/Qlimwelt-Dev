@@ -96,6 +96,18 @@
   .type-cta {
     @apply font-sans text-xs font-semibold uppercase tracking-[0.08em];
   }
+  /* Card / component titles — Plus Jakarta, not decorative serif */
+  .type-title {
+    @apply font-sans font-semibold tracking-[-0.025em] text-foreground;
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    line-height: 1.2;
+  }
+  /* In-section subheads below the hero display line */
+  .type-section {
+    @apply font-sans text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-4xl;
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    line-height: 1.15;
+  }
 
   /* Qlim AI design system — light theme */
 
