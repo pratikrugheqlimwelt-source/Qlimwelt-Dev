@@ -1174,7 +1174,14 @@ const en: Dict = {
     profileSettings: "Profile settings",
     companySettings: "Company settings",
     teamMembers: "Team members",
+    tryQaiMobile: "Try QAI Mobile",
     signOut: "Sign out",
+  },
+  qaiMobile: {
+    tryCta: "Try QAI Mobile",
+    tagline: "Your climate intelligence, wherever you go.",
+    headline: "Climate intelligence in your pocket",
+    joinBeta: "Join mobile beta",
   },
   marketing: {
     openQlimAi: "Watch QAI reason →",

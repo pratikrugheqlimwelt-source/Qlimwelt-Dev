@@ -29,6 +29,7 @@ import {
 import { AnimatedRule, PricingSelector } from "@/components/marketing/motion-ui";
 import { QaiIntelligenceLayerViz } from "@/components/marketing/qai-intelligence-layer-viz";
 import { QaiHowItWorksPipeline } from "@/components/marketing/qai-how-it-works";
+import { TryQaiMobileButton } from "@/components/qai-mobile/try-qai-mobile-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
@@ -148,6 +149,7 @@ export default function HomePage() {
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-3">
                 <EditorialCta href="#contact">{t("marketing.bookDemo")}</EditorialCta>
+                <TryQaiMobileButton variant="hero" label={t("qaiMobile.tryCta")} />
                 <button
                   type="button"
                   onClick={() => setQlimAiOpen(true)}
@@ -156,6 +158,7 @@ export default function HomePage() {
                   {t("marketing.seeQai")}
                 </button>
               </div>
+              <p className="mt-2 text-xs text-slate-500">{t("qaiMobile.tagline")}</p>
             </FadeUp>
             <FadeUp delay={0.14} className="w-full min-w-0">
               <QaiIntelligenceLayerViz compact />

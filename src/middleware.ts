@@ -11,7 +11,9 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const needsAuth =
-    pathname.startsWith("/dashboard") || pathname === "/onboarding";
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/qai-mobile") ||
+    pathname === "/onboarding";
 
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -34,6 +36,8 @@ export const config = {
   matcher: [
     "/",
     "/dashboard/:path*",
+    "/qai-mobile",
+    "/qai-mobile/:path*",
     "/login",
     "/onboarding",
     "/auth/:path*",

@@ -308,7 +308,16 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [emissionFactors, setEmissionFactors] = useState<EmissionFactor[]>(demoFactors);
   const [notifications, setNotifications] = useState<DashboardNotification[]>([]);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
-  const [filters, setFiltersState] = useState<DashboardFilters>(DEFAULT_FILTERS);
+  const [filters, setFiltersState] = useState<DashboardFilters>(() => {
+    if (typeof window === "undefined") return DEFAULT_FILTERS;
+    try {
+      const raw = sessionStorage.getItem("qlimwelt-dashboard-filters");
+      if (!raw) return DEFAULT_FILTERS;
+      return { ...DEFAULT_FILTERS, ...(JSON.parse(raw) as Partial<DashboardFilters>) };
+    } catch {
+      return DEFAULT_FILTERS;
+    }
+  });
   const [calculationDetail, setCalculationDetail] = useState<CalculationDetail | null>(null);
 
   const activeCompany = useMemo(
@@ -352,7 +361,15 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   }, [refresh]);
 
   const setFilters = useCallback((patch: Partial<DashboardFilters>) => {
-    setFiltersState((f) => ({ ...f, ...patch }));
+    setFiltersState((f) => {
+      const next = { ...f, ...patch };
+      try {
+        sessionStorage.setItem("qlimwelt-dashboard-filters", JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
   }, []);
 
   const filteredActivities = useMemo(

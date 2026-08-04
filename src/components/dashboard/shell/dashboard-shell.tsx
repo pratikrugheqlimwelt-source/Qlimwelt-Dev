@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { AccountMenu } from "@/components/dashboard/AccountMenu";
+import { TryQaiMobileButton } from "@/components/qai-mobile/try-qai-mobile-button";
 import { LanguageToggle } from "@/components/i18n/language-toggle";
 import { useT } from "@/components/i18n/locale-provider";
 import { QlimAiFloatingChat } from "@/components/qlim-ai/qlim-ai-floating-chat";
@@ -405,6 +406,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </div>
 
             <div className="flex items-center gap-1">
+              <TryQaiMobileButton variant="header" className="mr-1 hidden sm:block" />
               <LanguageToggle className="mr-1" />
               <div className="relative" ref={bellRef}>
                 <Button

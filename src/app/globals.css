@@ -278,6 +278,22 @@
   }
 }
 
+@keyframes qai-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 10px 28px -8px rgba(130, 209, 83, 0.9);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 14px 34px -6px rgba(130, 209, 83, 1);
+  }
+}
+
+.animate-qai-breathe {
+  animation: qai-breathe 2.8s ease-in-out infinite;
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);

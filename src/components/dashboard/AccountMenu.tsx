@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Building2, LogOut, User, Users } from "lucide-react";
+import { Building2, LogOut, Smartphone, User, Users } from "lucide-react";
+import { trackQaiMobile } from "@/lib/qai-mobile/analytics";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,6 +81,16 @@ export function AccountMenu() {
           <Link href="/dashboard/team" className="cursor-pointer">
             <Users className="mr-2 h-4 w-4" />
             {t("account.teamMembers")}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href="/qai-mobile"
+            className="cursor-pointer"
+            onClick={() => trackQaiMobile("try_qai_mobile_clicked", { placement: "menu" })}
+          >
+            <Smartphone className="mr-2 h-4 w-4 text-[#82D153]" />
+            {t("account.tryQaiMobile")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

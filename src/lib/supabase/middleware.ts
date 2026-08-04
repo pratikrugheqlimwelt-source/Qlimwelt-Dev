@@ -31,11 +31,13 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute = pathname === "/login" || pathname.startsWith("/auth/");
   const isOnboarding = pathname === "/onboarding";
   const isDashboard = pathname.startsWith("/dashboard");
+  const isQaiMobile = pathname.startsWith("/qai-mobile");
+  const isProtectedApp = isDashboard || isQaiMobile;
 
-  if (!user && (isDashboard || isOnboarding)) {
+  if (!user && (isProtectedApp || isOnboarding)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    if (isDashboard) url.searchParams.set("redirect", pathname);
+    if (isProtectedApp) url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
 
@@ -48,7 +50,7 @@ export async function updateSession(request: NextRequest) {
 
     const onboardingDone = profile?.onboarding_completed === true;
 
-    if (isDashboard && !onboardingDone) {
+    if (isProtectedApp && !onboardingDone) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";
       return NextResponse.redirect(url);
