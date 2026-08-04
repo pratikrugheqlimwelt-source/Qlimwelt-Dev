@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface LogoMarkProps {
@@ -5,26 +6,30 @@ interface LogoMarkProps {
 }
 
 /**
- * Official Qlimwelt mark — four identical right triangles (pinwheel),
- * uniform central cross gap, rounded corners. Color #82D153.
- *
- * Geometry traced from brand assets: each piece is rotated 90° around center.
+ * Official Qlimwelt mark — four separated lime pinwheel wedges with a clear
+ * central cross gap. Uses the approved brand PNG from the design system.
  */
 export function LogoMark({ className }: LogoMarkProps) {
+  return (
+    <Image
+      src="/logo-mark.png"
+      alt=""
+      width={48}
+      height={48}
+      className={cn("shrink-0 object-contain", className)}
+      aria-hidden
+      priority
+    />
+  );
+}
+
+/**
+ * Inline SVG twin of the brand mark for contexts that need a vector.
+ * Four right triangles · right angles toward center · clear cross gap · no stroke.
+ */
+export function LogoMarkSvg({ className }: LogoMarkProps) {
   const fill = "#82D153";
-
-  // Single quadrant piece: right angle at inner corner, legs along gap edges, hypotenuse to outer diamond corner
-  // viewBox 0 0 48 48 · center 24,24 · gap half-width 3.25
-  const piece =
-    "M 20.75 20.75 L 42 20.75 L 20.75 6 Z";
-
-  const shared = {
-    fill,
-    stroke: fill,
-    strokeWidth: 2.6,
-    strokeLinejoin: "round" as const,
-    strokeLinecap: "round" as const,
-  };
+  const wedge = "M 19 19 L 43 19 L 19 5 Z";
 
   return (
     <svg
@@ -34,10 +39,10 @@ export function LogoMark({ className }: LogoMarkProps) {
       aria-hidden="true"
       className={cn("shrink-0", className)}
     >
-      <path {...shared} d={piece} />
-      <path {...shared} d={piece} transform="rotate(90 24 24)" />
-      <path {...shared} d={piece} transform="rotate(180 24 24)" />
-      <path {...shared} d={piece} transform="rotate(270 24 24)" />
+      <path fill={fill} d={wedge} />
+      <path fill={fill} d={wedge} transform="rotate(90 24 24)" />
+      <path fill={fill} d={wedge} transform="rotate(180 24 24)" />
+      <path fill={fill} d={wedge} transform="rotate(270 24 24)" />
     </svg>
   );
 }

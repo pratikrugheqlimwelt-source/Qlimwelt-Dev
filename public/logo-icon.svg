@@ -1,8 +1,8 @@
 <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g fill="#82D153" stroke="#82D153" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M 20.75 20.75 L 42 20.75 L 20.75 6 Z"/>
-    <path d="M 20.75 20.75 L 42 20.75 L 20.75 6 Z" transform="rotate(90 24 24)"/>
-    <path d="M 20.75 20.75 L 42 20.75 L 20.75 6 Z" transform="rotate(180 24 24)"/>
-    <path d="M 20.75 20.75 L 42 20.75 L 20.75 6 Z" transform="rotate(270 24 24)"/>
+  <g fill="#82D153">
+    <path d="M 19 19 L 43 19 L 19 5 Z"/>
+    <path d="M 19 19 L 43 19 L 19 5 Z" transform="rotate(90 24 24)"/>
+    <path d="M 19 19 L 43 19 L 19 5 Z" transform="rotate(180 24 24)"/>
+    <path d="M 19 19 L 43 19 L 19 5 Z" transform="rotate(270 24 24)"/>
   </g>
 </svg>
