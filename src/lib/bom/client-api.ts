@@ -25,11 +25,15 @@ import {
   localListFactors,
   localListMappings,
   localRejectMapping,
+  localApproveCalculation,
+  localListAuditEvents,
+  localRefreshStaleFlags,
+  localRejectCalculation,
   localRunCalculation,
   localSuggestForItem,
   localUpsertMapping,
 } from "./carbon/local-service";
-import type { CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "./carbon/types";
+import type { BomAuditEvent, CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "./carbon/types";
 async function tryJson<T>(res: Response): Promise<T | null> {
   try {
     return (await res.json()) as T;
@@ -383,4 +387,86 @@ export async function fetchBomCalculations(
     /* local */
   }
   return localListCalculations(companyId, bomId);
+}
+
+
+export async function approveBomCalculation(
+  companyId: string,
+  calculationId: string,
+  input?: { notes?: string }
+): Promise<PcfCalculation> {
+  try {
+    const res = await fetch(`/api/bom/calculations/${calculationId}/approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input ?? {}),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ calculation: PcfCalculation }>(res);
+      if (data?.calculation) return data.calculation;
+    }
+  } catch {
+    /* local */
+  }
+  return localApproveCalculation(companyId, calculationId, {
+    approvedBy: "local-user",
+    notes: input?.notes,
+  });
+}
+
+export async function rejectBomCalculation(
+  companyId: string,
+  calculationId: string,
+  input?: { notes?: string }
+): Promise<PcfCalculation> {
+  try {
+    const res = await fetch(`/api/bom/calculations/${calculationId}/reject`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input ?? {}),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ calculation: PcfCalculation }>(res);
+      if (data?.calculation) return data.calculation;
+    }
+  } catch {
+    /* local */
+  }
+  return localRejectCalculation(companyId, calculationId, input);
+}
+
+export async function refreshBomStaleFlags(
+  companyId: string,
+  bomId: string
+): Promise<PcfCalculation[]> {
+  try {
+    const res = await fetch(`/api/bom/boms/${bomId}/stale/refresh`, { method: "POST" });
+    if (res.ok) {
+      const data = await tryJson<{ calculations: PcfCalculation[] }>(res);
+      if (data?.calculations) return data.calculations;
+    }
+  } catch {
+    /* local */
+  }
+  return localRefreshStaleFlags(companyId, bomId);
+}
+
+export async function fetchBomAuditEvents(
+  companyId: string,
+  filter?: { entityType?: string; entityId?: string; limit?: number }
+): Promise<BomAuditEvent[]> {
+  try {
+    const params = new URLSearchParams();
+    if (filter?.entityType) params.set("entityType", filter.entityType);
+    if (filter?.entityId) params.set("entityId", filter.entityId);
+    if (filter?.limit) params.set("limit", String(filter.limit));
+    const res = await fetch(`/api/bom/audit?${params.toString()}`);
+    if (res.ok) {
+      const data = await tryJson<{ events: BomAuditEvent[] }>(res);
+      if (data?.events) return data.events;
+    }
+  } catch {
+    /* local */
+  }
+  return localListAuditEvents(companyId, filter);
 }

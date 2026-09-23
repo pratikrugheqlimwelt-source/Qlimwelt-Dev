@@ -9,6 +9,37 @@ export type MappingMethod =
   | "spend"
   | "process";
 export type CalculationStatus = "draft" | "completed" | "failed" | "superseded";
+export type ApprovalStatus = "pending" | "approved" | "rejected";
+
+export interface DataQualityScore {
+  temporal: number;
+  geo: number;
+  tech: number;
+  overall: number;
+  notes: string[];
+}
+
+export interface BomAuditEvent {
+  id: string;
+  companyId: string;
+  entityType:
+    | "product"
+    | "bom"
+    | "bom_item"
+    | "mapping"
+    | "calculation"
+    | "emission_factor"
+    | "dataset";
+  entityId: string;
+  action: string;
+  actorId?: string | null;
+  actorLabel?: string | null;
+  summary: string;
+  beforeState?: Record<string, unknown> | null;
+  afterState?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
 
 export interface CarbonDataset {
   id: string;
@@ -94,6 +125,17 @@ export interface PcfCalculation {
   createdAt: string;
   completedAt?: string | null;
   ledger?: CarbonLedgerEntry[];
+  /** Phase 1C */
+  approvalStatus: ApprovalStatus;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  approvalNotes?: string | null;
+  isStale: boolean;
+  staleReason?: string | null;
+  staleAt?: string | null;
+  dq?: DataQualityScore | null;
+  bomFingerprint?: string | null;
+  mappingFingerprint?: string | null;
 }
 
 export interface MappingSuggestion {

@@ -3,6 +3,8 @@ import { newEntityId } from "@/lib/bom/local-store";
 import type { BomItem, BomTreeNode } from "@/lib/bom/types";
 import { convertBomUnit, inputQuantityAfterScrap } from "@/lib/bom/units";
 import { isMappingUsable } from "./mapping";
+import { scoreCalculationQuality } from "./quality";
+import { bomFingerprint, mappingFingerprint } from "./stale";
 import type {
   CalculateBomInput,
   CarbonLedgerEntry,
@@ -133,6 +135,12 @@ export function calculateBomPcf(
     warnings.push("BOM has no items");
   }
 
+  const dq = scoreCalculationQuality({
+    items: ctx.items,
+    mappings: ctx.mappings,
+    factors: ctx.factors,
+  });
+
   return {
     id: calcId,
     companyId: input.companyId,
@@ -149,5 +157,15 @@ export function calculateBomPcf(
     createdAt: now,
     completedAt: now,
     ledger,
+    approvalStatus: "pending",
+    approvedBy: null,
+    approvedAt: null,
+    approvalNotes: null,
+    isStale: false,
+    staleReason: null,
+    staleAt: null,
+    dq,
+    bomFingerprint: bomFingerprint(ctx.items),
+    mappingFingerprint: mappingFingerprint(ctx.mappings),
   };
 }

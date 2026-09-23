@@ -5,14 +5,17 @@ import {
   updateBomLocal,
 } from "@/lib/bom/local-store";
 import type { BomItem } from "@/lib/bom/types";
+import { appendAuditEvent, listAuditEvents } from "./audit";
 import { calculateBomPcf } from "./calculate";
 import { suggestMappings } from "./mapping";
 import { seedDemoCarbonLibrary } from "./seed";
+import { detectStaleCalculation } from "./stale";
 import type {
   CarbonDataset,
   CarbonMapping,
   EmissionFactor,
   MappingSuggestion,
+  BomAuditEvent,
   PcfCalculation,
 } from "./types";
 
@@ -126,6 +129,15 @@ export function localApproveMapping(
     }),
   }));
   if (!updated) throw new Error("Mapping not found");
+  appendAuditEvent({
+    companyId,
+    entityType: "mapping",
+    entityId: mappingId,
+    action: "mapping_approved",
+    summary: `Approved mapping ${mappingId}`,
+    actorId: approvedBy ?? null,
+    afterState: { status: "approved" },
+  });
   return updated;
 }
 
@@ -141,6 +153,14 @@ export function localRejectMapping(companyId: string, mappingId: string): Carbon
     }),
   }));
   if (!updated) throw new Error("Mapping not found");
+  appendAuditEvent({
+    companyId,
+    entityType: "mapping",
+    entityId: mappingId,
+    action: "mapping_rejected",
+    summary: `Rejected mapping ${mappingId}`,
+    afterState: { status: "rejected" },
+  });
   return updated;
 }
 
@@ -181,12 +201,25 @@ export function localRunCalculation(
     pcfCalculations: [
       ...s.pcfCalculations.map((c) =>
         c.bomId === input.bomId && c.status === "completed"
-          ? { ...c, status: "superseded" as const }
+          ? { ...c, status: "superseded" as const, isStale: true, staleReason: "Superseded by newer calculation", staleAt: new Date().toISOString() }
           : c
       ),
       result,
     ],
   }));
+  appendAuditEvent({
+    companyId,
+    entityType: "calculation",
+    entityId: result.id,
+    action: "calculated",
+    summary: `Calculated PCF ${result.totalKgco2e.toFixed(4)} kgCO2e for BOM ${input.bomId}`,
+    actorId: input.createdBy ?? null,
+    afterState: {
+      totalKgco2e: result.totalKgco2e,
+      dqOverall: result.dq?.overall ?? null,
+      approvalStatus: result.approvalStatus,
+    },
+  });
   return result;
 }
 
@@ -203,6 +236,123 @@ export function localGetCalculation(
   return loadBomLocal(companyId).pcfCalculations.find((c) => c.id === calculationId) ?? null;
 }
 
+export function localApproveCalculation(
+  companyId: string,
+  calculationId: string,
+  input?: { approvedBy?: string; notes?: string }
+): PcfCalculation {
+  const now = new Date().toISOString();
+  let updated: PcfCalculation | null = null;
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    pcfCalculations: s.pcfCalculations.map((c) => {
+      if (c.id !== calculationId) return c;
+      if (c.isStale) {
+        throw new Error("Cannot approve a stale calculation — recalculate first");
+      }
+      updated = {
+        ...c,
+        approvalStatus: "approved",
+        approvedBy: input?.approvedBy ?? "local-user",
+        approvedAt: now,
+        approvalNotes: input?.notes ?? null,
+      };
+      return updated!;
+    }),
+  }));
+  if (!updated) throw new Error("Calculation not found");
+  appendAuditEvent({
+    companyId,
+    entityType: "calculation",
+    entityId: calculationId,
+    action: "calc_approved",
+    summary: `Approved calculation ${calculationId}`,
+    actorId: input?.approvedBy ?? null,
+    afterState: { approvalStatus: "approved" },
+  });
+  return updated;
+}
+
+export function localRejectCalculation(
+  companyId: string,
+  calculationId: string,
+  input?: { notes?: string; actorId?: string }
+): PcfCalculation {
+  const now = new Date().toISOString();
+  let updated: PcfCalculation | null = null;
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    pcfCalculations: s.pcfCalculations.map((c) => {
+      if (c.id !== calculationId) return c;
+      updated = {
+        ...c,
+        approvalStatus: "rejected",
+        approvedBy: null,
+        approvedAt: null,
+        approvalNotes: input?.notes ?? null,
+      };
+      return updated!;
+    }),
+  }));
+  if (!updated) throw new Error("Calculation not found");
+  appendAuditEvent({
+    companyId,
+    entityType: "calculation",
+    entityId: calculationId,
+    action: "calc_rejected",
+    summary: `Rejected calculation ${calculationId}`,
+    actorId: input?.actorId ?? null,
+    afterState: { approvalStatus: "rejected", notes: input?.notes ?? null },
+  });
+  return updated;
+}
+
+/** Re-evaluate stale flags for a BOM's calculations against current items/mappings. */
+export function localRefreshStaleFlags(companyId: string, bomId: string): PcfCalculation[] {
+  const state = loadBomLocal(companyId);
+  const items = state.items.filter((i) => i.bomId === bomId);
+  const itemIds = new Set(items.map((i) => i.id));
+  const mappings = state.carbonMappings.filter((m) => itemIds.has(m.bomItemId));
+  const now = new Date().toISOString();
+  const touched: PcfCalculation[] = [];
+
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    pcfCalculations: s.pcfCalculations.map((c) => {
+      if (c.bomId !== bomId) return c;
+      const { isStale, reason } = detectStaleCalculation(c, items, mappings);
+      if (isStale === c.isStale && (reason ?? null) === (c.staleReason ?? null)) return c;
+      const next = {
+        ...c,
+        isStale,
+        staleReason: reason,
+        staleAt: isStale ? c.staleAt ?? now : null,
+      };
+      touched.push(next);
+      if (isStale && !c.isStale) {
+        appendAuditEvent({
+          companyId,
+          entityType: "calculation",
+          entityId: c.id,
+          action: "marked_stale",
+          summary: reason ?? "Calculation marked stale",
+          afterState: { isStale: true, reason },
+        });
+      }
+      return next;
+    }),
+  }));
+  return touched;
+}
+
+export function localListAuditEvents(
+  companyId: string,
+  filter?: { entityType?: string; entityId?: string; limit?: number }
+): BomAuditEvent[] {
+  return listAuditEvents(companyId, filter);
+}
+
 export function resetCarbonLocal(companyId: string) {
   clearBomLocal(companyId);
 }
+

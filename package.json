@@ -11,6 +11,7 @@
     "test:calc": "npx tsx src/lib/calculations/engine.test.ts",
     "test:bom": "npx tsx src/lib/bom/bom.test.ts",
     "test:bom:carbon": "npx tsx src/lib/bom/carbon/carbon.test.ts",
+    "test:bom:quality": "npx tsx src/lib/bom/carbon/quality.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "seed:user": "npx tsx scripts/seed-user-demo.ts"

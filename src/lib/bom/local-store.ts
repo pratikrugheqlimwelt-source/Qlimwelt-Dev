@@ -12,6 +12,7 @@ import type {
   CarbonDataset,
   CarbonMapping,
   EmissionFactor,
+  BomAuditEvent,
   PcfCalculation,
 } from "./carbon/types";
 
@@ -31,6 +32,7 @@ export type BomLocalState = {
   emissionFactors: EmissionFactor[];
   carbonMappings: CarbonMapping[];
   pcfCalculations: PcfCalculation[];
+  auditEvents: BomAuditEvent[];
 };
 
 function key(companyId: string) {
@@ -49,6 +51,7 @@ function empty(): BomLocalState {
     emissionFactors: [],
     carbonMappings: [],
     pcfCalculations: [],
+    auditEvents: [],
   };
 }
 

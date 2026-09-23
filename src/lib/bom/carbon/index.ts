@@ -2,4 +2,7 @@ export * from "./types";
 export * from "./mapping";
 export * from "./calculate";
 export * from "./seed";
+export * from "./quality";
+export * from "./stale";
+export * from "./audit";
 export * from "./local-service";

@@ -12,7 +12,7 @@ Permission-gated phases. **Stop and ask before starting the next phase.**
 
 **Gate:** Ask permission before 1B.
 
-## Phase 1B — Carbon mapping + calculation (current)
+## Phase 1B — Carbon mapping + calculation ✅
 
 - Carbon datasets / emission factors registry
 - Mapping with confidence + human approve
@@ -22,12 +22,14 @@ Permission-gated phases. **Stop and ask before starting the next phase.**
 
 **Gate:** Ask permission before 1C.
 
-## Phase 1C — Audit & data quality
+## Phase 1C — Audit & data quality (current)
 
 - Calculation approval workflow
 - DQ dimensions (temporal / geo / tech)
 - Stale calculation flags
 - Append-only audit trail
+
+**Gate:** Ask permission before 1D.
 
 ## Phase 1D — Analytics UX
 

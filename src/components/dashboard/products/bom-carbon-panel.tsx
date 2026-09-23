@@ -3,15 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  approveBomCalculation,
   approveCarbonMapping,
+  fetchBomAuditEvents,
   fetchCarbonMappings,
   fetchEmissionFactors,
+  refreshBomStaleFlags,
+  rejectBomCalculation,
   rejectCarbonMapping,
   runBomCalculation,
   suggestItemMappings,
   upsertCarbonMapping,
 } from "@/lib/bom/client-api";
-import type { CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "@/lib/bom/carbon/types";
+import type { BomAuditEvent, CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "@/lib/bom/carbon/types";
 import type { BomItem } from "@/lib/bom/types";
 
 type Props = {
@@ -27,6 +31,7 @@ export function BomCarbonPanel({ companyId, productId, bomId, item, busy }: Prop
   const [mappings, setMappings] = useState<CarbonMapping[]>([]);
   const [suggestions, setSuggestions] = useState<MappingSuggestion[]>([]);
   const [calc, setCalc] = useState<PcfCalculation | null>(null);
+  const [auditEvents, setAuditEvents] = useState<BomAuditEvent[]>([]);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,12 +41,15 @@ export function BomCarbonPanel({ companyId, productId, bomId, item, busy }: Prop
   );
 
   async function reload() {
-    const [f, m] = await Promise.all([
+    const [f, m, events] = await Promise.all([
       fetchEmissionFactors(companyId),
       fetchCarbonMappings(companyId, bomId),
+      fetchBomAuditEvents(companyId, { limit: 8 }),
     ]);
     setFactors(f);
     setMappings(m);
+    setAuditEvents(events);
+    await refreshBomStaleFlags(companyId, bomId);
   }
 
   useEffect(() => {
@@ -64,7 +72,7 @@ export function BomCarbonPanel({ companyId, productId, bomId, item, busy }: Prop
       <div>
         <h3 className="text-sm font-semibold">Carbon mapping & PCF</h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          Suggest and approve emission factors, then run recursive BOM calculation (Phase 1B).
+          Map factors, run PCF, review DQ scores, approve calculations, and inspect the audit trail (Phase 1C).
         </p>
       </div>
 
@@ -194,18 +202,82 @@ export function BomCarbonPanel({ companyId, productId, bomId, item, busy }: Prop
       </div>
 
       {calc && (
-        <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
+        <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3 text-sm">
           <p>
             Total:{" "}
             <strong className="tabular-nums">{calc.totalKgco2e.toFixed(4)}</strong> kgCO₂e /{" "}
             {calc.declaredUnit}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {calc.methodology} · {calc.ledger?.length ?? 0} ledger rows · status {calc.status}
+          <p className="text-xs text-muted-foreground">
+            {calc.methodology} · {calc.ledger?.length ?? 0} ledger rows · {calc.status} · approval{" "}
+            {calc.approvalStatus}
+            {calc.isStale ? " · STALE" : ""}
           </p>
+          {calc.dq && (
+            <div className="grid grid-cols-2 gap-1 text-xs sm:grid-cols-4">
+              <span>DQ overall {(calc.dq.overall * 100).toFixed(0)}%</span>
+              <span>Temporal {(calc.dq.temporal * 100).toFixed(0)}%</span>
+              <span>Geo {(calc.dq.geo * 100).toFixed(0)}%</span>
+              <span>Tech {(calc.dq.tech * 100).toFixed(0)}%</span>
+            </div>
+          )}
+          {calc.isStale && calc.staleReason && (
+            <p className="text-xs text-amber-800">Stale: {calc.staleReason}</p>
+          )}
           {calc.warnings.slice(0, 5).map((w) => (
-            <p key={w} className="mt-1 text-xs text-amber-800">
+            <p key={w} className="text-xs text-amber-800">
               {w}
+            </p>
+          ))}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button
+              size="sm"
+              disabled={working || busy || calc.isStale || calc.approvalStatus === "approved"}
+              onClick={async () => {
+                setWorking(true);
+                setError(null);
+                try {
+                  const next = await approveBomCalculation(companyId, calc.id);
+                  setCalc(next);
+                  await reload();
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : "Approve calc failed");
+                } finally {
+                  setWorking(false);
+                }
+              }}
+            >
+              Approve calculation
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={working || busy || calc.approvalStatus === "rejected"}
+              onClick={async () => {
+                setWorking(true);
+                try {
+                  const next = await rejectBomCalculation(companyId, calc.id, {
+                    notes: "Rejected from BOM panel",
+                  });
+                  setCalc(next);
+                  await reload();
+                } finally {
+                  setWorking(false);
+                }
+              }}
+            >
+              Reject calculation
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {auditEvents.length > 0 && (
+        <div className="space-y-1 border-t border-border pt-3">
+          <p className="text-xs font-semibold">Audit trail</p>
+          {auditEvents.slice(0, 6).map((e) => (
+            <p key={e.id} className="text-[11px] text-muted-foreground">
+              {new Date(e.createdAt).toLocaleString()} · {e.action} · {e.summary}
             </p>
           ))}
         </div>
