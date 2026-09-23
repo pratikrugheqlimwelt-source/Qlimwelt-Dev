@@ -124,9 +124,9 @@ export default function HomePage() {
   return (
     <MarketingLayout navVariant="home">
       {/* ── HERO ── */}
-      <section className="viewport-section-fill relative overflow-hidden border-b border-border bg-white !py-0">
-        <div className="mx-auto grid h-full min-h-[inherit] max-w-7xl lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-8 lg:py-12 xl:pr-4">
+      <section className="viewport-section-fill relative w-full overflow-hidden border-b border-border bg-white !py-0">
+        <div className="mx-auto grid h-full min-h-[inherit] w-full max-w-[90rem] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+          <div className="flex min-w-0 flex-col justify-center px-4 py-10 sm:px-6 lg:px-10 lg:py-12 xl:pr-6">
             <FadeUp delay={0.04}>
               <p className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
                 Qlimwelt
@@ -146,16 +146,16 @@ export default function HomePage() {
               <SiemensProofRow className="mt-8" />
             </FadeUp>
           </div>
-          <FadeUp delay={0.12} className="min-h-[280px] min-w-0 lg:min-h-0">
-            <HeroVisualPanel className="h-full min-h-[280px] lg:min-h-full" />
+          <FadeUp delay={0.12} className="min-h-[260px] min-w-0 lg:min-h-0">
+            <HeroVisualPanel className="h-full min-h-[260px] lg:min-h-full" />
           </FadeUp>
         </div>
       </section>
 
       {/* ── CAPABILITIES ── */}
       <Section id="capabilities" viewport viewportAlign="start" className="bg-white !py-0">
-        <div className="mx-auto grid max-w-7xl border-b border-border lg:min-h-[min(52vh,28rem)] lg:grid-cols-2">
-          <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+        <div className="mx-auto grid w-full max-w-[90rem] border-b border-border lg:min-h-[min(52vh,28rem)] lg:grid-cols-2">
+          <div className="flex min-w-0 flex-col justify-center px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
             <FadeUp>
               <MetaLabel className="text-brand">{t("marketing.capabilitiesLabel")}</MetaLabel>
               <h2 className="siemens-display mt-3 max-w-xl">{t("marketing.capabilitiesHeadline")}</h2>
@@ -249,7 +249,7 @@ export default function HomePage() {
       {/* ── INTELLIGENCE / VALUE ── */}
       <Section id="intelligence" viewport viewportAlign="start" className="bg-[hsl(var(--siemens-surface))]">
         <SectionContainer>
-          <div className="mx-auto grid max-w-7xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
+          <div className="mx-auto grid w-full max-w-[90rem] items-center gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:gap-12 lg:px-10">
             <FadeUp delay={0.06} className="order-2 lg:order-1">
               <div className="relative min-h-[min(42vh,22rem)] overflow-hidden rounded-lg">
                 <MediaPanel src={MARKETING_IMAGES.hydro} overlay="teal" minH="min-h-full" />
@@ -281,8 +281,8 @@ export default function HomePage() {
 
       {/* ── QAI IN ACTION ── */}
       <Section id="qai" viewport className="bg-white !py-0">
-        <div className="mx-auto grid h-full min-h-[inherit] max-w-7xl lg:grid-cols-2">
-          <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+        <div className="mx-auto grid h-full min-h-[inherit] w-full max-w-[90rem] lg:grid-cols-2">
+          <div className="flex min-w-0 flex-col justify-center px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
             <FadeUp>
               <MetaLabel className="text-brand">{t("marketing.qlimAiLabel")}</MetaLabel>
               <h2 className="siemens-display mt-3">
@@ -346,8 +346,8 @@ export default function HomePage() {
         id="contact"
         className="viewport-section-fill overflow-hidden border-t border-border bg-white !py-0"
       >
-        <div className="mx-auto grid h-full min-h-[inherit] max-w-7xl lg:grid-cols-2">
-          <FadeUp className="relative min-h-[min(48vh,22rem)] lg:min-h-0">
+        <div className="mx-auto grid h-full min-h-[inherit] w-full max-w-[90rem] lg:grid-cols-2">
+          <FadeUp className="relative min-h-[min(48vh,22rem)] min-w-0 lg:min-h-0">
             <MediaPanel src={MARKETING_IMAGES.turbines} overlay="dark" minH="absolute inset-0 min-h-full">
               <div className="max-w-md text-white">
                 <p className="siemens-eyebrow text-white/70">{t("marketing.finalCtaLabel")}</p>
@@ -369,7 +369,7 @@ export default function HomePage() {
             </MediaPanel>
           </FadeUp>
 
-          <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
+          <div className="flex min-w-0 flex-col justify-center px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
             <FadeUp delay={0.08}>
               <div
                 id="demo-form"

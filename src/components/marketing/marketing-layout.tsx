@@ -15,10 +15,10 @@ export function MarketingLayout({
   navVariant = "default",
 }: MarketingLayoutProps) {
   return (
-    <div className={cn("relative min-h-screen bg-background")}>
+    <div className={cn("relative min-h-screen w-full overflow-x-hidden bg-background")}>
       {showBanner && <AnnouncementBanner />}
       <MarketingNav variant={navVariant} />
-      <main className="relative z-[2]">{children}</main>
+      <main className="relative z-[2] w-full min-w-0">{children}</main>
       <MarketingFooter />
     </div>
   );

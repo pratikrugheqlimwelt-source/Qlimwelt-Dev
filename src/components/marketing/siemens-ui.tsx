@@ -164,7 +164,7 @@ export function MediaPanel({
         {overlay !== "none" ? <div className={cn("absolute inset-0", overlayClass)} /> : null}
       </div>
       {children ? (
-        <div className="relative z-[1] flex h-full min-h-[inherit] items-end p-4 sm:p-6 lg:items-center lg:justify-end lg:p-8">
+        <div className="relative z-[1] flex h-full min-h-[inherit] items-end p-4 sm:p-5 lg:items-center lg:justify-center lg:p-6 xl:justify-end xl:p-8">
           {children}
         </div>
       ) : null}
@@ -263,7 +263,7 @@ export function HeroVisualPanel({ className }: { className?: string }) {
       className={cn("h-full", className)}
       minH="min-h-[280px] lg:min-h-full"
     >
-      <HeroIntelCard className="w-full max-w-md lg:translate-x-[-6%]" />
+      <HeroIntelCard className="w-full max-w-sm sm:max-w-md lg:max-w-[min(100%,24rem)] xl:max-w-md lg:translate-x-0 xl:translate-x-[-4%]" />
     </MediaPanel>
   );
 }

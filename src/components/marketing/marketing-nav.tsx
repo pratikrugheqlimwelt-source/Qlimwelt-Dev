@@ -45,16 +45,16 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
       transition={{ duration: 0.4, ease: EASE_OUT }}
       className="sticky top-0 z-50 border-b border-border bg-white/98 backdrop-blur-[8px]"
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 lg:px-8">
+      <div className="marketing-rail flex h-16 items-center justify-between gap-3 sm:gap-4 lg:gap-6">
         <Logo size="sm" className="shrink-0" />
 
-        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+        <nav className="hidden min-w-0 items-center gap-0.5 xl:flex" aria-label="Primary">
           {links.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "px-3.5 py-2 text-[13px] font-medium tracking-tight text-foreground/70 transition-colors duration-150",
+                "whitespace-nowrap px-2.5 py-2 text-[13px] font-medium tracking-tight text-foreground/70 transition-colors duration-150 xl:px-3.5",
                 "hover:text-foreground"
               )}
             >
@@ -63,11 +63,11 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <LanguageToggle />
           <Link
             href="/login"
-            className="siemens-btn-secondary hidden h-9 px-4 py-0 sm:inline-flex"
+            className="siemens-btn-secondary hidden h-9 px-4 py-0 lg:inline-flex"
           >
             {t("common.getStarted")}
           </Link>
@@ -80,7 +80,7 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
           </Link>
           <button
             type="button"
-            className="rounded-sm p-2 text-foreground lg:hidden"
+            className="rounded-sm p-2 text-foreground xl:hidden"
             aria-label={mobileOpen ? t("common.closeMenu") : t("common.openMenu")}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
@@ -91,7 +91,7 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border bg-white px-4 py-4 lg:hidden">
+        <div className="border-t border-border bg-white px-4 py-4 xl:hidden">
           <nav className="flex flex-col gap-0.5" aria-label="Mobile">
             {links.map((item) => (
               <Link

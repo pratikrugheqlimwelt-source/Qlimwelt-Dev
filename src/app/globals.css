@@ -56,6 +56,7 @@
     @apply bg-background font-sans text-foreground antialiased;
     font-feature-settings: "ss01" 1, "cv11" 1;
     text-rendering: optimizeLegibility;
+    overflow-x: hidden;
   }
   /* Headings default to sans; marketing headlines opt into font-serif explicitly */
   ::selection {
@@ -81,21 +82,30 @@
     flex-direction: column;
     justify-content: center;
     box-sizing: border-box;
+    width: 100%;
   }
   .viewport-section-fill {
     min-height: var(--viewport-section-h);
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    width: 100%;
+  }
+  /* Centered marketing content rail — fills MacBook / laptop widths */
+  .marketing-rail {
+    @apply mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-10;
+  }
+  .marketing-rail-flush {
+    @apply mx-auto w-full max-w-[90rem];
   }
   .section-container {
-    @apply mx-auto max-w-7xl px-4 lg:px-8;
+    @apply mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-10;
   }
   .section-container-narrow {
-    @apply mx-auto max-w-4xl px-4 lg:px-8;
+    @apply mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8;
   }
   .section-container-tight {
-    @apply mx-auto max-w-3xl px-4 lg:px-8;
+    @apply mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8;
   }
   .section-number {
     @apply pointer-events-none absolute right-4 top-6 hidden select-none lg:right-8 lg:block;
@@ -164,7 +174,12 @@
     @apply text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground;
   }
   .hero-diagonal {
-    clip-path: polygon(12% 0, 100% 0, 100% 100%, 0% 100%);
+    clip-path: polygon(8% 0, 100% 0, 100% 100%, 0% 100%);
+  }
+  @media (max-width: 1279px) {
+    .hero-diagonal {
+      clip-path: polygon(4% 0, 100% 0, 100% 100%, 0% 100%);
+    }
   }
   @media (max-width: 1023px) {
     .hero-diagonal {
