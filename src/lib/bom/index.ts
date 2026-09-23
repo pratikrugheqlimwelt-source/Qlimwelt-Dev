@@ -9,3 +9,8 @@ export {
   previewFromCsvText,
 } from "./import/parse";
 export { previewRowsToBomItems } from "./import/commit";
+export {
+  parseSpreadsheetFile,
+  previewFromSpreadsheet,
+  autoMappingForFile,
+} from "./import/spreadsheet";

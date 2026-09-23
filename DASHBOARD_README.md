@@ -128,7 +128,7 @@ Roles stored on `company_members`: **admin**, **manager**, **member**, **viewer*
 
 Treat these as limited or scaffolded — usable for demos / early testing, not full production coverage for every customer type:
 
-- **Product CCF** — scaffold only (full BOM / PACT later)
+- **Product CCF** — Products/BOM master data (Phase 1A); carbon mapping + PCF calculation in Phase 1B
 - **Event / Project** and **Supplier Data Collection** assessment types — coming soon
 - **Connected Systems** sync/import — available in-product; depth varies by connector (catalog includes available + future items)
 - **Invite email delivery** — recorded always; emailed when Resend is configured

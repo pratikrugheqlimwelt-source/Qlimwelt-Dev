@@ -152,10 +152,16 @@ export default function BomEditorPage() {
           />
           <BomImportWizard
             busy={busy}
-            onPreview={async (fileName, csvText) => {
+            onPreview={async (fileName, csvText, mapping) => {
               setBusy(true);
               try {
-                return await previewBomImport(company.id, params.bomId, fileName, csvText);
+                return await previewBomImport(
+                  company.id,
+                  params.bomId,
+                  fileName,
+                  csvText,
+                  mapping
+                );
               } finally {
                 setBusy(false);
               }

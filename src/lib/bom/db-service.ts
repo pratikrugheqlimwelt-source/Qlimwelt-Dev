@@ -215,6 +215,58 @@ export async function dbCreateProduct(
   };
 }
 
+export async function dbListProductVersions(
+  ctx: ExportAuthContext,
+  productId: string
+): Promise<ProductVersion[]> {
+  const { data, error } = await ctx.supabase
+    .from("product_versions")
+    .select("*")
+    .eq("company_id", ctx.companyId)
+    .eq("product_id", productId)
+    .order("created_at");
+  if (error) throw error;
+  return (data ?? []).map((r) => mapVersion(r as Record<string, unknown>));
+}
+
+export async function dbCreateProductVersion(
+  ctx: ExportAuthContext,
+  productId: string,
+  input: {
+    versionLabel: string;
+    notes?: string;
+    effectiveFrom?: string;
+    effectiveTo?: string;
+  }
+): Promise<ProductVersion> {
+  const { data: version, error } = await ctx.supabase
+    .from("product_versions")
+    .insert({
+      company_id: ctx.companyId,
+      product_id: productId,
+      version_label: input.versionLabel,
+      status: "draft",
+      notes: input.notes ?? null,
+      effective_from: input.effectiveFrom ?? null,
+      effective_to: input.effectiveTo ?? null,
+    })
+    .select("*")
+    .single();
+  if (error) throw error;
+
+  // Each new product version gets an empty engineering BOM shell
+  const { error: bomErr } = await ctx.supabase.from("boms").insert({
+    company_id: ctx.companyId,
+    product_version_id: version.id,
+    bom_type: "engineering",
+    version_label: "1",
+    status: "draft",
+  });
+  if (bomErr) throw bomErr;
+
+  return mapVersion(version as Record<string, unknown>);
+}
+
 export async function dbGetBom(ctx: ExportAuthContext, bomId: string): Promise<Bom | null> {
   const { data, error } = await ctx.supabase
     .from("boms")

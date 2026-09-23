@@ -102,4 +102,25 @@ function item(partial: Partial<BomItem> & { id: string; partNumber: string }): B
   assert(!hasBlockingErrors(validateBomStructure(items)), "imported structure valid");
 }
 
+// --- Excel spreadsheet parse + column map ---
+{
+  const XLSX = require("xlsx") as typeof import("xlsx");
+  const { autoMappingForFile, previewFromSpreadsheet } = require("./import/spreadsheet") as typeof import("./import/spreadsheet");
+  const sheet = XLSX.utils.aoa_to_sheet([
+    ["Part Number", "Parent", "Qty", "UOM", "Name"],
+    ["ROOT", "", "1", "piece", "Product"],
+    ["CHILD", "ROOT", "2", "piece", "Child"],
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "BOM");
+  const buffer = XLSX.write(wb, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
+  const auto = autoMappingForFile("fixture.xlsx", buffer);
+  assert(auto.headers.includes("Part Number"), "excel headers");
+  assert(auto.mapping.partNumber === "Part Number", "auto-map part number");
+  assert(auto.mapping.parentPartNumber === "Parent", "auto-map parent");
+  const preview = previewFromSpreadsheet("fixture.xlsx", buffer, auto.mapping);
+  assert(preview.rows.length === 2, "excel preview rows");
+  assert(preview.errorCount === 0, `excel preview clean: ${JSON.stringify(preview.issues)}`);
+}
+
 console.log("BOM Phase 1A tests passed.");
