@@ -9,6 +9,7 @@ import { BomItemDetail } from "@/components/dashboard/products/bom-item-detail";
 import { BomImportWizard } from "@/components/dashboard/products/bom-import-wizard";
 import { BomCarbonPanel } from "@/components/dashboard/products/bom-carbon-panel";
 import { BomCarbonAnalytics } from "@/components/dashboard/products/bom-carbon-analytics";
+import { BomScenarioPanel } from "@/components/dashboard/products/bom-scenario-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
@@ -174,6 +175,12 @@ export default function BomEditorPage() {
           <BomCarbonAnalytics
             companyId={company.id}
             bomId={params.bomId}
+            refreshKey={analyticsKey}
+          />
+          <BomScenarioPanel
+            companyId={company.id}
+            bomId={params.bomId}
+            items={items}
             refreshKey={analyticsKey}
           />
           <BomImportWizard

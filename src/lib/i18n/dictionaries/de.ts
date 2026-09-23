@@ -266,8 +266,8 @@ const de: Dict = {
     },
     products: {
       title: "Produkte",
-      description: "Produktstammdaten, versionierte Stücklisten und PCF-Analytik (BOM Phase 1D).",
-      tip: "Legen Sie ein Produkt an, um die Engineering-BOM zu öffnen. CSV-Import mit part_number und optional parent_part_number. Emissionsfaktoren mappen, PCF berechnen, dann Hotspots und Versionsvergleich nutzen (Phase 1D).",
+      description: "Produktstammdaten, versionierte Stücklisten und Szenario-Analytik (BOM Phase 6).",
+      tip: "Legen Sie ein Produkt an, mappen Sie Faktoren, berechnen Sie PCF, analysieren Sie Hotspots und modellieren Sie What-if-Szenarien ohne die Baseline zu ändern (Phase 6).",
       new: "Neues Produkt",
       emptyTitle: "Noch keine Produkte",
       emptyBody: "Erstellen Sie ein Produkt für versionierte BOMs. Produktbewertungen können eine BOM-Version verknüpfen und PCF gegen freigegebene Mappings berechnen.",
@@ -283,6 +283,7 @@ const de: Dict = {
       runPcf: "PCF-Berechnung starten",
       carbonMapping: "Carbon-Mapping",
       carbonAnalytics: "Carbon-Analytik",
+      carbonScenarios: "What-if-Szenarien",
       importCommitted: "BOM-Import übernommen",
     },
   },

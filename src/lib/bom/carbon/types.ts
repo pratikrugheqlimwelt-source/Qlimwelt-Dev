@@ -29,7 +29,8 @@ export interface BomAuditEvent {
     | "mapping"
     | "calculation"
     | "emission_factor"
-    | "dataset";
+    | "dataset"
+    | "scenario";
   entityId: string;
   action: string;
   actorId?: string | null;
@@ -136,6 +137,8 @@ export interface PcfCalculation {
   dq?: DataQualityScore | null;
   bomFingerprint?: string | null;
   mappingFingerprint?: string | null;
+  /** Phase 6 — set when calculation is a what-if run */
+  scenarioId?: string | null;
 }
 
 export interface MappingSuggestion {

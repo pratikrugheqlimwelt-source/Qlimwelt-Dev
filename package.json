@@ -15,7 +15,8 @@
     "test:bom:analytics": "npx tsx src/lib/bom/carbon/analytics.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "seed:user": "npx tsx scripts/seed-user-demo.ts"
+    "seed:user": "npx tsx scripts/seed-user-demo.ts",
+    "test:bom:scenario": "npx tsx src/lib/bom/carbon/scenario.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

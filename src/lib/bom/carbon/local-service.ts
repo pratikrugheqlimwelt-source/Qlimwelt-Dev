@@ -16,6 +16,13 @@ import {
   type VersionCompareResult,
 } from "./analytics";
 import { detectStaleCalculation } from "./stale";
+import {
+  calculateScenarioPcf,
+  scenarioDeltaVsBaseline,
+  type BomScenario,
+  type ScenarioOverride,
+  type ScenarioRunResult,
+} from "./scenario";
 import type {
   CarbonDataset,
   CarbonMapping,
@@ -206,7 +213,7 @@ export function localRunCalculation(
     ...s,
     pcfCalculations: [
       ...s.pcfCalculations.map((c) =>
-        c.bomId === input.bomId && c.status === "completed"
+        c.bomId === input.bomId && c.status === "completed" && !c.scenarioId
           ? { ...c, status: "superseded" as const, isStale: true, staleReason: "Superseded by newer calculation", staleAt: new Date().toISOString() }
           : c
       ),
@@ -385,6 +392,231 @@ export function localCompareCalculations(
   const right = localGetCalculation(companyId, rightId);
   if (!left || !right) throw new Error("Both calculations are required for comparison");
   return compareCalculations(left, right);
+}
+
+
+export function localListScenarios(companyId: string, bomId?: string): BomScenario[] {
+  return loadBomLocal(companyId)
+    .scenarios.filter((s) => (bomId ? s.bomId === bomId : true))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export function localGetScenario(companyId: string, scenarioId: string): BomScenario | null {
+  return loadBomLocal(companyId).scenarios.find((s) => s.id === scenarioId) ?? null;
+}
+
+export function localCreateScenario(
+  companyId: string,
+  input: {
+    bomId: string;
+    name: string;
+    description?: string | null;
+    baselineCalculationId?: string | null;
+    overrides?: ScenarioOverride[];
+  }
+): BomScenario {
+  const now = new Date().toISOString();
+  const baselineId =
+    input.baselineCalculationId ??
+    localListCalculations(companyId, input.bomId).find((c) => !c.scenarioId && c.status === "completed")?.id ??
+    null;
+  const scenario: BomScenario = {
+    id: newEntityId("scn"),
+    companyId,
+    bomId: input.bomId,
+    name: input.name.trim() || "What-if scenario",
+    description: input.description ?? null,
+    baselineCalculationId: baselineId,
+    overrides: input.overrides ?? [],
+    lastResultCalculationId: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    scenarios: [...s.scenarios, scenario],
+  }));
+  appendAuditEvent({
+    companyId,
+    entityType: "scenario",
+    entityId: scenario.id,
+    action: "scenario_created",
+    summary: `Created scenario "${scenario.name}" for BOM ${input.bomId}`,
+    afterState: { name: scenario.name, overrideCount: scenario.overrides.length },
+  });
+  return scenario;
+}
+
+export function localUpdateScenario(
+  companyId: string,
+  scenarioId: string,
+  patch: {
+    name?: string;
+    description?: string | null;
+    baselineCalculationId?: string | null;
+    overrides?: ScenarioOverride[];
+  }
+): BomScenario {
+  const now = new Date().toISOString();
+  let updated: BomScenario | null = null;
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    scenarios: s.scenarios.map((sc) => {
+      if (sc.id !== scenarioId) return sc;
+      updated = {
+        ...sc,
+        name: patch.name?.trim() || sc.name,
+        description: patch.description !== undefined ? patch.description : sc.description,
+        baselineCalculationId:
+          patch.baselineCalculationId !== undefined
+            ? patch.baselineCalculationId
+            : sc.baselineCalculationId,
+        overrides: patch.overrides ?? sc.overrides,
+        updatedAt: now,
+      };
+      return updated!;
+    }),
+  }));
+  if (!updated) throw new Error("Scenario not found");
+  appendAuditEvent({
+    companyId,
+    entityType: "scenario",
+    entityId: scenarioId,
+    action: "scenario_updated",
+    summary: `Updated scenario ${scenarioId}`,
+    afterState: {
+      name: updated.name,
+      overrideCount: updated.overrides.length,
+    },
+  });
+  return updated;
+}
+
+export function localDeleteScenario(companyId: string, scenarioId: string): void {
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    scenarios: s.scenarios.filter((sc) => sc.id !== scenarioId),
+    // keep historical scenario calculations for audit, but they remain tagged
+  }));
+  appendAuditEvent({
+    companyId,
+    entityType: "scenario",
+    entityId: scenarioId,
+    action: "scenario_deleted",
+    summary: `Deleted scenario ${scenarioId}`,
+  });
+}
+
+/** Run what-if calculation without mutating baseline BOM items or mappings. */
+export function localRunScenario(
+  companyId: string,
+  scenarioId: string,
+  input?: { productId?: string | null; requireApproved?: boolean; createdBy?: string | null }
+): ScenarioRunResult {
+  ensureCarbonLibrary(companyId);
+  const state = loadBomLocal(companyId);
+  const scenario = state.scenarios.find((s) => s.id === scenarioId);
+  if (!scenario) throw new Error("Scenario not found");
+
+  const items = state.items.filter((i) => i.bomId === scenario.bomId);
+  const itemIds = new Set(items.map((i) => i.id));
+  const mappings = state.carbonMappings.filter((m) => itemIds.has(m.bomItemId));
+
+  const baselineItemSnapshot = items.map((i) => ({
+    id: i.id,
+    quantity: i.quantity,
+    scrapRate: i.scrapRate,
+    yieldRate: i.yieldRate,
+  }));
+
+  const baseline =
+    (scenario.baselineCalculationId
+      ? state.pcfCalculations.find((c) => c.id === scenario.baselineCalculationId)
+      : null) ??
+    state.pcfCalculations.find(
+      (c) => c.bomId === scenario.bomId && !c.scenarioId && c.status === "completed"
+    ) ??
+    null;
+
+  const result = calculateScenarioPcf({
+    companyId,
+    bomId: scenario.bomId,
+    productId: input?.productId,
+    scenarioId: scenario.id,
+    items,
+    mappings,
+    factors: state.emissionFactors,
+    overrides: scenario.overrides,
+    requireApproved: input?.requireApproved,
+    createdBy: input?.createdBy,
+  });
+
+  // Verify isolation: store items unchanged
+  const afterItems = loadBomLocal(companyId).items.filter((i) => i.bomId === scenario.bomId);
+  for (const snap of baselineItemSnapshot) {
+    const cur = afterItems.find((i) => i.id === snap.id);
+    if (!cur) continue;
+    if (
+      cur.quantity !== snap.quantity ||
+      cur.scrapRate !== snap.scrapRate ||
+      cur.yieldRate !== snap.yieldRate
+    ) {
+      throw new Error("Scenario run mutated baseline BOM items — aborting");
+    }
+  }
+
+  const now = new Date().toISOString();
+  let savedScenario: BomScenario = scenario;
+  updateBomLocal(companyId, (s) => {
+    savedScenario = {
+      ...scenario,
+      lastResultCalculationId: result.id,
+      baselineCalculationId: scenario.baselineCalculationId ?? baseline?.id ?? null,
+      updatedAt: now,
+    };
+    return {
+      ...s,
+      // Do NOT supersede baseline calculations when running scenarios
+      pcfCalculations: [...s.pcfCalculations, result],
+      scenarios: s.scenarios.map((sc) => (sc.id === scenarioId ? savedScenario : sc)),
+    };
+  });
+
+  appendAuditEvent({
+    companyId,
+    entityType: "scenario",
+    entityId: scenarioId,
+    action: "scenario_calculated",
+    summary: `Scenario "${savedScenario.name}" → ${result.totalKgco2e.toFixed(4)} kgCO2e`,
+    actorId: input?.createdBy ?? null,
+    afterState: {
+      totalKgco2e: result.totalKgco2e,
+      baselineTotalKgco2e: baseline?.totalKgco2e ?? null,
+      overrideCount: savedScenario.overrides.length,
+    },
+  });
+
+  // Re-load items to confirm still unchanged after persist
+  const finalItems = loadBomLocal(companyId).items.filter((i) => i.bomId === scenario.bomId);
+  for (const snap of baselineItemSnapshot) {
+    const cur = finalItems.find((i) => i.id === snap.id);
+    if (
+      cur &&
+      (cur.quantity !== snap.quantity ||
+        cur.scrapRate !== snap.scrapRate ||
+        cur.yieldRate !== snap.yieldRate)
+    ) {
+      throw new Error("Baseline BOM isolation failed after scenario persist");
+    }
+  }
+
+  return {
+    scenario: savedScenario,
+    baseline,
+    result,
+    comparison: scenarioDeltaVsBaseline(baseline, result),
+    baselineItemSnapshot,
+  };
 }
 
 export function resetCarbonLocal(companyId: string) {

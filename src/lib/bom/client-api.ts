@@ -34,11 +34,17 @@ import {
   localRunCalculation,
   localSuggestForItem,
   localUpsertMapping,
+  localCreateScenario,
+  localDeleteScenario,
+  localListScenarios,
+  localRunScenario,
+  localUpdateScenario,
 } from "./carbon/local-service";
 import type {
   BomAnalytics,
   VersionCompareResult,
 } from "./carbon/analytics";
+import type { BomScenario, ScenarioOverride, ScenarioRunResult } from "./carbon/scenario";
 import type { BomAuditEvent, CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "./carbon/types";
 async function tryJson<T>(res: Response): Promise<T | null> {
   try {
@@ -509,4 +515,107 @@ export async function compareBomCalculations(
     /* local */
   }
   return localCompareCalculations(companyId, leftId, rightId);
+}
+
+
+export async function fetchBomScenarios(
+  companyId: string,
+  bomId: string
+): Promise<BomScenario[]> {
+  try {
+    const res = await fetch(`/api/bom/boms/${bomId}/scenarios`);
+    if (res.ok) {
+      const data = await tryJson<{ scenarios: BomScenario[] }>(res);
+      if (data?.scenarios) return data.scenarios;
+    }
+  } catch {
+    /* local */
+  }
+  return localListScenarios(companyId, bomId);
+}
+
+export async function createBomScenario(
+  companyId: string,
+  input: {
+    bomId: string;
+    name: string;
+    description?: string | null;
+    baselineCalculationId?: string | null;
+    overrides?: ScenarioOverride[];
+  }
+): Promise<BomScenario> {
+  try {
+    const res = await fetch(`/api/bom/boms/${input.bomId}/scenarios`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ scenario: BomScenario }>(res);
+      if (data?.scenario) return data.scenario;
+    }
+  } catch {
+    /* local */
+  }
+  return localCreateScenario(companyId, input);
+}
+
+export async function updateBomScenario(
+  companyId: string,
+  scenarioId: string,
+  patch: {
+    name?: string;
+    description?: string | null;
+    baselineCalculationId?: string | null;
+    overrides?: ScenarioOverride[];
+  }
+): Promise<BomScenario> {
+  try {
+    const res = await fetch(`/api/bom/scenarios/${scenarioId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ scenario: BomScenario }>(res);
+      if (data?.scenario) return data.scenario;
+    }
+  } catch {
+    /* local */
+  }
+  return localUpdateScenario(companyId, scenarioId, patch);
+}
+
+export async function deleteBomScenario(
+  companyId: string,
+  scenarioId: string
+): Promise<void> {
+  try {
+    const res = await fetch(`/api/bom/scenarios/${scenarioId}`, { method: "DELETE" });
+    if (res.ok) return;
+  } catch {
+    /* local */
+  }
+  localDeleteScenario(companyId, scenarioId);
+}
+
+export async function runBomScenario(
+  companyId: string,
+  scenarioId: string,
+  input?: { productId?: string | null; requireApproved?: boolean }
+): Promise<ScenarioRunResult> {
+  try {
+    const res = await fetch(`/api/bom/scenarios/${scenarioId}/run`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input ?? {}),
+    });
+    if (res.ok) {
+      const data = await tryJson<ScenarioRunResult>(res);
+      if (data?.result) return data;
+    }
+  } catch {
+    /* local */
+  }
+  return localRunScenario(companyId, scenarioId, input);
 }

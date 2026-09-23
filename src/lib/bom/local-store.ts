@@ -15,6 +15,7 @@ import type {
   BomAuditEvent,
   PcfCalculation,
 } from "./carbon/types";
+import type { BomScenario } from "./carbon/scenario";
 
 const PREFIX = "qlimwelt-bom-v1:";
 
@@ -33,6 +34,7 @@ export type BomLocalState = {
   carbonMappings: CarbonMapping[];
   pcfCalculations: PcfCalculation[];
   auditEvents: BomAuditEvent[];
+  scenarios: BomScenario[];
 };
 
 function key(companyId: string) {
@@ -52,6 +54,7 @@ function empty(): BomLocalState {
     carbonMappings: [],
     pcfCalculations: [],
     auditEvents: [],
+    scenarios: [],
   };
 }
 
