@@ -32,7 +32,7 @@ import {
   MediaPanel,
   MARKETING_IMAGES,
 } from "@/components/marketing/siemens-ui";
-import { IntegrationLogoMarquee } from "@/components/marketing/integration-logo-marquee";
+import { ConnectedSystemsShowcase } from "@/components/marketing/connected-systems-showcase";
 import { TeamSection } from "@/components/marketing/team-section";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -251,24 +251,11 @@ export default function HomePage() {
         </SectionContainer>
       </Section>
 
-      {/* ── INTEGRATIONS MARQUEE ── */}
-      <Section id="integrations" viewport className="border-b border-border bg-white !py-12 lg:!py-14">
+      {/* ── CONNECTED SYSTEMS ── */}
+      <Section id="integrations" viewportAlign="start" className="border-b border-border bg-white !py-14 lg:!py-20">
         <SectionContainer>
-          <FadeUp className="mx-auto max-w-3xl text-center">
-            <MetaLabel className="text-center text-brand">
-              {t("marketing.integrationsLabel")}
-            </MetaLabel>
-            <h2 className="siemens-display mt-4">
-              {t("marketing.integrationsMarqueeHeadline")}
-            </h2>
-            <p className="siemens-body mx-auto mt-5 max-w-2xl">
-              {t("marketing.integrationsMarqueeBody")}
-            </p>
-          </FadeUp>
+          <ConnectedSystemsShowcase />
         </SectionContainer>
-        <FadeUp delay={0.08} className="mt-10 lg:mt-12">
-          <IntegrationLogoMarquee />
-        </FadeUp>
       </Section>
 
       {/* ── INTELLIGENCE / VALUE ── */}

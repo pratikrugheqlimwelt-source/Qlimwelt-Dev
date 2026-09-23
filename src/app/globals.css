@@ -396,6 +396,41 @@
     animation-play-state: paused;
   }
 
+  /* Connected Systems — infinite logo rivers */
+  .conn-river {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 8%,
+      #000 92%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 8%,
+      #000 92%,
+      transparent 100%
+    );
+  }
+  .conn-river-track {
+    animation: conn-river-scroll var(--conn-river-duration, 48s) linear infinite;
+    will-change: transform;
+  }
+  .conn-river-track-reverse {
+    animation-name: conn-river-scroll-reverse;
+  }
+  .conn-river:hover .conn-river-track {
+    animation-play-state: paused;
+  }
+  .conn-river-track-static {
+    animation: none !important;
+    flex-wrap: wrap;
+    width: 100% !important;
+    max-width: 100%;
+    justify-content: center;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .motion-safe\:transition-all {
       transition: none !important;
@@ -417,6 +452,17 @@
     }
     .logo-marquee-track {
       animation: none !important;
+    }
+    .conn-river {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+    .conn-river-track {
+      animation: none !important;
+      flex-wrap: wrap;
+      width: 100% !important;
+      max-width: 100%;
+      justify-content: center;
     }
   }
 }
@@ -452,6 +498,24 @@
   }
   to {
     transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes conn-river-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes conn-river-scroll-reverse {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
   }
 }
 

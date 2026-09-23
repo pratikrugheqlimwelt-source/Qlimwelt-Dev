@@ -45,8 +45,6 @@ export const INTEGRATION_MARQUEE_LOGOS: MarqueeLogo[] = [
   { id: "azure", name: "Microsoft Azure", domain: "azure.microsoft.com" },
   { id: "gcp", name: "Google Cloud", domain: "cloud.google.com", simpleIcon: "siGooglecloud" },
   // Energy & IoT
-  { id: "siemens", name: "Siemens", domain: "siemens.com", simpleIcon: "siSiemens" },
-  { id: "eon", name: "E.ON", domain: "eon.com" },
   { id: "landisgyr", name: "Smart Meter", domain: "landisgyr.com" },
   { id: "octopus", name: "Energy APIs", domain: "octopus.energy" },
   // Logistics & Fleet
