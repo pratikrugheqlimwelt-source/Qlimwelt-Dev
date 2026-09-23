@@ -458,26 +458,23 @@ export function localUpdateScenario(
   }
 ): BomScenario {
   const now = new Date().toISOString();
-  let updated: BomScenario | null = null;
+  const existing = localGetScenario(companyId, scenarioId);
+  if (!existing) throw new Error("Scenario not found");
+  const updated: BomScenario = {
+    ...existing,
+    name: patch.name?.trim() || existing.name,
+    description: patch.description !== undefined ? patch.description : existing.description,
+    baselineCalculationId:
+      patch.baselineCalculationId !== undefined
+        ? patch.baselineCalculationId
+        : existing.baselineCalculationId,
+    overrides: patch.overrides ?? existing.overrides,
+    updatedAt: now,
+  };
   updateBomLocal(companyId, (s) => ({
     ...s,
-    scenarios: s.scenarios.map((sc) => {
-      if (sc.id !== scenarioId) return sc;
-      updated = {
-        ...sc,
-        name: patch.name?.trim() || sc.name,
-        description: patch.description !== undefined ? patch.description : sc.description,
-        baselineCalculationId:
-          patch.baselineCalculationId !== undefined
-            ? patch.baselineCalculationId
-            : sc.baselineCalculationId,
-        overrides: patch.overrides ?? sc.overrides,
-        updatedAt: now,
-      };
-      return updated!;
-    }),
+    scenarios: s.scenarios.map((sc) => (sc.id === scenarioId ? updated : sc)),
   }));
-  if (!updated) throw new Error("Scenario not found");
   appendAuditEvent({
     companyId,
     entityType: "scenario",
