@@ -34,6 +34,7 @@ export default function BomEditorPage() {
   const [busy, setBusy] = useState(false);
   const [newPart, setNewPart] = useState("");
   const [newQty, setNewQty] = useState("1");
+  const [newUnit, setNewUnit] = useState("kg");
   const [analyticsKey, setAnalyticsKey] = useState(0);
 
   const reload = useCallback(async () => {
@@ -86,6 +87,15 @@ export default function BomEditorPage() {
             type="number"
           />
         </div>
+        <div>
+          <p className="mb-1 text-xs text-muted-foreground">Unit</p>
+          <Input
+            value={newUnit}
+            onChange={(e) => setNewUnit(e.target.value)}
+            className="w-20"
+            placeholder="kg"
+          />
+        </div>
         <Button
           disabled={busy || !newPart.trim()}
           onClick={async () => {
@@ -95,9 +105,9 @@ export default function BomEditorPage() {
                 partNumber: newPart.trim(),
                 description: newPart.trim(),
                 quantity: Number(newQty) || 1,
-                unit: "piece",
+                unit: newUnit.trim() || "kg",
                 parentItemId: selectedId,
-                itemType: "component",
+                itemType: "material",
                 sequenceNo: items.length,
               });
               setNewPart("");
