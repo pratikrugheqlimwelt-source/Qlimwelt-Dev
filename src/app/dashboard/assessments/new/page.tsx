@@ -87,9 +87,23 @@ export default function NewAssessmentPage() {
         </div>
 
         {type === "product" && (
-          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            {t("pages.assessmentsNew.productNote")}
-          </p>
+          <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-900">
+            <p>{t("pages.assessmentsNew.productNote")}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100"
+                onClick={() => router.push("/dashboard/products")}
+              >
+                {t("pages.products.title")}
+              </Button>
+              <span className="rounded-md border border-dashed border-amber-300 px-2 py-1 text-[11px] text-amber-800/80">
+                Select BOM version (required for calculation in Phase 1B) — coming next
+              </span>
+            </div>
+          </div>
         )}
 
         <div className="flex gap-3">

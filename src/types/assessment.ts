@@ -132,6 +132,9 @@ export interface AssessmentProfile {
   orgStructure: OrgStructure | "";
   /** Structure-specific answers keyed by question id */
   structureAnswers: Record<string, unknown>;
+  /** Soft bridge to Products/BOM master data (PCF calc in Phase 1B) */
+  productId?: string | null;
+  bomId?: string | null;
 }
 
 export interface ModuleProgress {
@@ -173,6 +176,8 @@ export function emptyProfile(): AssessmentProfile {
     sustainabilityContact: "",
     orgStructure: "",
     structureAnswers: {},
+    productId: null,
+    bomId: null,
   };
 }
 

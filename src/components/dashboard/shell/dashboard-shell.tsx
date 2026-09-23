@@ -27,6 +27,7 @@ import {
   ChevronDown,
   UsersRound,
   Settings,
+  Package,
 } from "lucide-react";
 import { Logo } from "@/components/marketing/logo";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,7 @@ const NAV_GROUP_DEFS = [
     labelKey: "dashNav.operations",
     items: [
       { href: "/dashboard/assessments", labelKey: "dashNav.assessments", icon: ListChecks },
+      { href: "/dashboard/products", labelKey: "dashNav.products", icon: Package },
       { href: "/dashboard/data-collection", labelKey: "dashNav.dataCollection", icon: DatabaseZap },
       { href: "/dashboard/connected-systems", labelKey: "dashNav.connectedSystems", icon: Plug },
       { href: "/dashboard/resources", labelKey: "dashNav.resources", icon: Layers2 },

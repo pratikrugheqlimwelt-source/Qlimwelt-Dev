@@ -31,6 +31,7 @@ Qlimwelt is a **carbon intelligence workspace**. Signed-in company members can m
 | Page | What it shows / does |
 |------|----------------------|
 | **Assessments** | Guided carbon assessments (profile → boundaries → screening → modules → review) |
+| **Products** | Product master data, versioned multi-level BOMs, Excel/CSV import (BOM Phase 1A) |
 | **Data Collection** | Manual activity entry with live tCO₂e preview and optional evidence upload |
 | **Connected Systems** | Connect catalog systems, test connection, sync, schedule, import files, manage API keys |
 | **Resources** | Facilities, vehicles, and suppliers used to allocate emission activities |
@@ -38,7 +39,8 @@ Qlimwelt is a **carbon intelligence workspace**. Signed-in company members can m
 **Actions you can perform:**
 
 - Create / continue **Corporate Carbon Footprint** assessments (primary path)
-- Start **Product Carbon Footprint** scaffold (full BOM / PACT later); Event / Supplier flows marked coming soon
+- Manage **Products** and versioned BOMs (import, validate, browse tree); Product assessment can link a BOM version (PCF calculation in Phase 1B)
+- Start **Product Carbon Footprint** scaffold linked to Products master data; Event / Supplier flows marked coming soon
 - Add, edit, and delete activity records (delete restricted for admins in DB)
 - Pick templates / emission factors; enter measured or estimated values; attach evidence
 - Add facilities, vehicles (incl. bulk), and suppliers

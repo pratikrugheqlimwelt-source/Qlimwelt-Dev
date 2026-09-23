@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:calc": "npx tsx src/lib/calculations/engine.test.ts",
+    "test:bom": "npx tsx src/lib/bom/bom.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "seed:user": "npx tsx scripts/seed-user-demo.ts"

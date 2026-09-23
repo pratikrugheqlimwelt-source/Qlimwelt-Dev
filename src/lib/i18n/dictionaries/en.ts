@@ -75,6 +75,7 @@ const en: Dict = {
     assessments: "Assessments",
     dataCollection: "Data Collection",
     connectedSystems: "Connected Systems",
+    products: "Products",
     resources: "Resources",
     climateIntelligence: "Climate Intelligence",
     reductionPlanner: "Reduction Planner",
@@ -127,10 +128,11 @@ const en: Dict = {
       supplierHint: "Supplier questionnaires and data-request workflows",
       comingSoon: "Coming soon",
       productNote:
-        "Product CCF opens a scaffolded branch in this MVP. Full BOM / PACT workflows follow in Phase 2.",
+        "Product CCF still uses the guided scaffold. Create product master data and BOMs under Products; link a BOM version here in Phase 1B when calculation ships.",
     },
     assessmentWizard: {
-      productDesc: "Product CCF scaffold — define profile & boundaries; full BOM flows in Phase 2.",
+      productDesc:
+        "Product CCF scaffold — define profile & boundaries. Manage BOM structure under Products (Phase 1A). PCF calculation against a BOM version is Phase 1B.",
       corporateDesc: "Guided corporate assessment: structure → screening → quantities.",
       tip: "Only collect quantities for modules activated by operational screening.",
       stepProfile: "Company profile",
@@ -261,6 +263,24 @@ const en: Dict = {
     settings: {
       title: "Settings",
       description: "Company profile, carbon price, GWP values, and custom emission factors.",
+    },
+    products: {
+      title: "Products",
+      description: "Product master data and versioned multi-level bills of materials (BOM Phase 1A).",
+      tip: "Create a product to open its engineering BOM. Import CSV with part_number and optional parent_part_number. Carbon mapping and PCF calculation arrive in Phase 1B.",
+      new: "New product",
+      emptyTitle: "No products yet",
+      emptyBody: "Create a product to manage versioned BOMs. Product assessments can link a BOM version once Phase 1B calculation is enabled.",
+      notFound: "Product not found.",
+      versions: "Versions",
+      boms: "Bills of materials",
+      openBom: "Open BOM",
+      bomTitle: "Bill of materials",
+      bomLoading: "Loading BOM…",
+      addPart: "Part number",
+      addItem: "Add item",
+      itemSaved: "BOM item saved",
+      importCommitted: "BOM import committed",
     },
   },
   status: {
