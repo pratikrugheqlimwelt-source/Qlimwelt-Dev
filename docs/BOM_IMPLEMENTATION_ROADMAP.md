@@ -22,7 +22,7 @@ Permission-gated phases. **Stop and ask before starting the next phase.**
 
 **Gate:** Ask permission before 1C.
 
-## Phase 1C — Audit & data quality (current)
+## Phase 1C — Audit & data quality ✅
 
 - Calculation approval workflow
 - DQ dimensions (temporal / geo / tech)
@@ -31,10 +31,12 @@ Permission-gated phases. **Stop and ask before starting the next phase.**
 
 **Gate:** Ask permission before 1D.
 
-## Phase 1D — Analytics UX
+## Phase 1D — Analytics UX ✅
 
 - Hotspots, BOM carbon explorer, version comparison
 - Lifecycle breakdown dashboard
+
+**Gate:** Ask permission before Phase 6 (scenario / what-if).
 
 ## Later (permission-gated)
 

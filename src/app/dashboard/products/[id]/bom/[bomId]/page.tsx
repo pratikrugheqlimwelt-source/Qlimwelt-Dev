@@ -8,6 +8,7 @@ import { BomTree } from "@/components/dashboard/products/bom-tree";
 import { BomItemDetail } from "@/components/dashboard/products/bom-item-detail";
 import { BomImportWizard } from "@/components/dashboard/products/bom-import-wizard";
 import { BomCarbonPanel } from "@/components/dashboard/products/bom-carbon-panel";
+import { BomCarbonAnalytics } from "@/components/dashboard/products/bom-carbon-analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
@@ -33,6 +34,7 @@ export default function BomEditorPage() {
   const [busy, setBusy] = useState(false);
   const [newPart, setNewPart] = useState("");
   const [newQty, setNewQty] = useState("1");
+  const [analyticsKey, setAnalyticsKey] = useState(0);
 
   const reload = useCallback(async () => {
     const [b, list] = await Promise.all([
@@ -157,6 +159,12 @@ export default function BomEditorPage() {
             bomId={params.bomId}
             item={selected}
             busy={busy}
+            onCalculated={() => setAnalyticsKey((k) => k + 1)}
+          />
+          <BomCarbonAnalytics
+            companyId={company.id}
+            bomId={params.bomId}
+            refreshKey={analyticsKey}
           />
           <BomImportWizard
             busy={busy}

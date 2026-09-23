@@ -21,6 +21,8 @@ import {
 import {
   ensureCarbonLibrary,
   localApproveMapping,
+  localCompareCalculations,
+  localGetBomAnalytics,
   localListCalculations,
   localListFactors,
   localListMappings,
@@ -33,6 +35,10 @@ import {
   localSuggestForItem,
   localUpsertMapping,
 } from "./carbon/local-service";
+import type {
+  BomAnalytics,
+  VersionCompareResult,
+} from "./carbon/analytics";
 import type { BomAuditEvent, CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "./carbon/types";
 async function tryJson<T>(res: Response): Promise<T | null> {
   try {
@@ -469,4 +475,44 @@ export async function fetchBomAuditEvents(
     /* local */
   }
   return localListAuditEvents(companyId, filter);
+}
+
+export async function fetchBomAnalytics(
+  companyId: string,
+  bomId: string,
+  calculationId?: string
+): Promise<BomAnalytics | null> {
+  try {
+    const params = new URLSearchParams();
+    if (calculationId) params.set("calculationId", calculationId);
+    const qs = params.toString();
+    const res = await fetch(
+      `/api/bom/boms/${bomId}/analytics${qs ? `?${qs}` : ""}`
+    );
+    if (res.ok) {
+      const data = await tryJson<{ analytics: BomAnalytics }>(res);
+      if (data?.analytics) return data.analytics;
+    }
+  } catch {
+    /* local */
+  }
+  return localGetBomAnalytics(companyId, bomId, calculationId);
+}
+
+export async function compareBomCalculations(
+  companyId: string,
+  leftId: string,
+  rightId: string
+): Promise<VersionCompareResult> {
+  try {
+    const params = new URLSearchParams({ left: leftId, right: rightId });
+    const res = await fetch(`/api/bom/calculations/compare?${params.toString()}`);
+    if (res.ok) {
+      const data = await tryJson<{ comparison: VersionCompareResult }>(res);
+      if (data?.comparison) return data.comparison;
+    }
+  } catch {
+    /* local */
+  }
+  return localCompareCalculations(companyId, leftId, rightId);
 }

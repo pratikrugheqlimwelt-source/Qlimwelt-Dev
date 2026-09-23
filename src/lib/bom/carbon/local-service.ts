@@ -9,6 +9,12 @@ import { appendAuditEvent, listAuditEvents } from "./audit";
 import { calculateBomPcf } from "./calculate";
 import { suggestMappings } from "./mapping";
 import { seedDemoCarbonLibrary } from "./seed";
+import {
+  buildBomAnalytics,
+  compareCalculations,
+  type BomAnalytics,
+  type VersionCompareResult,
+} from "./analytics";
 import { detectStaleCalculation } from "./stale";
 import type {
   CarbonDataset,
@@ -352,7 +358,37 @@ export function localListAuditEvents(
   return listAuditEvents(companyId, filter);
 }
 
+export function localGetBomAnalytics(
+  companyId: string,
+  bomId: string,
+  calculationId?: string
+): BomAnalytics | null {
+  const calcs = localListCalculations(companyId, bomId).filter(
+    (c) => c.status === "completed" || c.status === "superseded"
+  );
+  const calc = calculationId
+    ? calcs.find((c) => c.id === calculationId) ?? null
+    : calcs.find((c) => !c.isStale) ?? calcs[0] ?? null;
+  if (!calc) return null;
+  const items = loadBomLocal(companyId).items.filter((i) => i.bomId === bomId);
+  // ensure ledger present
+  const full = localGetCalculation(companyId, calc.id) ?? calc;
+  return buildBomAnalytics(full, items);
+}
+
+export function localCompareCalculations(
+  companyId: string,
+  leftId: string,
+  rightId: string
+): VersionCompareResult {
+  const left = localGetCalculation(companyId, leftId);
+  const right = localGetCalculation(companyId, rightId);
+  if (!left || !right) throw new Error("Both calculations are required for comparison");
+  return compareCalculations(left, right);
+}
+
 export function resetCarbonLocal(companyId: string) {
+
   clearBomLocal(companyId);
 }
 
