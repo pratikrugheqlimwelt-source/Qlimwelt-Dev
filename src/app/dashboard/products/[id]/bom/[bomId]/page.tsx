@@ -11,6 +11,7 @@ import { BomCarbonPanel } from "@/components/dashboard/products/bom-carbon-panel
 import { BomCarbonAnalytics } from "@/components/dashboard/products/bom-carbon-analytics";
 import { BomScenarioPanel } from "@/components/dashboard/products/bom-scenario-panel";
 import { BomSupplierPcfPanel } from "@/components/dashboard/products/bom-supplier-pcf-panel";
+import { BomConnectorPanel } from "@/components/dashboard/products/bom-connector-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
@@ -190,6 +191,16 @@ export default function BomEditorPage() {
             items={items}
             selectedItemId={selectedId}
             refreshKey={analyticsKey}
+          />
+          <BomConnectorPanel
+            companyId={company.id}
+            bomId={params.bomId}
+            busy={busy}
+            onCommitted={async () => {
+              await reload();
+              setAnalyticsKey((k) => k + 1);
+              toast({ title: "Connector import committed" });
+            }}
           />
           <BomImportWizard
             busy={busy}

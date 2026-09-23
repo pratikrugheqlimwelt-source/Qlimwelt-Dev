@@ -17,7 +17,8 @@
     "test:e2e:ui": "playwright test --ui",
     "seed:user": "npx tsx scripts/seed-user-demo.ts",
     "test:bom:scenario": "npx tsx src/lib/bom/carbon/scenario.test.ts",
-    "test:bom:supplier-pcf": "npx tsx src/lib/bom/carbon/supplier-pcf.test.ts"
+    "test:bom:supplier-pcf": "npx tsx src/lib/bom/carbon/supplier-pcf.test.ts",
+    "test:bom:connectors": "npx tsx src/lib/bom/connectors/connectors.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

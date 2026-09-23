@@ -16,8 +16,14 @@ import {
   localListBomItems,
   localListProducts,
   localPreviewImport,
+  localPreviewConnectorImport,
   localUpsertBomItem,
 } from "./local-service";
+import {
+  BOM_CONNECTOR_PROFILES,
+  type BomConnectorKind,
+  type ConnectorNormalizeResult,
+} from "./connectors";
 import {
   ensureCarbonLibrary,
   localApproveMapping,
@@ -723,4 +729,34 @@ export function rejectSupplierPcfRequest(
   reviewNotes?: string | null
 ) {
   return patchSupplierPcfRequest(companyId, requestId, "reject", reviewNotes);
+}
+
+export function listBomConnectorProfiles() {
+  return BOM_CONNECTOR_PROFILES;
+}
+
+export async function previewBomConnectorImport(
+  companyId: string,
+  bomId: string,
+  kind: BomConnectorKind,
+  payload: string,
+  fileName?: string
+): Promise<{ job: BomImportJob; normalized: ConnectorNormalizeResult }> {
+  try {
+    const res = await fetch(`/api/bom/boms/${bomId}/connectors`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind, payload, fileName }),
+    });
+    if (res.ok) {
+      const data = await tryJson<{
+        job: BomImportJob;
+        normalized: ConnectorNormalizeResult;
+      }>(res);
+      if (data?.job && data.normalized) return data;
+    }
+  } catch {
+    /* local */
+  }
+  return localPreviewConnectorImport(companyId, bomId, kind, payload, fileName);
 }
