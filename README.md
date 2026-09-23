@@ -2,6 +2,9 @@
 
 Carbon intelligence platform — emissions dashboard, CSRD-ready reporting, and Google OAuth onboarding.
 
+**Dashboard capabilities & who can use it:** see [DASHBOARD_README.md](./DASHBOARD_README.md).  
+**Step-by-step usage:** see [docs/DASHBOARD_USER_MANUAL.md](./docs/DASHBOARD_USER_MANUAL.md).
+
 ## Stack
 
 - **Next.js 15** (App Router)
