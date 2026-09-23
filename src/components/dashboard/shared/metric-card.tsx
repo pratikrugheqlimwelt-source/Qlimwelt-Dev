@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { HelpCorner } from "@/components/ui/tooltip";
 import { MetricFigure } from "@/components/ui/metric-figure";
@@ -21,7 +21,7 @@ const ACCENT_STYLES: Record<Accent, {
     icon: "bg-gradient-to-br from-[#82D153]/20 to-[#5cb832]/10 text-[#3d8b2e] ring-1 ring-[#82D153]/30",
     glow: "from-[#82D153]/15 to-transparent",
     spark: "#82D153",
-    bg: "from-[#82D153]/[0.06] to-white",
+    bg: "from-[#82D153]/10 to-white",
   },
   scope1: {
     bar: "bg-gradient-to-b from-slate-700 to-slate-900",

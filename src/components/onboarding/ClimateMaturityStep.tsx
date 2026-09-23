@@ -43,7 +43,7 @@ function MultiToggle({
             className={cn(
               "rounded-lg border px-3 py-2 text-left text-xs font-medium transition-colors",
               active
-                ? "border-[#82D153] bg-[#82D153]/10 text-[#3d8b2e]"
+                ? "border-[#82D153] bg-[#82D153]/10 text-[#5cb832]"
                 : "border-border text-muted-foreground hover:border-foreground/30"
             )}
           >
@@ -118,7 +118,7 @@ export function ClimateMaturityStep({ data, errors, onChange }: ClimateMaturityS
                 className={cn(
                   "rounded-lg border px-4 py-2 text-sm font-medium",
                   data.hasClimateTarget === value
-                    ? "border-[#82D153] bg-[#82D153]/10 text-[#3d8b2e]"
+                    ? "border-[#82D153] bg-[#82D153]/10 text-[#5cb832]"
                     : "border-border text-muted-foreground"
                 )}
               >

@@ -58,7 +58,7 @@ export function FilterBar() {
       />
       <div className="flex items-center justify-between gap-4 border-b border-border/40 px-5 py-3.5 pr-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand-dark">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#82D153]/15 text-[#3d8b2e]">
             <SlidersHorizontal className="h-4 w-4" />
           </div>
           <div>

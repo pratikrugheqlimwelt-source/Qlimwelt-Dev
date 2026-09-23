@@ -54,14 +54,14 @@ export function TechStackIntegrations() {
         <SectionIntro
           label={t("marketing.integrationsLabel")}
           lines={[
-            { text: t("marketing.integrationsTitle1"), italic: true },
+            { text: t("marketing.integrationsTitle1") },
             { text: t("marketing.integrationsTitle2") },
           ]}
         />
-        <p className="mt-5 max-w-xl font-serif text-xl italic leading-snug text-[#2f6f24] sm:text-2xl">
+        <p className="mt-4 max-w-xl text-base font-medium leading-snug text-brand-dark sm:text-lg">
           {t("marketing.integrationsSubhead")}
         </p>
-        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
+        <p className="siemens-body mt-4 max-w-2xl">
           {t("marketing.integrationsBody")}
         </p>
       </FadeUp>
@@ -81,20 +81,20 @@ export function TechStackIntegrations() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.45, delay: i * 0.04, ease: EASE_OUT }}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#82D153]/40"
+              className="siemens-card group"
             >
               <div className="flex items-start justify-between gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#82D153]/12 text-[#2f6f24] ring-1 ring-[#82D153]/25 transition-transform group-hover:scale-105">
-                  <Icon className="h-5 w-5" strokeWidth={2} />
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-brand">
+                  <Icon className="h-5 w-5" strokeWidth={1.75} />
                 </span>
-                <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-300">
+                <span className="font-sans text-xs font-medium tabular-nums text-muted-foreground/50">
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>
-              <h3 className="type-title mt-5 text-xl text-slate-900 sm:text-[1.35rem]">
+              <h3 className="mt-5 font-sans text-lg font-semibold tracking-tight text-foreground">
                 {t(`marketing.integrationsSrc${key}Title`)}
               </h3>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {t(`marketing.integrationsSrc${key}Body`)}
               </p>
             </motion.div>
@@ -129,7 +129,7 @@ export function TechStackIntegrations() {
         </div>
 
         <FadeUp>
-          <p className="mx-auto mt-10 max-w-2xl text-center font-serif text-lg italic leading-snug text-slate-800 sm:text-xl">
+          <p className="mx-auto mt-10 max-w-2xl text-center font-sans text-lg font-medium leading-snug text-slate-800 sm:text-xl">
             {t("marketing.integrationsFitClosing")}
           </p>
         </FadeUp>

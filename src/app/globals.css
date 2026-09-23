@@ -4,33 +4,40 @@
 
 @layer base {
   :root {
+    /* Brand greens locked to logo mark #82D153 */
     --background: 0 0% 100%;
-    --foreground: 0 0% 7%;
+    --foreground: 210 25% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
+    --card-foreground: 210 25% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
-    --primary: 0 0% 7%;
+    --popover-foreground: 210 25% 12%;
+    --primary: 168 100% 15%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 7%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 98 62% 55%;
-    --accent-foreground: 0 0% 7%;
-    --brand: 98 70% 45%;
-    --brand-dark: 98 55% 38%;
-    --brand-light: 98 60% 95%;
+    --secondary: 98 30% 96%;
+    --secondary-foreground: 210 25% 12%;
+    --muted: 98 20% 96%;
+    --muted-foreground: 210 10% 42%;
+    --accent: 98 58% 57%;
+    --accent-foreground: 210 28% 9%;
+    --brand: 98 58% 57%;
+    --brand-dark: 98 55% 32%;
+    --brand-light: 98 45% 94%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --success: 98 62% 45%;
+    --success: 98 52% 42%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 98 62% 45%;
-    --radius: 0.5rem;
+    --border: 210 14% 90%;
+    --input: 210 14% 90%;
+    --ring: 98 58% 45%;
+    --radius: 0.125rem;
+    --siemens-surface: 98 18% 97%;
+    --siemens-ink: 210 28% 9%;
+    --siemens-teal: 174 100% 28%;
+    /* Sticky nav + one standard screen for marketing sections */
+    --marketing-nav-h: 4rem;
+    --viewport-section-h: calc(100svh - var(--marketing-nav-h));
   }
 }
 
@@ -42,6 +49,7 @@
   }
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: var(--marketing-nav-h);
     overflow-anchor: none;
   }
   body {
@@ -64,7 +72,21 @@
 /* Marketing editorial sections */
 @layer components {
   .section-shell {
-    @apply relative overflow-hidden border-b border-border py-12 lg:py-14;
+    @apply relative overflow-hidden border-b border-border py-14 lg:py-16;
+  }
+  /* One standard screen tall (minus sticky nav); grows if content needs more room */
+  .viewport-section {
+    min-height: var(--viewport-section-h);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  .viewport-section-fill {
+    min-height: var(--viewport-section-h);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
   }
   .section-container {
     @apply mx-auto max-w-7xl px-4 lg:px-8;
@@ -109,6 +131,47 @@
     line-height: 1.15;
   }
 
+  /* Siemens marketing primitives */
+  .siemens-eyebrow {
+    @apply font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-brand;
+  }
+  .siemens-display {
+    @apply font-sans font-bold tracking-[-0.03em] text-[hsl(var(--siemens-ink))];
+    font-size: clamp(1.85rem, 1.1rem + 2.5vw, 3.15rem);
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    line-height: 1.1;
+  }
+  .siemens-body {
+    @apply leading-[1.65] text-muted-foreground;
+    font-size: clamp(0.9375rem, 0.88rem + 0.2vw, 1.05rem);
+  }
+  .siemens-card {
+    @apply rounded-sm border border-border bg-white p-6 shadow-none transition-colors duration-200 hover:border-primary/25;
+  }
+  .siemens-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-sm font-semibold tracking-tight text-primary-foreground transition-colors duration-200 hover:bg-[hsl(168_90%_12%)];
+  }
+  .siemens-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-border bg-white px-5 py-2.5 text-sm font-semibold tracking-tight text-foreground transition-colors duration-200 hover:border-primary/35 hover:bg-secondary;
+  }
+  .siemens-chip {
+    @apply inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground;
+  }
+  .siemens-divider {
+    @apply border-0 border-t border-border;
+  }
+  .siemens-link {
+    @apply text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground;
+  }
+  .hero-diagonal {
+    clip-path: polygon(12% 0, 100% 0, 100% 100%, 0% 100%);
+  }
+  @media (max-width: 1023px) {
+    .hero-diagonal {
+      clip-path: none;
+    }
+  }
+
   /* Qlim AI design system — light theme */
 
   /* Shared professional metric figures — Plus Jakarta (clear digits like 106.8 tCO₂e) */
@@ -125,7 +188,7 @@
     @apply shrink-0 font-sans text-[0.55em] font-medium tracking-normal text-current opacity-55;
   }
 
-  /* Dashboard design system — same type stack as landing (Jakarta / Playfair / JetBrains) */
+  /* Dashboard design system — soft canvas, frosted cards, logo green accents */
   .dash-root {
     @apply bg-[#e8edf4] font-sans text-foreground antialiased;
     font-feature-settings: "ss01" 1, "cv11" 1;
@@ -139,14 +202,12 @@
   .dash-root h2,
   .dash-root h3,
   .dash-title {
-    @apply font-sans font-semibold tracking-tight;
+    @apply font-sans font-semibold tracking-tight text-foreground;
     font-family: var(--font-sans), system-ui, sans-serif;
   }
-  /* Alias: large KPI figures use the shared professional metric style */
   .dash-metric {
     @apply metric-figure;
   }
-  /* Dense table / inline figures — JetBrains for column alignment */
   .dash-num {
     @apply font-mono font-semibold tabular-nums tracking-tight;
     font-variant-numeric: tabular-nums lining-nums;
@@ -161,7 +222,7 @@
     @apply rounded-2xl border border-white/60 bg-white/95 shadow-[0_1px_3px_rgba(15,23,42,0.04),0_8px_24px_rgba(15,23,42,0.06)] backdrop-blur-sm;
   }
   .dash-metric-card {
-    @apply rounded-2xl border border-white/80 p-4 shadow-[0_2px_8px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(15,23,42,0.1)];
+    @apply rounded-2xl border border-white/80 bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.03)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(15,23,42,0.1)];
   }
   .dash-metric-card-compact {
     @apply rounded-xl p-3 shadow-[0_1px_4px_rgba(15,23,42,0.04),0_2px_10px_rgba(15,23,42,0.03)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.08)];
@@ -203,6 +264,20 @@
   .dash-pill-blue {
     @apply dash-pill bg-blue-50 text-blue-700 ring-1 ring-blue-200/60;
   }
+  .dash-nav-item {
+    @apply relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium tracking-tight transition-colors;
+  }
+  .dash-nav-item-active {
+    @apply bg-[#82D153]/15 text-[#3d8b2e];
+  }
+  .dash-nav-item-idle {
+    @apply text-muted-foreground hover:bg-white/80 hover:text-foreground;
+  }
+  /* Soft corners for shared UI primitives rendered inside the dashboard */
+  .dash-root :is(button, a, [role="button"]).rounded-sm,
+  .dash-root :is(button, a)[class*="rounded-sm"] {
+    border-radius: 0.75rem;
+  }
 }
 
 /* Expanded chart modal — enlarge charts without a frame/box */
@@ -229,26 +304,23 @@
     font-family: var(--font-mono), ui-monospace, monospace;
   }
 
-  /* Brand gradients & effects */
+  /* Brand gradients & effects — Siemens-aligned (no glow) */
   .gradient-brand {
-    background: linear-gradient(135deg, hsl(98 70% 55%) 0%, hsl(98 55% 42%) 100%);
+    background: hsl(var(--primary));
   }
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(0 0% 15%) 0%, hsl(0 0% 30%) 100%);
+    background: hsl(var(--primary));
   }
   .text-gradient-brand {
-    background: linear-gradient(135deg, hsl(var(--brand)) 0%, hsl(var(--brand-dark)) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: hsl(var(--primary));
+    background: none;
+    -webkit-text-fill-color: unset;
   }
   .glass {
-    @apply border-border/50 bg-background/85 backdrop-blur-md;
+    @apply border-border bg-white;
   }
   .gradient-mesh {
-    background:
-      radial-gradient(ellipse at 20% 50%, hsl(98 70% 55% / 0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, hsl(98 60% 70% / 0.06) 0%, transparent 40%);
+    background: hsl(var(--siemens-surface));
   }
 
   /* Editorial patterns */
@@ -278,6 +350,31 @@
     animation: shimmer 1s ease-in-out infinite;
   }
 
+  /* Premium integration logo marquee */
+  .logo-marquee {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 10%,
+      #000 90%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #000 10%,
+      #000 90%,
+      transparent 100%
+    );
+  }
+  .logo-marquee-track {
+    animation: logo-marquee-scroll 48s linear infinite;
+    will-change: transform;
+  }
+  .logo-marquee:hover .logo-marquee-track {
+    animation-play-state: paused;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .motion-safe\:transition-all {
       transition: none !important;
@@ -285,6 +382,19 @@
     .animate-marquee,
     .animate-float,
     .animate-shimmer {
+      animation: none !important;
+    }
+    .logo-marquee {
+      -webkit-mask-image: none;
+      mask-image: none;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .logo-marquee::-webkit-scrollbar {
+      display: none;
+    }
+    .logo-marquee-track {
       animation: none !important;
     }
   }
@@ -312,6 +422,15 @@
   }
   to {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes logo-marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 

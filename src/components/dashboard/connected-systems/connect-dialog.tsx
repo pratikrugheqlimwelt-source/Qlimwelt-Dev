@@ -185,7 +185,6 @@ export function ConnectDialog({
           </Button>
           <Button
             variant="default"
-            className="border border-black bg-white text-black shadow-none hover:border-[#82D153] hover:bg-[#82D153] hover:text-black"
             disabled={busy}
             onClick={async () => {
               setBusy(true);

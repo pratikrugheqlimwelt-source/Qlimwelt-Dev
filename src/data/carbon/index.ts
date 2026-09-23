@@ -85,7 +85,7 @@ export const climateTarget: ClimateTarget = {
   name: "Science-Based Target 2030",
   baselineYear: 2023,
   targetYear: 2030,
-  baselineEmissionsTCO2e: 14200,
+  baselineEmissionsTCO2e: 18500,
   targetReductionPct: 42,
   type: "absolute",
 };
@@ -188,32 +188,33 @@ export function generateActivities(): EmissionActivity[] {
     const m = MONTHS.indexOf(period);
     const d = monthDrivers(m);
 
-    // Scope 1 — combustion varies strongly with season (~18–28% of monthly total)
-    activities.push(act(`a-${idx++}`, period, "scope1", "Stationary combustion", "Natural gas", "Munich boiler", Math.round(2340000 * d.heating), "kWh", 0.000202, "fac-mun", "bu-ops", "Germany", "fuel_based", 88, false));
-    activities.push(act(`a-${idx++}`, period, "scope1", "Stationary combustion", "Natural gas", "Hamburg heating", Math.round(504000 * d.heating), "kWh", 0.000202, "fac-ham", "bu-log", "Germany", "fuel_based", 85, false));
-    activities.push(act(`a-${idx++}`, period, "scope1", "Mobile combustion", "Diesel", "Fleet fuel — vans", Math.round(8160 * d.fleet), "litre", 0.00268, "fac-ham", "bu-log", "Germany", "fuel_based", 82, false));
-    activities.push(act(`a-${idx++}`, period, "scope1", "Mobile combustion", "Petrol", "Fleet fuel — cars", Math.round(3840 * d.fleet), "litre", 0.00231, "fac-ams", "bu-sales", "Netherlands", "fuel_based", 80, false));
+    // Scope 1 — combustion varies strongly with season (~20–30% of annual total)
+    // Factors are kgCO₂e per activity unit (engine ÷ 1000 → tCO₂e)
+    activities.push(act(`a-${idx++}`, period, "scope1", "Stationary combustion", "Natural gas", "Munich boiler", Math.round(1_250_000 * d.heating), "kWh", 0.202, "fac-mun", "bu-ops", "Germany", "fuel_based", 88, false));
+    activities.push(act(`a-${idx++}`, period, "scope1", "Stationary combustion", "Natural gas", "Hamburg heating", Math.round(280_000 * d.heating), "kWh", 0.202, "fac-ham", "bu-log", "Germany", "fuel_based", 85, false));
+    activities.push(act(`a-${idx++}`, period, "scope1", "Mobile combustion", "Diesel", "Fleet fuel — vans", Math.round(8160 * d.fleet), "litre", 2.68, "fac-ham", "bu-log", "Germany", "fuel_based", 82, false));
+    activities.push(act(`a-${idx++}`, period, "scope1", "Mobile combustion", "Petrol", "Fleet fuel — cars", Math.round(3840 * d.fleet), "litre", 2.31, "fac-ams", "bu-sales", "Netherlands", "fuel_based", 80, false));
     activities.push(act(`a-${idx++}`, period, "scope1", "Fugitive emissions", "Refrigerants", "HVAC Munich", 0.1 + (m >= 5 && m <= 8 ? 0.08 : 0) + m * 0.004, "kg", 1430, "fac-mun", "bu-ops", "Germany", "activity_specific", 75, false));
-    activities.push(act(`a-${idx++}`, period, "scope1", "Process emissions", "Industrial process", "Coating line", Math.round(4800 * d.production), "kg", 0.0028, "fac-mun", "bu-ops", "Germany", "activity_specific", 79, false));
+    activities.push(act(`a-${idx++}`, period, "scope1", "Process emissions", "Industrial process", "Coating line", Math.round(4800 * d.production), "kg", 2.8, "fac-mun", "bu-ops", "Germany", "activity_specific", 79, false));
 
-    // Scope 2 — electricity tracks production + cooling (~12–18% of monthly total)
-    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased electricity", "Grid mix", "Munich plant", Math.round(2770000 * d.electricity * d.production), "kWh", 0.000385, "fac-mun", "bu-ops", "Germany", "location_based", 92, false));
-    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased electricity", "Grid mix", "Hamburg warehouse", Math.round(633000 * d.electricity), "kWh", 0.000385, "fac-ham", "bu-log", "Germany", "location_based", 90, false));
-    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased electricity", "Grid mix", "Amsterdam office", Math.round(230000 * d.electricity), "kWh", 0.000312, "fac-ams", "bu-corp", "Netherlands", "location_based", 88, false));
-    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased heating", "District heating", "Amsterdam office", Math.round(56000 * d.heating), "kWh", 0.00018, "fac-ams", "bu-corp", "Netherlands", "activity_specific", 78, false));
-    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased steam", "Process steam", "Munich plant", Math.round(34000 * d.production), "kWh", 0.00022, "fac-mun", "bu-ops", "Germany", "activity_specific", 84, false));
+    // Scope 2 — electricity tracks production + cooling (~15–25%)
+    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased electricity", "Grid mix", "Munich plant", Math.round(780_000 * d.electricity * d.production), "kWh", 0.385, "fac-mun", "bu-ops", "Germany", "location_based", 92, false));
+    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased electricity", "Grid mix", "Hamburg warehouse", Math.round(210_000 * d.electricity), "kWh", 0.385, "fac-ham", "bu-log", "Germany", "location_based", 90, false));
+    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased electricity", "Grid mix", "Amsterdam office", Math.round(95_000 * d.electricity), "kWh", 0.312, "fac-ams", "bu-corp", "Netherlands", "location_based", 88, false));
+    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased heating", "District heating", "Amsterdam office", Math.round(42_000 * d.heating), "kWh", 0.18, "fac-ams", "bu-corp", "Netherlands", "activity_specific", 78, false));
+    activities.push(act(`a-${idx++}`, period, "scope2", "Purchased steam", "Process steam", "Munich plant", Math.round(28_000 * d.production), "kWh", 0.22, "fac-mun", "bu-ops", "Germany", "activity_specific", 84, false));
 
-    // Scope 3 — value chain linked to production (~55–65% of monthly total)
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 1", "Purchased goods", "Raw materials — steel", Math.round(920000 * d.production), "EUR", 0.005, "fac-mun", "bu-ops", "Germany", "spend_based", 52, true));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 1", "Purchased goods", "Components & parts", Math.round(540000 * d.production), "EUR", 0.0035, "fac-mun", "bu-ops", "Germany", "spend_based", 58, true));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 2", "Capital goods", "Machinery capex", m === 2 || m === 8 ? 180000 : 45000, "EUR", 0.0021, "fac-mun", "bu-ops", "Germany", "spend_based", 45, true));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 4", "Upstream transport", "Road freight inbound", Math.round(98000 * d.production), "tonne-km", 0.000112, "fac-ham", "bu-log", "Germany", "distance_based", 68, false));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 4", "Downstream transport", "Road freight outbound", Math.round(72000 * d.production), "tonne-km", 0.000098, "fac-ham", "bu-log", "Germany", "distance_based", 65, false));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 5", "Waste", "General waste", Math.round(22 * d.production), "tonne", 0.52, "fac-mun", "bu-ops", "Germany", "average_data", 72, false));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 6", "Business travel", "Flights — short haul", Math.round(38000 * d.travel), "passenger-km", 0.000156, "fac-ams", "bu-sales", "Netherlands", "distance_based", 65, false));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 6", "Business travel", "Flights — long haul", Math.round(12000 * d.travel), "passenger-km", 0.000195, "fac-ams", "bu-sales", "Netherlands", "distance_based", 62, false));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 7", "Employee commuting", "Car commute", Math.round(842 * 18 * d.fleet), "km", 0.00021, "fac-mun", "bu-ops", "Germany", "average_data", 58, true));
-    activities.push(act(`a-${idx++}`, period, "scope3", "Category 7", "Employee commuting", "Public transit", Math.round(842 * 8 * d.fleet), "km", 0.000042, "fac-ams", "bu-corp", "Netherlands", "average_data", 55, true));
+    // Scope 3 — purchased goods dominate (~50–60%)
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 1", "Purchased goods", "Raw materials — steel", Math.round(210_000 * d.production), "EUR", 1.85, "fac-mun", "bu-ops", "Germany", "spend_based", 52, true));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 1", "Purchased goods", "Components & parts", Math.round(145_000 * d.production), "EUR", 1.25, "fac-mun", "bu-ops", "Germany", "spend_based", 58, true));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 2", "Capital goods", "Machinery capex", m === 2 || m === 8 ? 95_000 : 22_000, "EUR", 0.95, "fac-mun", "bu-ops", "Germany", "spend_based", 45, true));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 4", "Upstream transport", "Road freight inbound", Math.round(98000 * d.production), "tonne-km", 0.112, "fac-ham", "bu-log", "Germany", "distance_based", 68, false));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 4", "Downstream transport", "Road freight outbound", Math.round(72000 * d.production), "tonne-km", 0.098, "fac-ham", "bu-log", "Germany", "distance_based", 65, false));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 5", "Waste", "General waste", Math.round(22 * d.production), "tonne", 520, "fac-mun", "bu-ops", "Germany", "average_data", 72, false));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 6", "Business travel", "Flights — short haul", Math.round(38000 * d.travel), "passenger-km", 0.156, "fac-ams", "bu-sales", "Netherlands", "distance_based", 65, false));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 6", "Business travel", "Flights — long haul", Math.round(12000 * d.travel), "passenger-km", 0.195, "fac-ams", "bu-sales", "Netherlands", "distance_based", 62, false));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 7", "Employee commuting", "Car commute", Math.round(842 * 18 * d.fleet), "km", 0.21, "fac-mun", "bu-ops", "Germany", "average_data", 58, true));
+    activities.push(act(`a-${idx++}`, period, "scope3", "Category 7", "Employee commuting", "Public transit", Math.round(842 * 8 * d.fleet), "km", 0.042, "fac-ams", "bu-corp", "Netherlands", "average_data", 55, true));
   }
 
   return activities;

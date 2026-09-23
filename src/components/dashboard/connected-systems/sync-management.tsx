@@ -40,10 +40,10 @@ export function SyncManagement({
                 type="button"
                 onClick={() => onScheduleChange(active.id, s)}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-xs font-semibold ring-1 transition",
+                  "rounded-xl px-3 py-1.5 text-xs font-semibold ring-1 transition",
                   active.syncSchedule === s
-                    ? "bg-[#82D153]/15 text-[#2f6f24] ring-[#82D153]/35"
-                    : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50"
+                    ? "bg-primary/10 text-primary ring-primary/30"
+                    : "bg-white text-muted-foreground ring-border hover:bg-secondary"
                 )}
               >
                 {t(`connectedSystemsPage.schedule.${s}`)}

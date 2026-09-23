@@ -219,7 +219,7 @@ export const carbonFootprintTopics = [
       "Indirect emissions from electricity, steam, heating, and cooling bought for your operations. Location-based and market-based methods both matter for CSRD.",
     share: "16%",
     shareLabel: "Typical mid-market share",
-    accent: "#22c55e",
+    accent: "#82D153",
     examples: ["Grid electricity", "District heating", "Renewable PPAs", "Steam for production"],
     image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Solar panels generating renewable electricity",

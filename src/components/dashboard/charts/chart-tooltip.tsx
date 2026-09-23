@@ -16,7 +16,7 @@ export function ChartTooltip({ active, payload, label, unit = "tCO₂e", formatt
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="min-w-[160px] rounded-xl border border-slate-200/80 bg-white/95 px-4 py-3 shadow-[0_12px_40px_rgba(15,23,42,0.16)] backdrop-blur-sm ring-1 ring-black/5">
+    <div className="min-w-[160px] rounded-xl border border-border bg-white px-4 py-3 shadow-lg">
       {label && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>}
       {subtitle && <p className="mb-2 text-[11px] text-muted-foreground">{subtitle}</p>}
       <div className="space-y-1.5">
@@ -26,7 +26,7 @@ export function ChartTooltip({ active, payload, label, unit = "tCO₂e", formatt
           return (
             <div key={i} className="flex items-center justify-between gap-6">
               <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full ring-1 ring-black/5" style={{ backgroundColor: entry.color ?? "#82D153" }} />
+                <span className="h-2.5 w-2.5 rounded-xl ring-1 ring-black/5" style={{ backgroundColor: entry.color ?? "#82D153" }} />
                 <span className="text-xs text-muted-foreground">{entry.name ?? entry.dataKey}</span>
               </div>
               <span className="dash-num text-xs text-foreground">{display}</span>

@@ -12,9 +12,8 @@ export function QaiAssistantCard() {
 
   return (
     <div className="dash-card relative overflow-hidden p-6">
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#82D153]/15 blur-2xl" />
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#82D153]/15 text-[#2f6f24] ring-1 ring-[#82D153]/25">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
           <Sparkles className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
@@ -26,7 +25,7 @@ export function QaiAssistantCard() {
                 key={key}
                 type="button"
                 onClick={() => openQaiAssistant(t(`connectedSystemsPage.${key}`))}
-                className="rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-[#f4fbf0] hover:text-[#2f6f24] hover:ring-[#82D153]/35"
+                className="rounded-xl bg-secondary px-3 py-1 text-xs font-medium text-foreground ring-1 ring-border transition hover:bg-primary/5 hover:text-primary hover:ring-primary/30"
               >
                 {t(`connectedSystemsPage.${key}`)}
               </button>

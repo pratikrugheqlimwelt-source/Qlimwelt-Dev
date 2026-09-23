@@ -6,16 +6,14 @@ import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/marketing/logo";
-import { NavAnchor, ScrollProgress } from "@/components/marketing/motion-ui";
 import { LanguageToggle } from "@/components/i18n/language-toggle";
 import { useT } from "@/components/i18n/locale-provider";
 import { EASE_OUT } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 interface MarketingNavProps {
   variant?: "home" | "default";
 }
-
-const navLinkClass = "type-nav";
 
 export function MarketingNav({ variant = "default" }: MarketingNavProps) {
   const pathname = usePathname();
@@ -24,61 +22,65 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const t = useT();
 
-  const homeAnchors: [string, string][] = [
-    ["#capabilities", t("marketingNav.learn")],
-    ["#how-it-works", t("marketingNav.process")],
-    ["#integrations", t("marketingNav.integrations")],
-    ["#intelligence", t("marketingNav.platform")],
-    ["#value", t("marketingNav.insights")],
-    ["#pricing", t("marketingNav.pricing")],
+  const homeLinks: { href: string; label: string }[] = [
+    { href: "#capabilities", label: t("marketingNav.solutions") },
+    { href: "/platform", label: t("marketingNav.platform") },
+    { href: "#integrations", label: t("marketingNav.integrations") },
+    { href: "#intelligence", label: t("marketingNav.intelligence") },
+    { href: "#about", label: t("marketingNav.company") },
   ];
+
+  const defaultLinks = [
+    { href: "/", label: t("common.home") },
+    { href: "/platform", label: t("marketingNav.platform") },
+    { href: "/whats-new", label: t("marketingNav.whatsNew") },
+  ];
+
+  const links = isHome ? homeLinks : defaultLinks;
 
   return (
     <motion.header
-      initial={reduced ? false : { y: -12, opacity: 0 }}
+      initial={reduced ? false : { y: -8, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: EASE_OUT }}
-      className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm"
+      transition={{ duration: 0.4, ease: EASE_OUT }}
+      className="sticky top-0 z-50 border-b border-border bg-white/98 backdrop-blur-[8px]"
     >
-      <ScrollProgress />
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 lg:px-8">
         <Logo size="sm" className="shrink-0" />
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {isHome ? (
-            <>
-              {homeAnchors.map(([href, label]) => (
-                <NavAnchor key={href} href={href}>
-                  {label}
-                </NavAnchor>
-              ))}
-            </>
-          ) : (
-            <Link href="/" className={navLinkClass}>
-              {t("common.home")}
+        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
+          {links.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "px-3.5 py-2 text-[13px] font-medium tracking-tight text-foreground/70 transition-colors duration-150",
+                "hover:text-foreground"
+              )}
+            >
+              {item.label}
             </Link>
-          )}
-          <Link href="/platform" className={navLinkClass}>
-            {t("marketingNav.aiFeatures")}
-          </Link>
-          <Link href="/whats-new" className={navLinkClass}>
-            {t("marketingNav.whatsNew")}
-          </Link>
+          ))}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <LanguageToggle />
-          <motion.div whileHover={reduced ? undefined : { scale: 1.03 }} whileTap={reduced ? undefined : { scale: 0.97 }}>
-            <Link
-              href="/login"
-              className="type-cta inline-block border border-foreground px-4 py-2.5 text-foreground transition-colors duration-300 hover:bg-foreground hover:text-background"
-            >
-              {t("common.getStarted")}
-            </Link>
-          </motion.div>
+          <Link
+            href="/login"
+            className="siemens-btn-secondary hidden h-9 px-4 py-0 sm:inline-flex"
+          >
+            {t("common.getStarted")}
+          </Link>
+          <Link
+            href={isHome ? "#contact" : "/#contact"}
+            className="siemens-btn-primary hidden h-9 px-4 py-0 sm:inline-flex"
+          >
+            {t("marketingNav.bookDemo")}
+            <span aria-hidden>→</span>
+          </Link>
           <button
             type="button"
-            className="rounded-md p-2 text-foreground lg:hidden"
+            className="rounded-sm p-2 text-foreground lg:hidden"
             aria-label={mobileOpen ? t("common.closeMenu") : t("common.openMenu")}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
@@ -89,39 +91,31 @@ export function MarketingNav({ variant = "default" }: MarketingNavProps) {
       </div>
 
       {mobileOpen && (
-        <div className="border-t border-border bg-background px-4 py-4 lg:hidden">
-          <nav className="flex flex-col gap-3">
-            {isHome ? (
-              homeAnchors.map(([href, label]) => (
-                <a
-                  key={href}
-                  href={href}
-                  className={navLinkClass}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {label}
-                </a>
-              ))
-            ) : (
-              <Link href="/" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                {t("common.home")}
+        <div className="border-t border-border bg-white px-4 py-4 lg:hidden">
+          <nav className="flex flex-col gap-0.5" aria-label="Mobile">
+            {links.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-sm px-3 py-2.5 text-sm font-medium text-foreground hover:bg-secondary"
+                onClick={() => setMobileOpen(false)}
+              >
+                {item.label}
               </Link>
-            )}
-            <Link href="/platform" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-              {t("marketingNav.aiFeatures")}
-            </Link>
-            <Link href="/whats-new" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-              {t("marketingNav.whatsNew")}
-            </Link>
-            <div className="pt-1">
-              <LanguageToggle />
-            </div>
+            ))}
             <Link
               href="/login"
-              className="type-cta mt-2 inline-block border border-foreground px-4 py-2.5 text-center text-foreground"
+              className="siemens-btn-secondary mt-3"
               onClick={() => setMobileOpen(false)}
             >
               {t("common.getStarted")}
+            </Link>
+            <Link
+              href={isHome ? "#contact" : "/#contact"}
+              className="siemens-btn-primary mt-2"
+              onClick={() => setMobileOpen(false)}
+            >
+              {t("marketingNav.bookDemo")}
             </Link>
           </nav>
         </div>

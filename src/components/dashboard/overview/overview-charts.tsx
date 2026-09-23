@@ -93,8 +93,8 @@ export function OverviewCharts() {
     { name: t("overview.charts.priorPeriod"), value: metrics.totalTCO2e * 1.08, fill: "#94a3b8" },
     { name: t("overview.charts.scope1Delta"), value: metrics.scope1 * 0.05, fill: "#1e293b" },
     { name: t("overview.charts.scope2Delta"), value: -metrics.scope2 * 0.12, fill: "#82D153" },
-    { name: t("overview.charts.scope3Delta"), value: metrics.scope3 * 0.03, fill: "#5cb832" },
-    { name: t("overview.charts.current"), value: metrics.totalTCO2e, fill: "#2563eb" },
+    { name: t("overview.charts.scope3Delta"), value: metrics.scope3 * 0.03, fill: "#0f766e" },
+    { name: t("overview.charts.current"), value: metrics.totalTCO2e, fill: "#004d40" },
   ], [metrics, t]);
 
   const macCurve = useMemo(() => [
@@ -251,7 +251,7 @@ export function OverviewCharts() {
                 positive: trendStats.ytdYoy <= 0,
               },
             ].map((stat) => (
-              <div key={stat.label} className="rounded-xl border border-border/50 bg-gradient-to-br from-muted/30 to-white px-3 py-2.5">
+              <div key={stat.label} className="rounded-xl border border-border bg-secondary/40 px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</p>
                 <p className="mt-0.5">
                   <MetricFigure size="md" className={cn("positive" in stat ? (stat.positive ? "text-green-600" : "text-red-600") : "text-foreground")}>
@@ -272,10 +272,10 @@ export function OverviewCharts() {
           <div className="mb-4 flex flex-wrap gap-2">
             {(["current", "previous", "baseline", "target"] as const).map((m) => (
               <button key={m} type="button" onClick={() => setTrendMode(m)} className={cn(
-                "rounded-full px-4 py-1.5 text-xs font-semibold capitalize transition-all",
+                "rounded-xl px-4 py-1.5 text-xs font-semibold capitalize transition-colors",
                 trendMode === m
-                  ? "bg-gradient-to-r from-[#82D153] to-emerald-500 text-white shadow-md shadow-green-500/25"
-                  : "border border-border/60 bg-white text-muted-foreground hover:bg-muted/50"
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-white text-muted-foreground hover:bg-secondary"
               )}>
                 {m === "current" ? t("overview.charts.currentYear") : m === "previous" ? t("overview.charts.previousYear") : m === "baseline" ? t("overview.charts.baseline") : t("overview.charts.targetPathway")}
               </button>
@@ -745,7 +745,7 @@ export function OverviewCharts() {
               { risk: t("overview.charts.energyPriceExposure"), level: t("overview.charts.riskHigh"), levelKey: "high" as const, detail: t("overview.charts.energyDetail"), color: "from-red-50 to-rose-50 border-red-200/60", bar: "bg-red-500" },
               { risk: t("overview.charts.carbonPriceExposure"), level: t("overview.charts.riskMedium"), levelKey: "medium" as const, detail: t("overview.charts.carbonDetail", { amount: metrics.carbonCostExposure.toFixed(0), price: company.carbonPricePerTonne }), color: "from-amber-50 to-yellow-50 border-amber-200/60", bar: "bg-amber-500" },
               { risk: t("overview.charts.supplierRisk"), level: t("overview.charts.riskHigh"), levelKey: "high" as const, detail: t("overview.charts.supplierDetail"), color: "from-red-50 to-orange-50 border-red-200/60", bar: "bg-red-500" },
-              { risk: t("overview.charts.operationalRisk"), level: t("overview.charts.riskLow"), levelKey: "low" as const, detail: t("overview.charts.operationalDetail"), color: "from-green-50 to-emerald-50 border-green-200/60", bar: "bg-green-500" },
+              { risk: t("overview.charts.operationalRisk"), level: t("overview.charts.riskLow"), levelKey: "low" as const, detail: t("overview.charts.operationalDetail"), color: "from-brand-light to-white border-brand/25", bar: "bg-brand" },
             ].map((r) => (
               <div key={r.risk} className={cn("rounded-xl border bg-gradient-to-br p-4", r.color)}>
                 <p className="text-sm font-semibold">{r.risk}</p>
@@ -774,7 +774,7 @@ export function OverviewCharts() {
               { label: t("overview.charts.qualityPoor"), color: "#ef4444" },
               { label: t("overview.charts.qualityFair"), color: "#f59e0b" },
               { label: t("overview.charts.qualityGood"), color: "#82D153" },
-              { label: t("overview.charts.qualityExcellent"), color: "#16a34a" },
+              { label: t("overview.charts.qualityExcellent"), color: "#5cb832" },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-md" style={{ backgroundColor: item.color }} />

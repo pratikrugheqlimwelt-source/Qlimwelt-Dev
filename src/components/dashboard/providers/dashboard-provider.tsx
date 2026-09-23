@@ -7,6 +7,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
 import type {
   DashboardFilters,
@@ -46,6 +47,7 @@ import {
   insertActivity,
   deleteActivity,
   seedSampleData,
+  buildScopedDemoInventory,
   upsertInitiative,
   insertVehicle,
   insertVehicles,
@@ -283,9 +285,18 @@ const DEFAULT_GWP: Record<string, number> = {
   CO2: 1, CH4: 27.9, N2O: 273, HFCs: 1430, PFCs: 6630, SF6: 25200, NF3: 17400,
 };
 
+/** Accounts that should receive a realistic FY inventory when empty. */
+const AUTO_SEED_EMAILS = new Set([
+  "pratikrughe.qlimwelt@gmail.com",
+]);
+
+/** When true, any authenticated empty workspace gets sample inventory. */
+const AUTO_SEED_ALL_EMPTY = true;
+
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
-  const { company: authCompany } = useAuth();
+  const { company: authCompany, user, refreshCompany } = useAuth();
   const companyId = authCompany?.id ?? demoCompany.id;
+  const autoSeedAttempted = useRef(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -628,10 +639,72 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const loadSampleData = useCallback(async () => {
     await withSaving(async () => {
+      // Hydrate UI immediately from the in-memory inventory.
+      const inventory = buildScopedDemoInventory(companyId);
+      setFacilities(inventory.facilities);
+      setVehicles(inventory.vehicles);
+      setSuppliers(inventory.suppliers);
+      setActivities(inventory.activities);
+      setInitiatives(inventory.initiatives);
+      setClimateTarget(inventory.climateTarget);
+      setSettings((prev) => ({
+        companyId,
+        carbonPricePerTonne: prev?.carbonPricePerTonne ?? demoCompany.carbonPricePerTonne,
+        discountRate: prev?.discountRate ?? demoCompany.discountRate,
+        unitsProduced: demoCompany.unitsProduced,
+        baselineYear: prev?.baselineYear ?? demoCompany.baselineYear,
+        reportingYear: prev?.reportingYear ?? demoCompany.reportingYear,
+        customFactors: prev?.customFactors ?? [],
+        gwpValues: prev?.gwpValues ?? DEFAULT_GWP,
+        seededAt: new Date().toISOString(),
+      }));
+
       await seedSampleData(companyId);
+      try {
+        await refreshCompany();
+      } catch {
+        /* company profile refresh is best-effort */
+      }
       await refresh();
     }, "Inventory loaded");
-  }, [companyId, refresh, withSaving]);
+  }, [companyId, refresh, refreshCompany, withSaving]);
+
+  // Auto-fill FY 2024 inventory when empty (target account, or ?seed=1).
+  useEffect(() => {
+    if (loading || saving || autoSeedAttempted.current) return;
+    if (activities.length > 0) return;
+
+    const email = (user?.email ?? "").trim().toLowerCase();
+    const forceSeed =
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("seed") === "1";
+    const allowAuto =
+      forceSeed ||
+      (Boolean(authCompany?.id) &&
+        (AUTO_SEED_ALL_EMPTY ||
+          (Boolean(email) && AUTO_SEED_EMAILS.has(email))));
+    if (!allowAuto) return;
+
+    autoSeedAttempted.current = true;
+    void loadSampleData()
+      .then(() => {
+        if (forceSeed && typeof window !== "undefined") {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("seed");
+          window.history.replaceState({}, "", url.pathname + url.search);
+        }
+      })
+      .catch(() => {
+        autoSeedAttempted.current = false;
+      });
+  }, [
+    loading,
+    saving,
+    user?.email,
+    authCompany?.id,
+    activities.length,
+    loadSampleData,
+  ]);
 
   const deleteActivityRecord = useCallback(
     async (id: string) => {
@@ -761,8 +834,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     [filteredActivities, initiatives, activeCompany.carbonPricePerTonne]
   );
 
-  const isSampleData = Boolean(settings?.seededAt);
-  const isEmpty = activities.length === 0 && !settings?.seededAt;
+  const isSampleData = Boolean(settings?.seededAt) || activities.length > 0;
+  const isEmpty = activities.length === 0;
   const gwpValues = settings?.gwpValues ?? DEFAULT_GWP;
 
   const value = useMemo(

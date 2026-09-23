@@ -15,7 +15,7 @@ export function LanguageToggle({ className, compact }: LanguageToggleProps) {
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full border border-border bg-background p-0.5 shadow-sm",
+        "inline-flex items-center rounded-sm border border-border bg-white p-0.5",
         className
       )}
       role="group"
@@ -33,9 +33,9 @@ export function LanguageToggle({ className, compact }: LanguageToggleProps) {
               setLocale(opt.code as Locale);
             }}
             className={cn(
-              "rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide transition-colors",
+              "rounded-sm px-2.5 py-1 text-[11px] font-semibold tracking-wide transition-colors",
               active
-                ? "bg-foreground text-background"
+                ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:text-foreground"
             )}
             aria-pressed={active}

@@ -107,10 +107,10 @@ export function ImportCenter({
 
       <label
         className={cn(
-          "mt-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-10 transition",
+          "mt-5 flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 transition",
           dragging
-            ? "border-[#82D153] bg-[#f4fbf0]"
-            : "border-slate-300 bg-slate-50/50 hover:border-[#82D153]/50"
+            ? "border-primary bg-primary/5"
+            : "border-border bg-secondary/40 hover:border-primary/40"
         )}
         onDragOver={(e) => {
           e.preventDefault();
@@ -124,8 +124,8 @@ export function ImportCenter({
           if (file) void parseFile(file);
         }}
       >
-        <FileUp className="h-8 w-8 text-slate-400" />
-        <p className="mt-3 text-sm font-medium text-slate-700">{t("connectedSystemsPage.importDrop")}</p>
+        <FileUp className="h-8 w-8 text-muted-foreground" />
+        <p className="mt-3 text-sm font-medium text-foreground">{t("connectedSystemsPage.importDrop")}</p>
         <p className="mt-1 text-xs text-muted-foreground">CSV · Excel · PDF · JSON · XML</p>
         <input
           type="file"

@@ -35,9 +35,26 @@ export async function updateSession(request: NextRequest) {
   const isProtectedApp = isDashboard || isQaiMobile;
 
   if (!user && (isProtectedApp || isOnboarding)) {
+    // Dev-only: ?seed=1 (and a cookie so tab switches keep working without the query).
+    const seedQuery = request.nextUrl.searchParams.get("seed") === "1";
+    const seedCookie = request.cookies.get("qlimwelt_dev_seed")?.value === "1";
+    if (process.env.NODE_ENV === "development" && isDashboard && (seedQuery || seedCookie)) {
+      if (seedQuery) {
+        supabaseResponse.cookies.set("qlimwelt_dev_seed", "1", {
+          path: "/",
+          sameSite: "lax",
+          httpOnly: false,
+          maxAge: 60 * 60 * 8,
+        });
+      }
+      return supabaseResponse;
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    if (isProtectedApp) url.searchParams.set("redirect", pathname);
+    url.searchParams.delete("seed");
+    if (isProtectedApp) {
+      url.searchParams.set("redirect", pathname);
+    }
     return NextResponse.redirect(url);
   }
 

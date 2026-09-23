@@ -187,7 +187,7 @@ export function CompanyDetailsStep({ data, errors, onChange }: CompanyDetailsSte
                   className={cn(
                     "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                     selected
-                      ? "border-[#82D153] bg-[#82D153]/10 text-[#3d8b2e]"
+                      ? "border-[#82D153] bg-[#82D153]/10 text-[#5cb832]"
                       : "border-border text-muted-foreground hover:border-foreground/30"
                   )}
                 >

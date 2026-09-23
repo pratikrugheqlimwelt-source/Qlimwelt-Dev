@@ -89,7 +89,7 @@ export function AccountMenu() {
             className="cursor-pointer"
             onClick={() => trackQaiMobile("try_qai_mobile_clicked", { placement: "menu" })}
           >
-            <Smartphone className="mr-2 h-4 w-4 text-[#82D153]" />
+            <Smartphone className="mr-2 h-4 w-4 text-primary" />
             {t("account.tryQaiMobile")}
           </Link>
         </DropdownMenuItem>

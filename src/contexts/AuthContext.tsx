@@ -54,6 +54,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const supabase = createClient();
     let mounted = true;
+    let settled = false;
+
+    const finishLoading = () => {
+      if (!mounted || settled) return;
+      settled = true;
+      setLoading(false);
+    };
+
+    // Never leave routes stuck on the auth loading screen
+    const safetyTimer = window.setTimeout(finishLoading, 8000);
+
+    const clearBadSession = async () => {
+      try {
+        await supabase.auth.signOut({ scope: "local" });
+      } catch {
+        /* ignore */
+      }
+      if (!mounted) return;
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setCompany(null);
+      setMembership(null);
+    };
 
     const loadUserData = async (currentUser: User) => {
       try {
@@ -75,23 +99,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      if (!mounted) return;
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      if (initialSession?.user) {
-        loadUserData(initialSession.user).finally(() => {
-          if (mounted) setLoading(false);
-        });
-      } else {
-        setLoading(false);
-      }
-    });
+    supabase.auth
+      .getSession()
+      .then(async ({ data: { session: initialSession }, error }) => {
+        if (!mounted) return;
+        if (error) {
+          if (process.env.NODE_ENV === "development") {
+            console.warn("[AuthProvider] getSession error:", error.message);
+          }
+          await clearBadSession();
+          finishLoading();
+          return;
+        }
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        if (initialSession?.user) {
+          await loadUserData(initialSession.user);
+        }
+        finishLoading();
+      })
+      .catch(async (err) => {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("[AuthProvider] getSession failed:", err);
+        }
+        await clearBadSession();
+        finishLoading();
+      });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       if (!mounted) return;
+
+      // Stale refresh tokens leave the app spinning on Loading
+      if (event === "TOKEN_REFRESHED" && !newSession) {
+        await clearBadSession();
+        finishLoading();
+        return;
+      }
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        setCompany(null);
+        setMembership(null);
+        finishLoading();
+        return;
+      }
+
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
@@ -102,11 +157,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setCompany(null);
         setMembership(null);
       }
-      setLoading(false);
+      finishLoading();
     });
 
     return () => {
       mounted = false;
+      window.clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, []);

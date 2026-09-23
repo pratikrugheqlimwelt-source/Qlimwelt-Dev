@@ -48,7 +48,7 @@ export const topEmissionSources = [
 ];
 
 export const renewableMix = [
-  { name: "Renewable", value: 28, color: "#16a34a" },
+  { name: "Renewable", value: 28, color: "#82D153" },
   { name: "Grid Mix", value: 72, color: "#94a3b8" },
 ];
 
@@ -105,6 +105,6 @@ export { qlimAiMessages as carbonChatMessages, qlimAiMessages } from "@/data/qli
 
 export const scopeBreakdown = [
   { name: "Scope 1", value: 2840, color: "#1e293b" },
-  { name: "Scope 2", value: 4120, color: "#82E05C" },
+  { name: "Scope 2", value: 4120, color: "#82D153" },
   { name: "Scope 3", value: 5490, color: "#5cb832" },
 ];

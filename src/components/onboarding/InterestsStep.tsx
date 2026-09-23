@@ -43,7 +43,7 @@ export function InterestsStep({ data, errors, onChange }: InterestsStepProps) {
                   className={cn(
                     "rounded-lg border px-3 py-2.5 text-left text-xs font-medium transition-colors",
                     active
-                      ? "border-[#82D153] bg-[#82D153]/10 text-[#3d8b2e]"
+                      ? "border-[#82D153] bg-[#82D153]/10 text-[#5cb832]"
                       : "border-border text-muted-foreground hover:border-foreground/30"
                   )}
                 >
@@ -87,7 +87,7 @@ export function InterestsStep({ data, errors, onChange }: InterestsStepProps) {
                 className={cn(
                   "rounded-full border px-4 py-2 text-xs font-medium",
                   data.implementationTimeline === timeline
-                    ? "border-[#82D153] bg-[#82D153]/10 text-[#3d8b2e]"
+                    ? "border-[#82D153] bg-[#82D153]/10 text-[#5cb832]"
                     : "border-border text-muted-foreground"
                 )}
               >

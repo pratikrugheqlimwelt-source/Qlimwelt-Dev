@@ -22,7 +22,7 @@ export function OnboardingProgress({ step, total = 5 }: OnboardingProgressProps)
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-muted">
         <div
-          className={cn("h-full rounded-full bg-gradient-to-r from-[#82D153] to-emerald-500 transition-all duration-500")}
+          className={cn("h-full rounded-full bg-brand transition-all duration-500")}
           style={{ width: `${pct}%` }}
           role="progressbar"
           aria-valuenow={step}

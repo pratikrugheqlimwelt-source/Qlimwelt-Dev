@@ -50,7 +50,7 @@ export function OverviewTab() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="month" /><YAxis /><Tooltip /><Legend />
                   <Area type="monotone" dataKey="scope1" stackId="1" stroke="#1e293b" fill="#1e293b" fillOpacity={0.7} name="Scope 1" />
-                  <Area type="monotone" dataKey="scope2" stackId="1" stroke="#82E05C" fill="#82E05C" fillOpacity={0.7} name="Scope 2" />
+                  <Area type="monotone" dataKey="scope2" stackId="1" stroke="#82D153" fill="#82D153" fillOpacity={0.7} name="Scope 2" />
                   <Area type="monotone" dataKey="scope3" stackId="1" stroke="#5cb832" fill="#5cb832" fillOpacity={0.5} name="Scope 3" />
                   <Line type="monotone" dataKey="target" stroke="#ef4444" strokeDasharray="5 5" name="Target" dot={false} />
                 </AreaChart>
@@ -82,7 +82,7 @@ export function OverviewTab() {
               <BarChart data={departmentEmissions} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" /><XAxis type="number" /><YAxis dataKey="dept" type="category" width={100} /><Tooltip /><Legend />
                 <Bar dataKey="scope1" stackId="a" fill="#2563eb" name="Scope 1" />
-                <Bar dataKey="scope2" stackId="a" fill="#16a34a" name="Scope 2" />
+                <Bar dataKey="scope2" stackId="a" fill="#82D153" name="Scope 2" />
                 <Bar dataKey="scope3" stackId="a" fill="#9333ea" name="Scope 3" />
               </BarChart>
             </ResponsiveContainer>

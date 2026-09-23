@@ -30,12 +30,12 @@ export function TrendTooltip({ active, payload, label, unit = "tCO₂e", row }: 
   const monthLabel = row?.monthLabel ?? label;
 
   return (
-    <div className="min-w-[200px] rounded-xl border border-border/60 bg-white px-4 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.15)]">
-      <p className="mb-2 text-sm font-bold">{monthLabel} 2024</p>
+    <div className="min-w-[200px] rounded-xl border border-border bg-white px-4 py-3 shadow-lg">
+      <p className="mb-2 text-sm font-semibold">{monthLabel} 2024</p>
       {payload.map((entry, i) => (
         <div key={i} className="flex items-center justify-between gap-4 py-0.5">
           <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color ?? "#82D153" }} />
+            <span className="h-2.5 w-2.5 rounded-xl" style={{ backgroundColor: entry.color ?? "#82D153" }} />
             <span className="text-xs text-muted-foreground">{entry.name ?? entry.dataKey}</span>
           </div>
           <span className="dash-num text-xs">

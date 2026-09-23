@@ -37,6 +37,8 @@ export function OverviewPage() {
     climateInsights,
     isEmpty,
     reductionInitiatives,
+    loadSampleData,
+    saving,
   } = useDashboard();
   const t = useT();
 
@@ -55,9 +57,9 @@ export function OverviewPage() {
       <WelcomeCard />
 
       {isEmpty && (
-        <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-brand/40 bg-brand/5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-[#82D153]/40 bg-[#82D153]/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand-dark">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#82D153]/20 text-[#3d8b2e]">
               <Database className="h-4 w-4" />
             </div>
             <div>
@@ -68,6 +70,9 @@ export function OverviewPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={() => void loadSampleData()} disabled={saving}>
+              {t("overview.loadSampleData")}
+            </Button>
             <Button size="sm" asChild>
               <Link href="/dashboard/data-collection">{t("overview.goDataCollection")}</Link>
             </Button>
@@ -81,8 +86,7 @@ export function OverviewPage() {
           className="right-3 top-3 [&_button]:border-white/20 [&_button]:bg-white/10 [&_button]:text-white/80 [&_button:hover]:bg-white/20 [&_button:hover]:text-white"
         />
         <div className="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA0KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-60" />
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#82D153]/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-teal-500/15 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 top-0 h-56 w-56 rounded-full bg-[#82D153]/15 blur-3xl" />
 
         <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>

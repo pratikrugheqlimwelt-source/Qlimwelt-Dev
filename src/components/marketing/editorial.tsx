@@ -15,12 +15,17 @@ export function Section({
   children,
   dark,
   noBorder,
+  viewport,
+  viewportAlign = "center",
 }: {
   id?: string;
   className?: string;
   children: React.ReactNode;
   dark?: boolean;
   noBorder?: boolean;
+  /** Size section to one standard screen (minus sticky nav) */
+  viewport?: boolean;
+  viewportAlign?: "center" | "start";
 }) {
   return (
     <section
@@ -29,6 +34,7 @@ export function Section({
         "section-shell",
         noBorder && "border-b-0",
         dark && "grid-dark border-white/10",
+        viewport && (viewportAlign === "start" ? "viewport-section-fill" : "viewport-section"),
         className
       )}
     >
@@ -82,7 +88,7 @@ export function SectionNumber({ n, className }: { n: string; className?: string 
   return (
     <span
       className={cn(
-        "font-serif text-[8rem] font-bold leading-none text-foreground/[0.04] sm:text-[10rem] lg:text-[12rem]",
+        "font-sans text-[8rem] font-bold leading-none tracking-tighter text-foreground/[0.04] sm:text-[10rem] lg:text-[12rem]",
         className
       )}
       aria-hidden
@@ -94,7 +100,7 @@ export function SectionNumber({ n, className }: { n: string; className?: string 
 
 export function MetaLabel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <p className={cn("type-label", className)}>
+    <p className={cn("siemens-eyebrow", className)}>
       {children}
     </p>
   );
@@ -119,13 +125,13 @@ export function EditorialHeadline({
   className?: string;
 }) {
   return (
-    <Tag className={cn("font-serif text-4xl leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl", className)}>
+    <Tag className={cn("siemens-display", className)}>
       {lines.map((line, i) => (
         <span
           key={i}
           className={cn(
             "block",
-            line.italic && "font-normal italic",
+            line.italic && "font-semibold",
             !line.italic && !line.accent && "font-bold",
             line.accent && "font-bold text-brand-dark"
           )}
@@ -160,7 +166,7 @@ export function StepRow({
       <div className="grid gap-6 pl-5 sm:grid-cols-[4rem_minmax(0,1fr)_2rem] sm:items-start sm:gap-10 sm:pl-6">
         <div>
           <MetaLabel>{label}</MetaLabel>
-          <p className="mt-2 font-serif text-4xl font-bold sm:text-5xl">{num}</p>
+          <p className="mt-2 font-sans text-4xl font-bold tracking-tight sm:text-5xl">{num}</p>
         </div>
         <div className="min-w-0 max-w-xl">
           <p className="type-title text-lg sm:text-xl">{title}</p>
@@ -197,7 +203,7 @@ export function MetricDark({
         {value}
       </MetricFigure>
       <ThinRule className="mt-6 border-white/10" />
-      <p className="mt-4 font-serif text-lg italic text-white/80">{label}</p>
+      <p className="mt-4 font-sans text-lg font-medium text-white/80">{label}</p>
       <div className="mt-auto space-y-1 pt-6">
         {meta.map((m) => (
           <MetaLabel key={m} className="text-white/30">
@@ -326,13 +332,13 @@ export function EditorialCta({
       <Link
         href={href}
         className={cn(
-          "group inline-flex items-center justify-center gap-3 border border-foreground px-8 py-4 type-cta transition-colors duration-300 hover:bg-foreground hover:text-background",
+          "siemens-btn-primary group",
           fullWidth && "w-full",
           className
         )}
       >
         {children}
-        <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+        <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
       </Link>
     </motion.div>
   );

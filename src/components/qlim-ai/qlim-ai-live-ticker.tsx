@@ -118,7 +118,7 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
 
         <div className="min-w-0 flex-1 overflow-hidden">
           <div className="flex items-center gap-1.5 leading-none">
-            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3d8b2e]">
+            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#5cb832]">
               {t("shell.aiTicker.agent")}
             </span>
           </div>
@@ -126,7 +126,7 @@ export function QlimAiLiveTicker({ className }: { className?: string }) {
             <span>{typed}</span>
             <span
               className={cn(
-                "ml-px inline-block h-3 w-[2px] translate-y-px bg-[#3d8b2e]",
+                "ml-px inline-block h-3 w-[2px] translate-y-px bg-[#5cb832]",
                 typing ? "animate-pulse" : "opacity-0"
               )}
               aria-hidden

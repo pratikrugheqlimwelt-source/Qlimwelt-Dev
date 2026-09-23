@@ -34,17 +34,17 @@ export function DataFlowViz() {
               <div
                 className={
                   key === "flowQlimwelt"
-                    ? "rounded-xl border border-[#82D153]/40 bg-[#82D153]/12 px-3 py-2 text-xs font-semibold text-[#2f6f24]"
-                    : "rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700"
+                    ? "rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-xs font-semibold text-primary"
+                    : "rounded-xl border border-border bg-white px-3 py-2 text-xs font-medium text-foreground/80"
                 }
               >
                 {t(`connectedSystemsPage.${key}`)}
               </div>
               {i < NODES.length - 1 && (
-                <div className="relative h-px w-6 bg-slate-200">
+                <div className="relative h-px w-6 bg-border">
                   {!reduced && (
                     <motion.span
-                      className="absolute -top-0.5 h-1.5 w-1.5 rounded-full bg-[#82D153]"
+                      className="absolute -top-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--siemens-teal))]"
                       animate={{ x: [0, 20], opacity: [0.2, 1, 0.2] }}
                       transition={{ duration: 1.6, repeat: Infinity, delay: i * 0.12, ease: "linear" }}
                     />

@@ -1,6 +1,7 @@
 import { AnnouncementBanner } from "@/components/marketing/announcement-banner";
 import { MarketingNav } from "@/components/marketing/marketing-nav";
 import { MarketingFooter } from "@/components/marketing/marketing-footer";
+import { cn } from "@/lib/utils";
 
 interface MarketingLayoutProps {
   children: React.ReactNode;
@@ -14,10 +15,10 @@ export function MarketingLayout({
   navVariant = "default",
 }: MarketingLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className={cn("relative min-h-screen bg-background")}>
       {showBanner && <AnnouncementBanner />}
       <MarketingNav variant={navVariant} />
-      <main>{children}</main>
+      <main className="relative z-[2]">{children}</main>
       <MarketingFooter />
     </div>
   );

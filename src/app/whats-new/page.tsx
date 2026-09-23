@@ -26,14 +26,14 @@ const differentiators = [
 export default function WhatsNewPage() {
   return (
     <MarketingLayout>
-      <Section dark className="border-white/10 py-14 lg:py-16">
+      <Section className="bg-[hsl(var(--siemens-surface))] py-14 lg:py-16">
         <SectionContainer narrow className="text-center">
           <FadeUp>
-            <MetaLabel className="text-brand">DIFFERENTIATION // 2026</MetaLabel>
-            <h1 className="section-headline-gap font-serif text-4xl font-bold text-white sm:text-5xl">
-              Why Qlimwelt AI is <span className="italic font-normal">Different</span>
+            <MetaLabel className="text-brand">Differentiation // 2026</MetaLabel>
+            <h1 className="siemens-display section-headline-gap">
+              Why Qlimwelt AI is <span className="text-brand-dark">Different</span>
             </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-white/60">
+            <p className="siemens-body mx-auto mt-6 max-w-2xl">
               Not another ESG checkbox tool. A genuine AI-native platform built for the complexity of European carbon regulation.
             </p>
           </FadeUp>
@@ -132,7 +132,7 @@ export default function WhatsNewPage() {
             {aiArchitectureSteps.map((step, i) => (
               <FadeUp key={step.step} delay={i * 0.06}>
                 <div className="grid gap-6 bg-[#0a0a0a] p-6 sm:grid-cols-[4rem_minmax(0,1fr)] sm:items-start sm:gap-10 sm:p-8">
-                  <p className="font-serif text-4xl font-bold tabular-nums text-white/20">{step.step}</p>
+                  <p className="font-sans text-4xl font-bold tabular-nums tracking-tight text-white/20">{step.step}</p>
                   <div className="min-w-0">
                     <h3 className="type-title text-lg text-white sm:text-xl">{step.title}</h3>
                     <p className="mt-3 text-sm leading-relaxed text-white/60">{step.description}</p>
@@ -205,8 +205,12 @@ export default function WhatsNewPage() {
           <FadeUp>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <EditorialCta href="/#contact">Request a Demo</EditorialCta>
-              <Link href="/login" className="type-nav text-white/50 hover:text-white">
-                Open Dashboard →
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center gap-2 rounded-sm border border-white/25 bg-transparent px-5 py-2.5 text-sm font-semibold tracking-tight text-white transition-colors duration-200 hover:border-white/50 hover:bg-white/5"
+              >
+                Open Dashboard
+                <span aria-hidden>→</span>
               </Link>
             </div>
           </FadeUp>

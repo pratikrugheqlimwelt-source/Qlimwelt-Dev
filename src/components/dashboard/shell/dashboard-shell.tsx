@@ -89,14 +89,14 @@ function NavIcon({ icon: Icon, active }: { icon: LucideIcon; active: boolean }) 
   return (
     <span
       className={cn(
-        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+        "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors duration-150",
         active
-          ? "bg-gradient-to-br from-[#82D153]/30 to-emerald-500/15 text-[#2f6f24] shadow-[inset_0_0_0_1px_rgba(130,209,83,0.45),0_1px_2px_rgba(61,139,46,0.12)]"
-          : "bg-slate-100/90 text-slate-500 ring-1 ring-slate-200/70 group-hover:bg-[#82D153]/12 group-hover:text-[#3d8b2e] group-hover:ring-[#82D153]/25"
+          ? "bg-[#82D153] text-white shadow-sm shadow-[#82D153]/30"
+          : "bg-slate-100 text-muted-foreground group-hover:bg-[#82D153]/15 group-hover:text-[#3d8b2e]"
       )}
       aria-hidden
     >
-      <Icon className="h-[17px] w-[17px]" strokeWidth={2.15} />
+      <Icon className="h-4 w-4" strokeWidth={2} />
     </span>
   );
 }
@@ -138,9 +138,29 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [periodOpen, setPeriodOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
+  const [seedPreview, setSeedPreview] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const periodRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    const fromQuery = new URLSearchParams(window.location.search).get("seed") === "1";
+    const fromStorage = (() => {
+      try {
+        return sessionStorage.getItem("qlimwelt_dev_seed") === "1";
+      } catch {
+        return false;
+      }
+    })();
+    const fromCookie = document.cookie.split(";").some((c) => c.trim().startsWith("qlimwelt_dev_seed=1"));
+    setSeedPreview(fromQuery || fromStorage || fromCookie);
+  }, [pathname]);
+
+  const withSeed = useCallback(
+    (href: string) => (seedPreview ? `${href}${href.includes("?") ? "&" : "?"}seed=1` : href),
+    [seedPreview]
+  );
 
   const navGroups = useMemo(
     () =>
@@ -203,12 +223,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border/60 bg-white transition-all duration-300",
+          "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-white transition-all duration-300",
           collapsed ? "w-[4.5rem]" : "w-64",
-          mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0 lg:shadow-none"
+          mobileOpen ? "translate-x-0 shadow-lg" : "-translate-x-full lg:translate-x-0 lg:shadow-none"
         )}
       >
-        <div className={cn("flex h-[4.25rem] items-center border-b border-border/60 px-4", collapsed && "justify-center px-2")}>
+        <div className={cn("flex h-16 items-center border-b border-border px-4", collapsed && "justify-center px-2")}>
           {!collapsed ? <Logo size="sm" /> : <Logo size="sm" variant="icon" />}
           <button type="button" onClick={() => setMobileOpen(false)} className="ml-auto lg:hidden" aria-label={t("shell.closeNav")}>
             <X className="h-5 w-5" />
@@ -216,7 +236,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}
-            className={cn("hidden rounded-lg p-1.5 text-muted-foreground hover:bg-muted lg:flex", !collapsed && "ml-auto")}
+            className={cn("hidden rounded-xl p-1.5 text-muted-foreground hover:bg-secondary lg:flex", !collapsed && "ml-auto")}
             aria-label={collapsed ? t("shell.expandSidebar") : t("shell.collapseSidebar")}
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -224,13 +244,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {!collapsed && (
-          <div className="border-b border-border/40 px-4 py-3">
+          <div className="border-b border-border px-4 py-3">
             <Link
-              href="/dashboard/settings"
+              href={withSeed("/dashboard/settings")}
               onClick={() => setMobileOpen(false)}
-              className="flex w-full items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-left text-sm transition-colors hover:bg-muted/50"
+              className="flex w-full items-center gap-2 rounded-xl border border-border bg-[hsl(var(--siemens-surface))] px-3 py-2 text-left text-sm transition-colors hover:border-primary/30"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-brand/15 text-xs font-bold text-brand-dark">
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#82D153] text-[10px] font-bold text-white">
                 {company.name.slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
@@ -248,7 +268,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {navGroups.map((group) => (
             <div key={group.label}>
               {!collapsed && (
-                <p className="dash-label mb-1.5 px-3 text-muted-foreground/70">
+                <p className="dash-label mb-1.5 px-3 text-brand">
                   {group.label}
                 </p>
               )}
@@ -258,18 +278,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   return (
                     <Link
                       key={href}
-                      href={href}
+                      href={withSeed(href)}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        "group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium transition-all",
-                        active
-                          ? "bg-gradient-to-r from-[#82D153]/15 to-emerald-500/10 text-[#3d8b2e] shadow-sm ring-1 ring-[#82D153]/20"
-                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                        "dash-nav-item group",
+                        active ? "dash-nav-item-active" : "dash-nav-item-idle",
                         collapsed && "justify-center px-2"
                       )}
                       title={collapsed ? label : undefined}
                     >
-                      {active && <span className="absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-r bg-brand-dark" />}
+                      {active && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-[#82D153]" />}
                       <NavIcon icon={Icon} active={active} />
                       {!collapsed && <span className="truncate">{label}</span>}
                     </Link>
@@ -280,27 +298,27 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="border-t border-border/40 p-3">
+        <div className="border-t border-border p-3">
           {!collapsed ? (
-            <Link href="/" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
+            <Link href="/" className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
               ← {t("marketing.backToWebsite")}
             </Link>
           ) : (
-            <Link href="/" className="flex justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted/50" title={t("marketing.backToWebsite")}>←</Link>
+            <Link href="/" className="flex justify-center rounded-xl p-2 text-muted-foreground hover:bg-secondary" title={t("marketing.backToWebsite")}>←</Link>
           )}
         </div>
       </aside>
 
       <div className={cn("flex min-h-screen flex-col transition-[padding] duration-300", collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64")}>
-        <header className="sticky top-0 z-30 border-b border-border/60 bg-white/90 backdrop-blur-md">
-          <div className="flex h-[4.75rem] items-center gap-2 px-4 lg:gap-3 lg:px-6">
-            <button type="button" className="rounded-lg p-2 hover:bg-muted lg:hidden" onClick={() => setMobileOpen(true)} aria-label={t("shell.openNav")}>
+        <header className="sticky top-0 z-30 border-b border-border bg-white/98 backdrop-blur-[8px]">
+          <div className="flex h-16 items-center gap-2 px-4 lg:gap-3 lg:px-6">
+            <button type="button" className="rounded-xl p-2 hover:bg-secondary lg:hidden" onClick={() => setMobileOpen(true)} aria-label={t("shell.openNav")}>
               <Menu className="h-5 w-5" />
             </button>
 
             <div className="min-w-0 shrink-0 max-w-[9.5rem] sm:max-w-[11rem] lg:max-w-[12.5rem]">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{t("overview.carbonIntelligence")}</p>
-              <h1 className="truncate text-lg font-semibold tracking-tight">{pageTitle}</h1>
+              <p className="siemens-eyebrow text-[10px]">{t("overview.carbonIntelligence")}</p>
+              <h1 className="truncate text-base font-semibold tracking-tight lg:text-lg">{pageTitle}</h1>
             </div>
 
             <QlimAiLiveTicker />
@@ -310,7 +328,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder={t("common.search")}
-                  className="h-8 w-28 border-border/60 bg-muted/30 pl-8 text-xs shadow-none lg:w-36"
+                  className="h-8 w-28 rounded-xl border-border bg-secondary/50 pl-8 text-xs shadow-none lg:w-36"
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
@@ -331,9 +349,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                               <button
                                 key={n.href}
                                 type="button"
-                                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm hover:bg-muted"
+                                className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-sm hover:bg-secondary"
                                 onClick={() => {
-                                  router.push(n.href);
+                                  router.push(withSeed(n.href));
                                   setSearch("");
                                   setSearchOpen(false);
                                 }}
@@ -351,12 +369,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                               <button
                                 key={a.id}
                                 type="button"
-                                className="flex w-full flex-col rounded-lg px-2 py-2 text-left hover:bg-muted"
+                                className="flex w-full flex-col rounded-xl px-2 py-2 text-left hover:bg-secondary"
                                 onClick={() => {
                                   openCalculation(a);
                                   setSearch("");
                                   setSearchOpen(false);
-                                  if (pathname !== "/dashboard/emissions") router.push("/dashboard/emissions");
+                                  if (pathname !== "/dashboard/emissions") router.push(withSeed("/dashboard/emissions"));
                                 }}
                               >
                                 <span className="text-sm font-medium">{a.source}</span>
@@ -391,8 +409,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         key={p}
                         type="button"
                         className={cn(
-                          "flex w-full rounded-lg px-3 py-2 text-left text-xs hover:bg-muted",
-                          filters.period === p && "bg-muted font-semibold"
+                          "flex w-full rounded-xl px-3 py-2 text-left text-xs hover:bg-secondary",
+                          filters.period === p && "bg-secondary font-semibold text-primary"
                         )}
                         onClick={() => {
                           setFilters({ period: p });
@@ -426,7 +444,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 </Button>
                 {bellOpen && (
                   <div className="absolute right-0 top-full z-50 mt-1 w-80 overflow-hidden rounded-xl border border-border bg-background shadow-lg">
-                    <div className="flex items-center justify-between border-b border-border/50 px-3 py-2">
+                    <div className="flex items-center justify-between border-b border-border px-3 py-2">
                       <p className="text-xs font-semibold">{t("common.notifications")}</p>
                       <Button
                         variant="ghost"
@@ -446,12 +464,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                             key={n.id}
                             type="button"
                             className={cn(
-                              "flex w-full flex-col gap-0.5 border-b border-border/40 px-3 py-2.5 text-left hover:bg-muted/50",
-                              !n.read && "bg-brand/5"
+                              "flex w-full flex-col gap-0.5 border-b border-border/40 px-3 py-2.5 text-left hover:bg-secondary/60",
+                              !n.read && "bg-primary/5"
                             )}
                             onClick={() => {
                               setBellOpen(false);
-                              if (n.href) router.push(n.href);
+                              if (n.href) router.push(withSeed(n.href));
                             }}
                           >
                             <span className="text-sm font-medium">{n.title}</span>
@@ -470,7 +488,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         <main className="flex-1 px-4 py-4 lg:px-6 lg:py-5">
           {dataMode === "local" && (
-            <div className="mx-auto mb-4 max-w-[1600px] rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-900">
+            <div className="mx-auto mb-4 max-w-[1600px] rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-900">
               {t("common.localDataBanner")}
             </div>
           )}

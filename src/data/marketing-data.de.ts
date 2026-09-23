@@ -159,7 +159,7 @@ export const carbonFootprintTopicsDe = [
       "Indirekte Emissionen aus Strom, Dampf, Heizung und Kühlung für Ihren Betrieb. Standort- und marktbezogene Methoden sind für CSRD relevant.",
     share: "16%",
     shareLabel: "Typischer Mid-Market-Anteil",
-    accent: "#22c55e",
+    accent: "#82D153",
     examples: ["Netzstrom", "Fernwärme", "Erneuerbare PPAs", "Prozessdampf"],
     image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=900&q=80",
     imageAlt: "Solarpaneele für erneuerbaren Strom",

@@ -200,6 +200,26 @@ export async function loadDashboardBundle(companyId: string): Promise<DashboardB
     return loadDashboardBundle(companyId);
   }
 
+  // If cloud inventory is empty but a local sample exists (seed wrote locally), use it.
+  const cloudActivities = (actRes.data ?? []).map(mapActivity);
+  if (cloudActivities.length === 0) {
+    const local = readLocal(companyId);
+    if (local.activities.length > 0) {
+      return {
+        mode: "local",
+        settings: local.settings,
+        facilities: local.facilities,
+        vehicles: local.vehicles,
+        suppliers: local.suppliers,
+        activities: local.activities,
+        initiatives: local.initiatives,
+        climateTarget: local.climateTarget,
+        notifications: local.notifications,
+        assessments: local.assessments ?? [],
+      };
+    }
+  }
+
   const assessments = assessRes.error
     ? readLocal(companyId).assessments ?? []
     : (assessRes.data ?? []).map(mapAssessment);
@@ -210,7 +230,7 @@ export async function loadDashboardBundle(companyId: string): Promise<DashboardB
     facilities: (facRes.data ?? []).map(mapFacility),
     vehicles: (vehRes.data ?? []).map(mapVehicle),
     suppliers: (supRes.data ?? []).map(mapSupplier),
-    activities: (actRes.data ?? []).map(mapActivity),
+    activities: cloudActivities,
     initiatives: (initRes.data ?? []).map(mapInitiative),
     climateTarget: tgtRes.data
       ? mapTarget(tgtRes.data)
@@ -247,43 +267,96 @@ export async function seedSampleData(companyId: string) {
   await seedCompanyDemo(companyId);
 }
 
+/** Scope demo entity IDs to a company so multi-tenant seeds do not collide on PKs. */
+export function scopeDemoId(companyId: string, id: string) {
+  const prefix = companyId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "co";
+  return `${prefix}-${id}`;
+}
+
+export function buildScopedDemoInventory(companyId: string) {
+  const idMap = new Map<string, string>();
+  const sid = (id: string) => {
+    const scoped = scopeDemoId(companyId, id);
+    idMap.set(id, scoped);
+    return scoped;
+  };
+
+  const facilities = demoFacilities.map((f) => ({ ...f, id: sid(f.id) }));
+  const vehicles = demoVehicles.map((v) => ({
+    ...v,
+    id: sid(v.id),
+    facilityId: idMap.get(v.facilityId) ?? sid(v.facilityId),
+  }));
+  const suppliers = demoSuppliers.map((s) => ({ ...s, id: sid(s.id) }));
+  const initiatives = demoInitiatives.map((i) => ({ ...i, id: sid(i.id) }));
+  const climateTarget = { ...demoTarget, id: sid(demoTarget.id) };
+  const activities = allActivities.map((a) => ({
+    ...a,
+    id: sid(a.id),
+    facilityId: idMap.get(a.facilityId) ?? sid(a.facilityId),
+    resourceId: a.resourceId ? idMap.get(a.resourceId) ?? sid(a.resourceId) : undefined,
+  }));
+
+  return { facilities, vehicles, suppliers, initiatives, climateTarget, activities };
+}
+
 export async function seedCompanyDemo(companyId: string) {
-  const useSb = await tablesAvailable();
-  if (!useSb) {
-    const base = emptyLocalStore(companyId);
-    writeLocal(companyId, {
-      ...base,
-      settings: {
-        ...base.settings,
-        unitsProduced: demoCompany.unitsProduced,
-        seededAt: new Date().toISOString(),
+  const inventory = buildScopedDemoInventory(companyId);
+
+  // Always write local workspace first so the dashboard has data even if RLS/network fails.
+  const base = emptyLocalStore(companyId);
+  writeLocal(companyId, {
+    ...base,
+    settings: {
+      ...base.settings,
+      unitsProduced: demoCompany.unitsProduced,
+      seededAt: new Date().toISOString(),
+    },
+    facilities: inventory.facilities,
+    vehicles: inventory.vehicles,
+    suppliers: inventory.suppliers,
+    activities: inventory.activities,
+    initiatives: inventory.initiatives,
+    climateTarget: inventory.climateTarget,
+    customFactors: [...demoFactors],
+    notifications: [
+      {
+        id: crypto.randomUUID(),
+        companyId,
+        userId: null,
+        title: "Inventory loaded",
+        message: "FY 2024 inventory is ready — facilities, fleet, suppliers, and monthly activity data.",
+        href: "/dashboard/emissions",
+        read: false,
+        createdAt: new Date().toISOString(),
       },
-      facilities: demoFacilities,
-      vehicles: demoVehicles,
-      suppliers: demoSuppliers,
-      activities: allActivities,
-      initiatives: demoInitiatives,
-      climateTarget: demoTarget,
-      customFactors: [...demoFactors],
-      notifications: [
-        {
-          id: crypto.randomUUID(),
-          companyId,
-          userId: null,
-          title: "Inventory loaded",
-          message: "Your workspace inventory is ready. Continue adding activities anytime.",
-          href: "/dashboard/emissions",
-          read: false,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    });
-    return;
-  }
+    ],
+  });
+
+  const useSb = await tablesAvailable();
+  if (!useSb) return;
 
   const supabase = createClient();
 
-  await supabase.from("company_settings").upsert({
+  const { error: companyErr } = await supabase
+    .from("companies")
+    .update({
+      name: demoCompany.name,
+      industry: demoCompany.industry,
+      employee_count: demoCompany.employeeCount,
+      annual_revenue: demoCompany.revenueEUR,
+      currency: demoCompany.currency,
+      facility_count: inventory.facilities.length,
+      headquarters_country: "Germany",
+      countries_of_operation: ["Germany", "Netherlands"],
+      company_size: "501-1000",
+    })
+    .eq("id", companyId);
+  if (companyErr) {
+    console.warn("[seed] company profile update:", companyErr.message);
+  }
+
+  const { error: settingsErr } = await supabase.from("company_settings").upsert({
     company_id: companyId,
     carbon_price_per_tonne: demoCompany.carbonPricePerTonne,
     discount_rate: demoCompany.discountRate,
@@ -293,23 +366,46 @@ export async function seedCompanyDemo(companyId: string) {
     custom_factors: demoFactors,
     seeded_at: new Date().toISOString(),
   });
+  if (settingsErr) {
+    console.warn("[seed] settings:", settingsErr.message);
+    return; // local inventory already written
+  }
 
-  await supabase.from("facilities").upsert(demoFacilities.map((f) => facilityToRow(f, companyId)));
-  await supabase.from("vehicles").upsert(demoVehicles.map((v) => vehicleToRow(v, companyId)));
-  await supabase.from("suppliers").upsert(demoSuppliers.map((s) => supplierToRow(s, companyId)));
-  await supabase.from("reduction_initiatives").upsert(demoInitiatives.map((i) => initiativeToRow(i, companyId)));
-  await supabase.from("climate_targets").upsert(targetToRow(demoTarget, companyId));
+  const upsertOrWarn = async (table: string, rows: Record<string, unknown>[]) => {
+    if (!rows.length) return;
+    const { error } = await supabase.from(table).upsert(rows);
+    if (error) console.warn(`[seed] ${table}:`, error.message);
+  };
 
-  const rows = allActivities.map((a) => activityToRow(a, companyId));
+  await upsertOrWarn(
+    "facilities",
+    inventory.facilities.map((f) => facilityToRow(f, companyId))
+  );
+  await upsertOrWarn(
+    "vehicles",
+    inventory.vehicles.map((v) => vehicleToRow(v, companyId))
+  );
+  await upsertOrWarn(
+    "suppliers",
+    inventory.suppliers.map((s) => supplierToRow(s, companyId))
+  );
+  await upsertOrWarn(
+    "reduction_initiatives",
+    inventory.initiatives.map((i) => initiativeToRow(i, companyId))
+  );
+  await upsertOrWarn("climate_targets", [targetToRow(inventory.climateTarget, companyId)]);
+
+  const rows = inventory.activities.map((a) => activityToRow(a, companyId));
   for (let i = 0; i < rows.length; i += 100) {
     const chunk = rows.slice(i, i + 100);
-    await supabase.from("emission_activities").upsert(chunk);
+    const { error } = await supabase.from("emission_activities").upsert(chunk);
+    if (error) console.warn("[seed] emission_activities:", error.message);
   }
 
   await supabase.from("notifications").insert({
     company_id: companyId,
     title: "Inventory loaded",
-    message: "Your workspace inventory is ready. Continue adding activities anytime.",
+    message: "FY 2024 inventory is ready — facilities, fleet, suppliers, and monthly activity data.",
     href: "/dashboard/overview",
     read: false,
   });

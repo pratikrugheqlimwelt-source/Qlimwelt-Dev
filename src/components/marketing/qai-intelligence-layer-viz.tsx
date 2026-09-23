@@ -236,12 +236,12 @@ export function QaiIntelligenceLayerViz({
           <defs>
             <linearGradient id={`${uid}-syn`} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#d4d4d8" stopOpacity="0.8" />
-              <stop offset="50%" stopColor="#86efac" stopOpacity="0.5" />
+              <stop offset="50%" stopColor="#82D153" stopOpacity="0.5" />
               <stop offset="100%" stopColor="#d4d4d8" stopOpacity="0.8" />
             </linearGradient>
             <linearGradient id={`${uid}-hot`} x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#82D153" stopOpacity="0.45" />
-              <stop offset="100%" stopColor="#3d8b2e" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#5cb832" stopOpacity="0.95" />
             </linearGradient>
             <filter id={`${uid}-glow`} x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="2" result="b" />
@@ -270,7 +270,7 @@ export function QaiIntelligenceLayerViz({
             x={COL.hidX}
             y={18}
             textAnchor="middle"
-            fill="#3d8b2e"
+            fill="#5cb832"
             style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.14em" }}
           >
             QAI
@@ -412,7 +412,7 @@ export function QaiIntelligenceLayerViz({
                       hot || isHidden
                         ? "#82D153"
                         : n.kind === "output"
-                          ? "#86efac"
+                          ? "#82D153"
                           : "#cbd5e1"
                     }
                     strokeWidth={hot || isHidden ? 1.85 : 1.25}

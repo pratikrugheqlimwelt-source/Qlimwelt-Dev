@@ -50,33 +50,31 @@ export default function PlatformPage() {
 
   return (
     <MarketingLayout>
-      <Section dark className="border-white/10 py-14 lg:py-16">
+      <Section className="bg-[hsl(var(--siemens-surface))] py-14 lg:py-16">
         <SectionContainer narrow className="text-center">
           <FadeUp>
             <MetaLabel className="text-brand">{t("marketing.platformHeroLabel")}</MetaLabel>
-            <h1 className="section-headline-gap font-serif text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
+            <h1 className="siemens-display section-headline-gap">
               {t("marketing.platformHeroTitle")}
-              <span className="mt-1 block font-normal italic text-brand">{t("marketing.platformHeroAccent")}</span>
+              <span className="mt-1 block text-brand-dark">{t("marketing.platformHeroAccent")}</span>
             </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-white/60">
+            <p className="siemens-body mx-auto mt-6 max-w-2xl">
               {t("marketing.platformHeroBody")}
             </p>
-            <div className="mx-auto mt-10 flex max-w-xl items-center gap-3 border border-white/15 bg-white/[0.04] p-4">
+            <div className="mx-auto mt-10 flex max-w-xl items-center gap-3 rounded-sm border border-border bg-white p-4">
               <Bot className="h-5 w-5 shrink-0 text-brand" />
-              <motion.p key={queryIndex} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0 flex-1 text-left text-sm text-white/80">
+              <motion.p key={queryIndex} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0 flex-1 text-left text-sm text-foreground/80">
                 {platformQueries[queryIndex]}
               </motion.p>
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-white/20 text-white">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 <ArrowRight className="h-4 w-4" />
               </span>
             </div>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <a href="#capabilities">
-                <span className="type-cta inline-flex items-center gap-2 border border-white px-6 py-3 text-white transition-colors hover:bg-white hover:text-black">
-                  {t("marketing.exploreFeatures")} <ChevronRight className="h-4 w-4" />
-                </span>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <a href="#capabilities" className="siemens-btn-primary">
+                {t("marketing.exploreFeatures")} <ChevronRight className="h-4 w-4" />
               </a>
-              <Link href="/login" className="type-nav text-white/50 transition-colors hover:text-white">
+              <Link href="/dashboard" className="siemens-btn-secondary">
                 {t("marketing.openDashboard")}
               </Link>
             </div>
@@ -258,13 +256,17 @@ export default function PlatformPage() {
       <Section dark noBorder className="border-white/10 py-14">
         <SectionContainer narrow className="text-center">
           <FadeUp>
-            <h2 className="font-serif text-3xl font-bold text-white sm:text-4xl">
+            <h2 className="font-sans text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Ready to see Qlimwelt AI in action?
             </h2>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <EditorialCta href="/#contact">Request a Demo</EditorialCta>
-              <Link href="/dashboard" className="type-nav text-white/50 hover:text-white">
-                Open Dashboard →
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center gap-2 rounded-sm border border-white/25 bg-transparent px-5 py-2.5 text-sm font-semibold tracking-tight text-white transition-colors duration-200 hover:border-white/50 hover:bg-white/5"
+              >
+                Open Dashboard
+                <span aria-hidden>→</span>
               </Link>
             </div>
           </FadeUp>

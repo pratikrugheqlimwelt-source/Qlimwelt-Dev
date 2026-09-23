@@ -97,65 +97,59 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
   const reduced = useReducedMotion();
 
   return (
-    <LayoutGroup id="pricing">
-      <div className="grid gap-px bg-border lg:grid-cols-3">
-        {plans.map((plan, i) => {
-          const isSelected = selected === i;
-          return (
-            <motion.button
-              key={`plan-${i}`}
-              type="button"
-              onClick={() => setSelected(i)}
-              className="relative flex h-full flex-col bg-background p-8 text-left outline-none transition-colors sm:p-10 focus-visible:ring-2 focus-visible:ring-brand-dark focus-visible:ring-offset-2"
-              whileHover={reduced ? undefined : { backgroundColor: "hsl(0 0% 96% / 0.6)" }}
-              whileTap={reduced ? undefined : { scale: 0.995 }}
-              transition={{ duration: 0.2 }}
+    <div className="grid gap-4 lg:grid-cols-3">
+      {plans.map((plan, i) => {
+        const isSelected = selected === i;
+        return (
+          <motion.button
+            key={`plan-${i}`}
+            type="button"
+            onClick={() => setSelected(i)}
+            className={cn(
+              "siemens-card relative flex h-full flex-col p-8 text-left outline-none sm:p-10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+              isSelected && "ring-2 ring-inset ring-primary"
+            )}
+            whileHover={reduced ? undefined : { y: -2 }}
+            whileTap={reduced ? undefined : { scale: 0.995 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              animate={reduced ? undefined : { opacity: isSelected ? 1 : 0.72 }}
+              transition={{ duration: 0.25 }}
+              className="relative flex h-full flex-col"
             >
-              {isSelected && (
-                <motion.div
-                  layoutId="pricing-active-border"
-                  className="pointer-events-none absolute inset-0 ring-2 ring-inset ring-brand-dark"
-                  transition={springSnappy}
-                />
+              {plan.badge && (
+                <MetaLabel className="mb-4 text-brand-dark">{plan.badge.toUpperCase()}</MetaLabel>
               )}
-              <motion.div
-                animate={reduced ? undefined : { opacity: isSelected ? 1 : 0.72 }}
-                transition={{ duration: 0.25 }}
-                className="relative flex h-full flex-col"
-              >
-                {plan.badge && (
-                  <MetaLabel className="mb-4 text-brand-dark">{plan.badge.toUpperCase()}</MetaLabel>
-                )}
-                <MetaLabel>{plan.name}</MetaLabel>
-                <p className="mt-4">
-                  <MetricFigure size="hero">{plan.price}</MetricFigure>
-                  {plan.period ? (
-                    <span className="ml-1 align-baseline font-sans text-lg font-medium text-muted-foreground">
-                      {plan.period}
-                    </span>
-                  ) : null}
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{plan.description}</p>
-                <ThinRule className="my-8" />
-                <ul className="flex-1 space-y-3">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-dark" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-8">
-                  <EditorialCta href="#contact" fullWidth>
-                    {plan.cta}
-                  </EditorialCta>
-                </div>
-              </motion.div>
-            </motion.button>
-          );
-        })}
-      </div>
-    </LayoutGroup>
+              <MetaLabel>{plan.name}</MetaLabel>
+              <p className="mt-4">
+                <MetricFigure size="hero">{plan.price}</MetricFigure>
+                {plan.period ? (
+                  <span className="ml-1 align-baseline font-sans text-lg font-medium text-muted-foreground">
+                    {plan.period}
+                  </span>
+                ) : null}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{plan.description}</p>
+              <ThinRule className="my-8" />
+              <ul className="flex-1 space-y-3">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-dark" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8">
+                <EditorialCta href="#contact" fullWidth>
+                  {plan.cta}
+                </EditorialCta>
+              </div>
+            </motion.div>
+          </motion.button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -195,7 +189,7 @@ export function InteractiveSteps({ steps }: { steps: Step[] }) {
                   <motion.p
                     animate={reduced ? undefined : { opacity: isActive ? 1 : 0.35 }}
                     transition={{ duration: 0.25 }}
-                    className="mt-2 font-serif text-4xl font-bold sm:text-5xl"
+                    className="mt-2 font-sans text-4xl font-bold tracking-tight sm:text-5xl"
                   >
                     {step.step}
                   </motion.p>

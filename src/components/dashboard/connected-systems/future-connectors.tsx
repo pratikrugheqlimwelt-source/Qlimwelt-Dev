@@ -39,11 +39,7 @@ export function FutureConnectors({
               </div>
               <Button
                 size="sm"
-                className={
-                  connected
-                    ? undefined
-                    : "border border-black bg-white text-black shadow-none hover:border-[#82D153] hover:bg-[#82D153] hover:text-black"
-                }
+                className={undefined}
                 variant={connected ? "outline" : "default"}
                 onClick={() => onConnect(c)}
               >

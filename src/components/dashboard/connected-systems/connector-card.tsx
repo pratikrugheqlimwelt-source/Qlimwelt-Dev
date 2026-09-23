@@ -19,7 +19,7 @@ export function ConnectorCard({
   const t = useT();
 
   return (
-    <div className="dash-card flex h-full flex-col p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(15,23,42,0.08)]">
+    <div className="dash-card flex h-full flex-col p-5 transition-colors hover:border-primary/25">
       <div className="flex items-start justify-between gap-3">
         <ConnectorIcon
           connectorId={connector.id}
@@ -40,23 +40,19 @@ export function ConnectorCard({
         {connector.features.slice(0, 3).map((f) => (
           <span
             key={f}
-            className="rounded-md bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 ring-1 ring-slate-200/70"
+            className="rounded-xl bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-border"
           >
             {f}
           </span>
         ))}
       </div>
       <Button
-        className={
-          connected
-            ? "mt-4 w-full"
-            : "mt-4 w-full border border-black bg-white text-black shadow-none hover:border-[#82D153] hover:bg-[#82D153] hover:text-black"
-        }
+        className="mt-4 w-full"
         variant={connected ? "outline" : "default"}
         onClick={() => onConnect(connector)}
       >
         {connected ? (
-          <CheckCircle2 className="mr-2 h-4 w-4 text-[#2f6f24]" />
+          <CheckCircle2 className="mr-2 h-4 w-4 text-primary" />
         ) : (
           <Plug className="mr-2 h-4 w-4" />
         )}

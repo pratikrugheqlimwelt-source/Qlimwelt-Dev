@@ -238,7 +238,7 @@ export function InsightsNewsSection() {
                     {featured.readTime}
                   </span>
                 </div>
-                <h3 className="mt-5 max-w-3xl font-serif text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+                <h3 className="mt-5 max-w-3xl font-sans text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
                   {featured.title}
                 </h3>
                 <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">{featured.excerpt}</p>

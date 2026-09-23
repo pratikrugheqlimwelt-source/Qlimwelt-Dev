@@ -50,9 +50,9 @@ export function WelcomeCard({ firstName, companyName }: WelcomeCardProps) {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#82D153]/30 bg-gradient-to-r from-[#82D153]/10 via-white to-emerald-50 p-5 shadow-sm">
+    <div className="relative overflow-hidden rounded-2xl border border-white/60 bg-white/95 p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04),0_8px_24px_rgba(15,23,42,0.06)]">
       <div className="flex items-start gap-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#82D153]/20 text-[#3d8b2e]">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#82D153]/15 text-[#3d8b2e] ring-1 ring-[#82D153]/25">
           <Sparkles className="h-5 w-5" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">

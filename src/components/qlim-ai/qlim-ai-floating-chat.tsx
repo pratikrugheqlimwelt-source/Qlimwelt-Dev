@@ -62,7 +62,7 @@ export function QlimAiFloatingChat({ className }: QlimAiFloatingChatProps) {
             exit={{ opacity: 0, y: 12, scale: 0.96 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="h-1 w-full shrink-0 bg-gradient-to-r from-[#82D153] via-emerald-500 to-teal-500" />
+            <div className="h-1 w-full shrink-0 bg-brand" />
             <QlimAiChat
               messages={welcomeMessages}
               interactive

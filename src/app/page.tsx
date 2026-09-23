@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import {
   Network,
   Activity,
@@ -10,7 +8,7 @@ import {
   Lightbulb,
   Scale,
   Waypoints,
-  ArrowDown,
+  ChevronRight,
 } from "lucide-react";
 import { MarketingLayout } from "@/components/marketing/marketing-layout";
 import { QlimAiChat } from "@/components/qlim-ai/qlim-ai-chat";
@@ -18,19 +16,24 @@ import { QlimAiOverlay } from "@/components/qlim-ai/qlim-ai-overlay";
 import {
   Section,
   SectionContainer,
-  SectionNumberWrap,
   MetaLabel,
-  StatusBar,
-  EditorialHeadline,
   FadeUp,
-  EditorialCta,
-  SectionIntro,
 } from "@/components/marketing/editorial";
-import { AnimatedRule, PricingSelector } from "@/components/marketing/motion-ui";
-import { QaiIntelligenceLayerViz } from "@/components/marketing/qai-intelligence-layer-viz";
-import { QaiHowItWorksPipeline } from "@/components/marketing/qai-how-it-works";
-import { TechStackIntegrations } from "@/components/marketing/tech-stack-integrations";
-import { TryQaiMobileButton } from "@/components/qai-mobile/try-qai-mobile-button";
+import { PricingSelector } from "@/components/marketing/motion-ui";
+import {
+  SiemensPrimaryCta,
+  SiemensSecondaryCta,
+  SiemensFeatureCard,
+  SiemensProofRow,
+  HeroVisualPanel,
+  PipelineActionCard,
+  ValueMediaCard,
+  PricingBanner,
+  MediaPanel,
+  MARKETING_IMAGES,
+} from "@/components/marketing/siemens-ui";
+import { IntegrationLogoMarquee } from "@/components/marketing/integration-logo-marquee";
+import { TeamSection } from "@/components/marketing/team-section";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
@@ -38,41 +41,29 @@ import { qlimAiDemo } from "@/data/marketing-data";
 import { useT } from "@/components/i18n/locale-provider";
 import { useLocalizedMarketing } from "@/lib/i18n/use-localized-marketing";
 import { useLocalizedBrand } from "@/lib/i18n/use-localized-brand";
-import { EASE_OUT } from "@/lib/motion";
 
 const CAPABILITIES = [
-  { key: "capConnect", icon: Network },
-  { key: "capContinuous", icon: Activity },
-  { key: "capRootCause", icon: SearchCode },
-  { key: "capDecision", icon: Lightbulb },
-  { key: "capCompliance", icon: Scale },
-  { key: "capGraph", icon: Waypoints },
+  { key: "capConnect", icon: Network, image: MARKETING_IMAGES.factory },
+  { key: "capContinuous", icon: Activity, image: MARKETING_IMAGES.grid },
+  { key: "capRootCause", icon: SearchCode, image: MARKETING_IMAGES.data },
+  { key: "capDecision", icon: Lightbulb, image: MARKETING_IMAGES.boardroom },
+  { key: "capCompliance", icon: Scale, image: MARKETING_IMAGES.city },
+  { key: "capGraph", icon: Waypoints, image: MARKETING_IMAGES.control },
 ] as const;
 
-const VALUE_KEYS = [
-  "valueUnderstand",
-  "valuePredict",
-  "valueSupplier",
-  "valueCostCarbon",
-  "valueCompliance",
-  "valueAdvantage",
+const PIPELINE_STEPS = [
+  { n: "01", key: "pipelineStepConnect" },
+  { n: "02", key: "pipelineStepReason" },
+  { n: "03", key: "pipelineStepAct" },
 ] as const;
 
-const TRADITIONAL = [
-  "compareTrad1",
-  "compareTrad2",
-  "compareTrad3",
-  "compareTrad4",
-  "compareTrad5",
-] as const;
-
-const QAI_FLOW = [
-  "compareQai1",
-  "compareQai2",
-  "compareQai3",
-  "compareQai4",
-  "compareQai5",
-  "compareQai6",
+const VALUE_ITEMS = [
+  { key: "valueUnderstand", image: MARKETING_IMAGES.boardroom },
+  { key: "valuePredict", image: MARKETING_IMAGES.grid },
+  { key: "valueSupplier", image: MARKETING_IMAGES.logistics },
+  { key: "valueCostCarbon", image: MARKETING_IMAGES.turbines },
+  { key: "valueCompliance", image: MARKETING_IMAGES.city },
+  { key: "valueAdvantage", image: MARKETING_IMAGES.forest },
 ] as const;
 
 export default function HomePage() {
@@ -81,6 +72,16 @@ export default function HomePage() {
   const { pricingPlans } = useLocalizedMarketing();
   const [qlimAiOpen, setQlimAiOpen] = useState(false);
   const [demoSubmitting, setDemoSubmitting] = useState(false);
+
+  // Keep first paint on the hero — pricing layout animations previously jumped the viewport.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash) return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+  }, []);
 
   const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -123,292 +124,176 @@ export default function HomePage() {
   return (
     <MarketingLayout navVariant="home">
       {/* ── HERO ── */}
-      <Section className="py-12 lg:py-16">
-        <SectionNumberWrap n="01" className="text-foreground/[0.025]" />
-        <SectionContainer>
-          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-10 xl:gap-12">
-            <FadeUp delay={0.06}>
-              <StatusBar />
-              <p className="mt-5 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#82D153]" aria-hidden />
-                {t("marketing.heroEyebrow")}
+      <section className="viewport-section-fill relative overflow-hidden border-b border-border bg-white !py-0">
+        <div className="mx-auto grid h-full min-h-[inherit] max-w-7xl lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-8 lg:py-12 xl:pr-4">
+            <FadeUp delay={0.04}>
+              <p className="font-sans text-2xl font-bold tracking-tight text-primary sm:text-3xl">
+                Qlimwelt
               </p>
-              <EditorialHeadline
-                as="h1"
-                className="mt-3 text-[2rem] sm:text-4xl lg:text-5xl xl:text-[3.25rem]"
-                lines={[
-                  { text: t("marketing.heroLine1"), italic: true },
-                  { text: t("marketing.heroLine2"), accent: true },
-                ]}
-              />
-              <AnimatedRule className="mt-5 max-w-xs" />
-              <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-slate-600">
-                {t("marketing.heroBody")}
-              </p>
-              <p className="mt-3 max-w-md font-serif text-base italic leading-snug text-slate-800">
-                {t("marketing.heroCaption")}
-              </p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <EditorialCta href="#contact">{t("marketing.bookDemo")}</EditorialCta>
-                <TryQaiMobileButton variant="hero" label={t("qaiMobile.tryCta")} />
-                <button
-                  type="button"
-                  onClick={() => setQlimAiOpen(true)}
-                  className="type-nav inline-flex items-center gap-2 px-2 py-3 text-slate-700"
-                >
-                  {t("marketing.seeQai")}
-                </button>
+              <p className="siemens-eyebrow mt-5">{t("marketing.heroEyebrow")}</p>
+              <h1 className="siemens-display mt-3">
+                <span className="block">{t("marketing.heroLine1")}</span>
+                <span className="block">{t("marketing.heroLine2")}</span>
+              </h1>
+              <p className="siemens-body mt-5 max-w-xl">{t("marketing.heroBody")}</p>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <SiemensPrimaryCta href="#contact">{t("marketing.bookDemo")}</SiemensPrimaryCta>
+                <SiemensSecondaryCta href="/dashboard">
+                  {t("marketing.exploreDashboard")}
+                </SiemensSecondaryCta>
               </div>
-              <p className="mt-2 text-xs text-slate-500">{t("qaiMobile.tagline")}</p>
-            </FadeUp>
-            <FadeUp delay={0.14} className="w-full min-w-0">
-              <QaiIntelligenceLayerViz compact />
+              <SiemensProofRow className="mt-8" />
             </FadeUp>
           </div>
-        </SectionContainer>
-      </Section>
-
-      {/* ── POSITIONING STATEMENT ── */}
-      <Section>
-        <div className="watermark-text absolute inset-x-0 top-1/2 -translate-y-1/2 text-center">
-          QAI
+          <FadeUp delay={0.12} className="min-h-[280px] min-w-0 lg:min-h-0">
+            <HeroVisualPanel className="h-full min-h-[280px] lg:min-h-full" />
+          </FadeUp>
         </div>
-        <SectionContainer narrow className="relative text-center">
-          <FadeUp>
-            <MetaLabel className="text-center">{t("marketing.osLabel")}</MetaLabel>
-            <h2 className="mt-5 font-serif text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              {t("marketing.osHeadline")}
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-600">
-              {t("marketing.osBody")}
-            </p>
-            <p className="mx-auto mt-5 max-w-xl font-serif text-xl italic text-[#2f6f24]">
-              {t("marketing.osCaption")}
-            </p>
-          </FadeUp>
-          <AnimatedRule className="section-content-gap" />
-        </SectionContainer>
-      </Section>
+      </section>
 
-      {/* ── INTELLIGENCE CAPABILITIES ── */}
-      <Section id="capabilities">
-        <SectionNumberWrap n="02" />
-        <SectionContainer>
-          <FadeUp>
-            <SectionIntro
-              label={t("marketing.capabilitiesLabel")}
-              lines={[
-                { text: t("marketing.capabilitiesTitle1"), italic: true },
-                { text: t("marketing.capabilitiesTitle2") },
-              ]}
+      {/* ── CAPABILITIES ── */}
+      <Section id="capabilities" viewport viewportAlign="start" className="bg-white !py-0">
+        <div className="mx-auto grid max-w-7xl border-b border-border lg:min-h-[min(52vh,28rem)] lg:grid-cols-2">
+          <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+            <FadeUp>
+              <MetaLabel className="text-brand">{t("marketing.capabilitiesLabel")}</MetaLabel>
+              <h2 className="siemens-display mt-3 max-w-xl">{t("marketing.capabilitiesHeadline")}</h2>
+              <p className="siemens-body mt-4 max-w-lg">{t("marketing.capabilitiesCaption")}</p>
+              <div className="mt-8">
+                <SiemensSecondaryCta href="#how-it-works">{t("marketing.explorePlatform")}</SiemensSecondaryCta>
+              </div>
+            </FadeUp>
+          </div>
+          <FadeUp delay={0.08} className="min-h-[240px] min-w-0 lg:min-h-0">
+            <MediaPanel
+              src={MARKETING_IMAGES.engineering}
+              diagonal
+              className="h-full"
+              minH="min-h-[240px] lg:min-h-full"
             />
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
-              {t("marketing.capabilitiesCaption")}
-            </p>
           </FadeUp>
-          <div className="section-content-gap grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {CAPABILITIES.map(({ key, icon: Icon }, i) => (
-              <motion.div
+        </div>
+        <SectionContainer className="py-10 lg:py-12">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {CAPABILITIES.map(({ key, icon, image }, i) => (
+              <SiemensFeatureCard
                 key={key}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.45, delay: i * 0.05, ease: EASE_OUT }}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors hover:border-[#82D153]/40"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#82D153]/12 text-[#2f6f24] ring-1 ring-[#82D153]/25 transition-transform group-hover:scale-105">
-                    <Icon className="h-5 w-5" strokeWidth={2} />
-                  </span>
-                  <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-300">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3d8b2e]">
-                  {t(`marketing.${key}Caption`)}
-                </p>
-                <h3 className="type-title mt-2 text-xl text-slate-900 sm:text-[1.35rem]">
-                  {t(`marketing.${key}Title`)}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  {t(`marketing.${key}Body`)}
-                </p>
-              </motion.div>
+                index={String(i + 1).padStart(2, "0")}
+                icon={icon}
+                image={image}
+                caption={t(`marketing.${key}Caption`)}
+                title={t(`marketing.${key}Title`)}
+                body={t(`marketing.${key}Body`)}
+                delay={i * 0.04}
+              />
             ))}
           </div>
         </SectionContainer>
       </Section>
 
-      {/* ── HOW QAI WORKS ── */}
-      <Section id="how-it-works" className="bg-slate-50/70">
-        <SectionNumberWrap n="03" />
+      {/* ── PIPELINE ── */}
+      <Section id="how-it-works" viewport className="bg-[hsl(var(--siemens-surface))]">
         <SectionContainer>
-          <FadeUp>
-            <SectionIntro
-              label={t("marketing.howLabel")}
-              lines={[
-                { text: t("marketing.howTitle1"), italic: true },
-                { text: t("marketing.howTitle2") },
-              ]}
-            />
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
-              {t("marketing.howBody")}
-            </p>
-          </FadeUp>
-          <div className="section-content-gap">
-            <QaiHowItWorksPipeline />
-          </div>
-        </SectionContainer>
-      </Section>
-
-      {/* ── INTEGRATIONS / TECH STACK ── */}
-      <Section id="integrations">
-        <SectionNumberWrap n="04" />
-        <SectionContainer>
-          <TechStackIntegrations />
-        </SectionContainer>
-      </Section>
-
-      {/* ── COMPARISON ── */}
-      <Section id="intelligence">
-        <SectionNumberWrap n="05" />
-        <SectionContainer>
-          <FadeUp>
-            <SectionIntro
-              label={t("marketing.compareLabel")}
-              lines={[
-                { text: t("marketing.compareTitle1"), italic: true },
-                { text: t("marketing.compareTitle2") },
-              ]}
-            />
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
-              {t("marketing.compareCaption")}
-            </p>
-          </FadeUp>
-          <div className="section-content-gap grid gap-6 lg:grid-cols-2">
+          <div className="grid items-stretch gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
             <FadeUp>
-              <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-                <MetaLabel>{t("marketing.compareTradLabel")}</MetaLabel>
-                <h3 className="type-title mt-3 text-xl text-slate-900 sm:text-[1.35rem]">
-                  {t("marketing.compareTradTitle")}
-                </h3>
-                <ul className="mt-8 space-y-0">
-                  {TRADITIONAL.map((key, i) => (
-                    <li key={key} className="flex flex-col items-start">
-                      <div className="flex w-full items-center gap-3 rounded-lg bg-slate-50 px-3 py-3 text-sm font-medium text-slate-700">
-                        <span className="font-mono text-[10px] text-slate-400">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        {t(`marketing.${key}`)}
-                      </div>
-                      {i < TRADITIONAL.length - 1 && (
-                        <ArrowDown className="my-1.5 ml-5 h-3.5 w-3.5 text-slate-300" aria-hidden />
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <MetaLabel className="text-brand">{t("marketing.howLabel")}</MetaLabel>
+              <h2 className="siemens-display mt-3">
+                <span className="block">{t("marketing.howTitle1")}</span>
+                <span className="block">{t("marketing.howTitle2")}</span>
+              </h2>
+              <p className="siemens-body mt-4 max-w-lg">{t("marketing.howBody")}</p>
+              <ol className="mt-8 space-y-3">
+                {PIPELINE_STEPS.map((step, i) => (
+                  <li key={step.key} className="flex items-center gap-3">
+                    <div className="flex min-w-0 flex-1 items-center gap-4 rounded-md border border-border bg-white px-4 py-3.5">
+                      <span className="font-sans text-sm font-bold tabular-nums text-brand">{step.n}</span>
+                      <span className="text-sm font-semibold text-foreground">
+                        {t(`marketing.${step.key}`)}
+                      </span>
+                    </div>
+                    {i < PIPELINE_STEPS.length - 1 ? (
+                      <ChevronRight className="hidden h-4 w-4 shrink-0 text-muted-foreground/40 sm:block" />
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
             </FadeUp>
             <FadeUp delay={0.1}>
-              <div className="h-full rounded-2xl border border-[#82D153]/35 bg-gradient-to-b from-[#f4fbf0] to-white p-6 sm:p-8">
-                <MetaLabel className="text-[#3d8b2e]">{t("marketing.compareQaiLabel")}</MetaLabel>
-                <h3 className="type-title mt-3 text-xl text-slate-900 sm:text-[1.35rem]">
-                  {t("marketing.compareQaiTitle")}
-                </h3>
-                <ul className="mt-8 space-y-0">
-                  {QAI_FLOW.map((key, i) => (
-                    <li key={key} className="flex flex-col items-start">
-                      <div className="flex w-full items-center gap-3 rounded-lg border border-[#82D153]/20 bg-white/80 px-3 py-3 text-sm font-medium text-slate-800">
-                        <span className="font-mono text-[10px] text-[#3d8b2e]">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        {t(`marketing.${key}`)}
-                      </div>
-                      {i < QAI_FLOW.length - 1 && (
-                        <ArrowDown className="my-1.5 ml-5 h-3.5 w-3.5 text-[#82D153]" aria-hidden />
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <PipelineActionCard />
             </FadeUp>
           </div>
         </SectionContainer>
       </Section>
 
-      {/* ── WHY QAI EXISTS ── */}
-      <Section className="bg-slate-950 text-white">
-        <SectionContainer narrow className="py-4 text-center">
-          <FadeUp>
-            <MetaLabel className="text-center text-white/40">{t("marketing.whyLabel")}</MetaLabel>
-            <blockquote className="mt-8 font-serif text-3xl font-bold leading-snug tracking-tight sm:text-4xl lg:text-5xl">
-              {t("marketing.whyQuote1")}
-              <br />
-              <span className="italic text-[#82D153]">{t("marketing.whyQuote2")}</span>
-            </blockquote>
-            <p className="mx-auto mt-8 max-w-2xl text-base leading-relaxed text-white/65">
-              {t("marketing.whyBody")}
-            </p>
-            <p className="mx-auto mt-6 max-w-xl font-serif text-lg italic text-[#82D153]/90">
-              {t("marketing.whyCaption")}
+      {/* ── INTEGRATIONS MARQUEE ── */}
+      <Section id="integrations" viewport className="border-b border-border bg-white !py-12 lg:!py-14">
+        <SectionContainer>
+          <FadeUp className="mx-auto max-w-3xl text-center">
+            <MetaLabel className="text-center text-brand">
+              {t("marketing.integrationsLabel")}
+            </MetaLabel>
+            <h2 className="siemens-display mt-4">
+              {t("marketing.integrationsMarqueeHeadline")}
+            </h2>
+            <p className="siemens-body mx-auto mt-5 max-w-2xl">
+              {t("marketing.integrationsMarqueeBody")}
             </p>
           </FadeUp>
         </SectionContainer>
+        <FadeUp delay={0.08} className="mt-10 lg:mt-12">
+          <IntegrationLogoMarquee />
+        </FadeUp>
       </Section>
 
-      {/* ── CUSTOMER VALUE ── */}
-      <Section id="value">
-        <SectionNumberWrap n="06" />
+      {/* ── INTELLIGENCE / VALUE ── */}
+      <Section id="intelligence" viewport viewportAlign="start" className="bg-[hsl(var(--siemens-surface))]">
         <SectionContainer>
-          <FadeUp>
-            <SectionIntro
-              label={t("marketing.valueLabel")}
-              lines={[
-                { text: t("marketing.valueTitle1"), italic: true },
-                { text: t("marketing.valueTitle2") },
-              ]}
-            />
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
-              {t("marketing.valueCaption")}
-            </p>
-          </FadeUp>
-          <div className="section-content-gap grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {VALUE_KEYS.map((key, i) => (
-              <FadeUp key={key} delay={i * 0.04}>
-                <div className="flex h-full items-start gap-4 rounded-xl border border-slate-200 bg-white px-5 py-5 transition-colors hover:border-[#82D153]/35">
-                  <span className="mt-0.5 font-mono text-[11px] font-semibold text-[#82D153]">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <p className="type-title text-base leading-snug text-slate-900 sm:text-lg">
-                    {t(`marketing.${key}`)}
-                  </p>
-                </div>
-              </FadeUp>
+          <div className="mx-auto grid max-w-7xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
+            <FadeUp delay={0.06} className="order-2 lg:order-1">
+              <div className="relative min-h-[min(42vh,22rem)] overflow-hidden rounded-lg">
+                <MediaPanel src={MARKETING_IMAGES.hydro} overlay="teal" minH="min-h-full" />
+              </div>
+            </FadeUp>
+            <FadeUp className="order-1 lg:order-2">
+              <MetaLabel className="text-brand">{t("marketing.valueLabel")}</MetaLabel>
+              <h2 className="siemens-display mt-3">
+                <span className="block">{t("marketing.valueTitle1")}</span>
+                <span className="block">{t("marketing.valueTitle2")}</span>
+              </h2>
+              <p className="siemens-body mt-4 max-w-lg">{t("marketing.valueCaption")}</p>
+            </FadeUp>
+          </div>
+          <div className="section-content-gap grid gap-4 lg:grid-cols-2">
+            {VALUE_ITEMS.map(({ key, image }, i) => (
+              <ValueMediaCard
+                key={key}
+                index={String(i + 1).padStart(2, "0")}
+                title={t(`marketing.${key}`)}
+                hint={t(`marketing.${key}Hint`)}
+                image={image}
+                delay={i * 0.04}
+              />
             ))}
           </div>
         </SectionContainer>
       </Section>
 
       {/* ── QAI IN ACTION ── */}
-      <Section id="qai" className="bg-slate-50/70">
-        <SectionNumberWrap n="07" />
-        <SectionContainer>
-          <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-14">
+      <Section id="qai" viewport className="bg-white !py-0">
+        <div className="mx-auto grid h-full min-h-[inherit] max-w-7xl lg:grid-cols-2">
+          <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
             <FadeUp>
-              <SectionIntro
-                label={t("marketing.qlimAiLabel")}
-                lines={[
-                  { text: t("marketing.qlimAiHeadline"), italic: true },
-                  { text: t("marketing.qlimAiHeadlineAccent"), accent: true },
-                ]}
-              />
-              <p className="mt-5 max-w-lg text-sm leading-relaxed text-slate-600">
-                {t("marketing.qlimAiBody")}
-              </p>
+              <MetaLabel className="text-brand">{t("marketing.qlimAiLabel")}</MetaLabel>
+              <h2 className="siemens-display mt-3">
+                <span className="block">{t("marketing.qlimAiHeadline")}</span>
+                <span className="block text-brand-dark">{t("marketing.qlimAiHeadlineAccent")}</span>
+              </h2>
+              <p className="siemens-body mt-5 max-w-lg">{t("marketing.qlimAiBody")}</p>
               <ul className="mt-6 space-y-3">
                 {(["qlimAiBullet1", "qlimAiBullet2", "qlimAiBullet3"] as const).map((k) => (
-                  <li key={k} className="flex gap-3 text-sm text-slate-700">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#82D153]" />
+                  <li key={k} className="flex gap-3 text-sm text-foreground/80">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
                     {t(`marketing.${k}`)}
                   </li>
                 ))}
@@ -416,121 +301,101 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setQlimAiOpen(true)}
-                className="type-cta mt-8 inline-block border border-foreground px-5 py-3 transition-colors hover:bg-foreground hover:text-background"
+                className="siemens-btn-primary mt-8 w-fit"
               >
                 {t("marketing.openQlimAi")}
               </button>
             </FadeUp>
-            <FadeUp delay={0.1}>
-              <QlimAiChat
-                messages={qlimAiDemo.slice(0, 2)}
-                className="shadow-lg"
-              />
-            </FadeUp>
           </div>
-        </SectionContainer>
+          <FadeUp delay={0.1} className="relative min-h-[min(48vh,26rem)] lg:min-h-0">
+            <div className="absolute inset-0">
+              <MediaPanel src={MARKETING_IMAGES.control} overlay="dark" minH="min-h-full h-full">
+                <div className="w-full max-w-md overflow-hidden rounded-lg border border-white/30 bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.45)]">
+                  <QlimAiChat messages={qlimAiDemo.slice(0, 2)} className="border-0 shadow-none" />
+                </div>
+              </MediaPanel>
+            </div>
+          </FadeUp>
+        </div>
       </Section>
 
       {/* ── PRICING ── */}
-      <Section id="pricing">
+      <Section id="pricing" viewport viewportAlign="start" className="bg-[hsl(var(--siemens-surface))]">
         <SectionContainer>
           <FadeUp>
-            <SectionIntro
-              label={t("marketing.pricingLabel")}
-              lines={[
-                { text: t("marketing.noSurprises"), italic: true },
-                { text: t("marketing.justProgress") },
-              ]}
-            />
+            <MetaLabel className="text-brand">{t("marketing.pricingLabel")}</MetaLabel>
+            <h2 className="siemens-display mt-3 max-w-2xl">
+              <span className="block">{t("marketing.noSurprises")}</span>
+              <span className="block">{t("marketing.justProgress")}</span>
+            </h2>
           </FadeUp>
-          <div className="section-content-gap">
+          <FadeUp delay={0.06}>
+            <PricingBanner className="section-content-gap" caption={t("marketing.pricingBanner")} />
+          </FadeUp>
+          <div className="mt-2">
             <PricingSelector plans={pricingPlans} />
           </div>
         </SectionContainer>
       </Section>
 
-      {/* ── ABOUT ── */}
-      <Section id="about">
-        <SectionContainer>
-          <FadeUp>
-            <SectionIntro
-              label={t("marketing.companyOrigin")}
-              lines={[
-                { text: t("marketing.builtToFix"), italic: true },
-                { text: t("marketing.aRealProblem") },
-              ]}
-            />
-          </FadeUp>
-          <FadeUp delay={0.1}>
-            <div className="section-content-gap border border-border p-6 lg:p-8">
-              <div className="grid items-start gap-8 lg:grid-cols-[8rem_minmax(0,1fr)] lg:items-center lg:gap-10">
-                <div className="flex h-32 w-32 shrink-0 items-center justify-center border border-border font-serif text-4xl font-bold text-brand-dark">
-                  PR
-                </div>
-                <div className="min-w-0">
-                  <p className="font-serif text-3xl font-bold">Pratik Rughe</p>
-                  <MetaLabel className="mt-2">{t("marketing.founderRole")}</MetaLabel>
-                  <blockquote className="mt-8 max-w-2xl border-l border-brand-dark pl-6 font-serif text-xl italic leading-relaxed text-muted-foreground">
-                    {t("marketing.founderQuote")}
-                  </blockquote>
-                </div>
-              </div>
-            </div>
-          </FadeUp>
-        </SectionContainer>
-      </Section>
+      {/* ── TEAM ── */}
+      <TeamSection />
 
-      {/* ── CONTACT ── */}
-      <Section id="contact" noBorder className="pb-16">
-        <SectionContainer>
-          <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
-            <FadeUp>
-              <SectionIntro
-                label={t("marketing.getStarted")}
-                lines={[
-                  { text: t("marketing.startMeasuring"), italic: true },
-                  { text: t("marketing.whatMatters") },
-                ]}
-              />
-              <ul className="section-content-gap space-y-4">
-                {brand.cta.options.map((opt, oi) => (
-                  <li key={`cta-${oi}`} className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground">
-                    <span className="mt-px shrink-0 font-mono text-brand-dark">→</span>
-                    <span>{opt}</span>
-                  </li>
-                ))}
-              </ul>
-            </FadeUp>
-            <FadeUp delay={0.1}>
-              <div className="border border-border p-8 lg:p-10">
-                <MetaLabel>{t("marketing.requestDemoLabel")}</MetaLabel>
-                <form onSubmit={handleDemoSubmit} className="section-content-gap space-y-5">
+      {/* ── FINAL CTA + CONTACT ── */}
+      <section
+        id="contact"
+        className="viewport-section-fill overflow-hidden border-t border-border bg-white !py-0"
+      >
+        <div className="mx-auto grid h-full min-h-[inherit] max-w-7xl lg:grid-cols-2">
+          <FadeUp className="relative min-h-[min(48vh,22rem)] lg:min-h-0">
+            <MediaPanel src={MARKETING_IMAGES.turbines} overlay="dark" minH="absolute inset-0 min-h-full">
+              <div className="max-w-md text-white">
+                <p className="siemens-eyebrow text-white/70">{t("marketing.finalCtaLabel")}</p>
+                <h2 className="siemens-display mt-3 text-white">
+                  {t("marketing.finalCtaHeadline")}
+                </h2>
+                <p className="mt-4 text-[15px] leading-relaxed text-white/80">
+                  {t("marketing.finalCtaBody")}
+                </p>
+                <ul className="mt-6 space-y-2.5">
+                  {brand.cta.options.map((opt, oi) => (
+                    <li key={`cta-${oi}`} className="flex items-start gap-2.5 text-sm text-white/85">
+                      <span className="mt-px shrink-0 text-brand">→</span>
+                      <span>{opt}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </MediaPanel>
+          </FadeUp>
+
+          <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-10 lg:py-12">
+            <FadeUp delay={0.08}>
+              <div
+                id="demo-form"
+                className="rounded-sm border border-border bg-[hsl(var(--siemens-surface))] p-6 sm:p-8"
+              >
+                <MetaLabel className="text-brand">{t("marketing.requestDemoLabel")}</MetaLabel>
+                <p className="mt-2 font-sans text-xl font-semibold tracking-tight text-foreground">
+                  {t("marketing.bookDemo")}
+                </p>
+                <form onSubmit={handleDemoSubmit} className="mt-6 space-y-5">
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="firstName" className="type-label">
+                      <Label htmlFor="firstName" className="siemens-eyebrow text-muted-foreground">
                         {t("marketing.firstName")}
                       </Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        required
-                        className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0"
-                      />
+                      <Input id="firstName" name="firstName" required className="mt-2 rounded-md bg-white" />
                     </div>
                     <div>
-                      <Label htmlFor="lastName" className="type-label">
+                      <Label htmlFor="lastName" className="siemens-eyebrow text-muted-foreground">
                         {t("marketing.lastName")}
                       </Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        required
-                        className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0"
-                      />
+                      <Input id="lastName" name="lastName" required className="mt-2 rounded-md bg-white" />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="email" className="type-label">
+                    <Label htmlFor="email" className="siemens-eyebrow text-muted-foreground">
                       {t("marketing.email")}
                     </Label>
                     <Input
@@ -538,45 +403,40 @@ export default function HomePage() {
                       name="email"
                       type="email"
                       required
-                      className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0"
+                      className="mt-2 rounded-md bg-white"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="company" className="type-label">
+                    <Label htmlFor="company" className="siemens-eyebrow text-muted-foreground">
                       {t("marketing.company")}
                     </Label>
-                    <Input
-                      id="company"
-                      name="company"
-                      required
-                      className="mt-2 rounded-none border-x-0 border-b border-t-0 px-0 shadow-none focus-visible:ring-0"
-                    />
+                    <Input id="company" name="company" required className="mt-2 rounded-md bg-white" />
                   </div>
                   <div>
-                    <Label htmlFor="message" className="type-label">
+                    <Label htmlFor="message" className="siemens-eyebrow text-muted-foreground">
                       {t("marketing.message")}
                     </Label>
                     <textarea
                       id="message"
                       name="message"
                       rows={4}
-                      className="mt-2 flex w-full resize-none border-x-0 border-b border-t-0 border-input bg-transparent px-0 py-2 text-sm focus:outline-none"
+                      className="mt-2 flex w-full resize-none rounded-md border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={demoSubmitting}
-                    className="type-cta w-full border border-foreground py-4 transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-60"
+                    className="siemens-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {demoSubmitting ? t("marketing.sending") : t("marketing.bookDemo")}
                   </button>
-                  <p className="text-center type-label">{t("marketing.noSpam")}</p>
+                  <p className="text-center text-xs text-muted-foreground">{t("marketing.noSpam")}</p>
                 </form>
               </div>
             </FadeUp>
           </div>
-        </SectionContainer>
-      </Section>
+        </div>
+      </section>
 
       <QlimAiOverlay open={qlimAiOpen} onClose={() => setQlimAiOpen(false)} chatExpanded />
     </MarketingLayout>

@@ -138,10 +138,10 @@ export default function ConnectedSystemsPage() {
                   type="button"
                   onClick={() => setCategory("all")}
                   className={cn(
-                    "rounded-full px-3 py-1 text-xs font-semibold ring-1 transition",
+                    "rounded-xl px-3 py-1 text-xs font-semibold ring-1 transition",
                     category === "all"
-                      ? "bg-[#82D153]/15 text-[#2f6f24] ring-[#82D153]/35"
-                      : "bg-white text-slate-600 ring-slate-200"
+                      ? "bg-primary/10 text-primary ring-primary/30"
+                      : "bg-white text-muted-foreground ring-border hover:bg-secondary"
                   )}
                 >
                   {t("connectedSystemsPage.allCategories")}
@@ -152,10 +152,10 @@ export default function ConnectedSystemsPage() {
                     type="button"
                     onClick={() => setCategory(c.id)}
                     className={cn(
-                      "rounded-full px-3 py-1 text-xs font-semibold ring-1 transition",
+                      "rounded-xl px-3 py-1 text-xs font-semibold ring-1 transition",
                       category === c.id
-                        ? "bg-[#82D153]/15 text-[#2f6f24] ring-[#82D153]/35"
-                        : "bg-white text-slate-600 ring-slate-200"
+                        ? "bg-primary/10 text-primary ring-primary/30"
+                        : "bg-white text-muted-foreground ring-border hover:bg-secondary"
                     )}
                   >
                     {c.label}

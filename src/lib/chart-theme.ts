@@ -1,24 +1,28 @@
-/** Industry-grade chart design tokens for carbon intelligence dashboards */
+/** Chart tokens — greens match logo #82D153 */
+
+export const BRAND_GREEN = "#82D153";
+export const BRAND_GREEN_DARK = "#5cb832";
+export const BRAND_GREEN_LIGHT = "#b8e69a";
 
 export const CHART = {
   scope1: "#334155",
   scope1Light: "#64748b",
-  scope2: "#22c55e",
-  scope2Light: "#86efac",
-  scope3: "#059669",
-  scope3Light: "#6ee7b7",
-  brand: "#82D153",
-  brandDark: "#5cb832",
+  scope2: BRAND_GREEN,
+  scope2Light: BRAND_GREEN_LIGHT,
+  scope3: "#0f766e",
+  scope3Light: "#5eead4",
+  brand: BRAND_GREEN,
+  brandDark: BRAND_GREEN_DARK,
   target: "#ef4444",
   targetLight: "#fca5a5",
   baseline: "#94a3b8",
-  actual: "#3b82f6",
-  actualLight: "#93c5fd",
+  actual: "#334155",
+  actualLight: "#94a3b8",
   projected: "#f59e0b",
-  accent: "#8b5cf6",
-  accentLight: "#c4b5fd",
-  indigo: "#6366f1",
-  teal: "#14b8a6",
+  accent: BRAND_GREEN,
+  accentLight: BRAND_GREEN_LIGHT,
+  indigo: "#004d40",
+  teal: "#008e7b",
   grid: "#e2e8f0",
   tick: "#64748b",
   tooltipBg: "#ffffff",
@@ -71,8 +75,8 @@ export function formatChartValue(value: number, digits = 1): string {
 
 /** Quality score → heatmap color */
 export function qualityColor(score: number): string {
-  if (score >= 85) return "#16a34a";
-  if (score >= 70) return "#82D153";
+  if (score >= 85) return BRAND_GREEN_DARK;
+  if (score >= 70) return BRAND_GREEN;
   if (score >= 40) return "#f59e0b";
   return "#ef4444";
 }
