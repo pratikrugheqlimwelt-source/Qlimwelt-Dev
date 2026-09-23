@@ -11,6 +11,9 @@ import type {
 
 const PREFIX = "qlimwelt-bom-v1:";
 
+/** In-memory fallback for Node/tests (no window.localStorage). */
+const memoryStore = new Map<string, BomLocalState>();
+
 export type BomLocalState = {
   products: Product[];
   versions: ProductVersion[];
@@ -36,9 +39,12 @@ function empty(): BomLocalState {
 }
 
 export function loadBomLocal(companyId: string): BomLocalState {
-  if (typeof window === "undefined") return empty();
+  const k = key(companyId);
+  if (typeof window === "undefined") {
+    return memoryStore.get(k) ?? empty();
+  }
   try {
-    const raw = localStorage.getItem(key(companyId));
+    const raw = localStorage.getItem(k);
     if (!raw) return empty();
     return { ...empty(), ...(JSON.parse(raw) as BomLocalState) };
   } catch {
@@ -47,8 +53,18 @@ export function loadBomLocal(companyId: string): BomLocalState {
 }
 
 export function saveBomLocal(companyId: string, state: BomLocalState) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(key(companyId), JSON.stringify(state));
+  const k = key(companyId);
+  if (typeof window === "undefined") {
+    memoryStore.set(k, state);
+    return;
+  }
+  localStorage.setItem(k, JSON.stringify(state));
+}
+
+/** Test helper: clear in-memory store for a company (or all). */
+export function clearBomLocal(companyId?: string) {
+  if (companyId) memoryStore.delete(key(companyId));
+  else memoryStore.clear();
 }
 
 export function updateBomLocal(

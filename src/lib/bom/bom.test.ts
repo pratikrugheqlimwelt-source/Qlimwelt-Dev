@@ -123,4 +123,51 @@ function item(partial: Partial<BomItem> & { id: string; partNumber: string }): B
   assert(preview.errorCount === 0, `excel preview clean: ${JSON.stringify(preview.issues)}`);
 }
 
+// --- local-service: create product → import preview/commit → reload tree ---
+{
+  const {
+    clearBomLocal,
+  } = require("./local-store") as typeof import("./local-store");
+  const {
+    localCreateProduct,
+    localPreviewImport,
+    localCommitImport,
+    localListBomItems,
+    localGetProductBundle,
+  } = require("./local-service") as typeof import("./local-service");
+
+  const companyId = "co-audit-1a";
+  clearBomLocal(companyId);
+  const bundle = localCreateProduct(companyId, {
+    productNumber: "SKU-AUDIT",
+    name: "Audit Product",
+  });
+  assert(bundle.product.productNumber === "SKU-AUDIT", "product created");
+  assert(bundle.versions.length === 1, "version created");
+  assert(bundle.boms.length === 1, "bom shell created");
+  const bomId = bundle.boms[0].id;
+
+  const csv = [
+    "part_number,parent_part_number,description,quantity,unit",
+    "PROD,,Product,1,piece",
+    "ASM,PROD,Assembly,1,piece",
+    "MAT,ASM,Material,0.5,kg",
+  ].join("\n");
+  const job = localPreviewImport(companyId, bomId, "fixture.csv", csv);
+  assert(job.errorCount === 0, `preview clean: ${JSON.stringify(job.preview.issues)}`);
+  const { items } = localCommitImport(companyId, job.id);
+  assert(items.length === 3, "commit wrote 3 items");
+
+  const reloaded = localListBomItems(companyId, bomId);
+  assert(reloaded.length === 3, "reload matches commit");
+  const tree = buildBomTree(reloaded);
+  assert(tree.length === 1 && tree[0].partNumber === "PROD", "tree root PROD");
+  assert(tree[0].children[0]?.partNumber === "ASM", "tree child ASM");
+  assert(tree[0].children[0]?.children[0]?.partNumber === "MAT", "tree grandchild MAT");
+
+  const again = localGetProductBundle(companyId, bundle.product.id);
+  assert(again?.boms.some((b) => b.id === bomId), "bundle still has BOM");
+  clearBomLocal(companyId);
+}
+
 console.log("BOM Phase 1A tests passed.");

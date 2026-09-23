@@ -75,7 +75,9 @@ export function BomTree({ items, selectedId, onSelect }: Props) {
         </div>
       </div>
       {flat.length === 0 && (
-        <p className="p-6 text-sm text-muted-foreground">No BOM items yet. Add a line or import a CSV.</p>
+        <p className="p-6 text-sm text-muted-foreground">
+          No BOM items yet. Add a line or import a CSV / Excel file.
+        </p>
       )}
     </div>
   );
