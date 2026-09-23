@@ -4,6 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  localGetSupplierPcfByToken,
+  localSubmitSupplierPcfByToken,
+} from "@/lib/bom/carbon/local-service";
 import type { SupplierPcfPortalView } from "@/lib/bom/carbon/supplier-pcf";
 
 export default function SupplierPcfPortalPage() {
@@ -18,31 +22,46 @@ export default function SupplierPcfPortalPage() {
   const [evidence, setEvidence] = useState("");
   const [done, setDone] = useState(false);
 
+  const applyPortal = useCallback((next: SupplierPcfPortalView) => {
+    setPortal(next);
+    setUnit(next.declaredUnit || "kg");
+    if (next.declaredKgco2ePerUnit != null) {
+      setValue(String(next.declaredKgco2ePerUnit));
+    }
+    setMethodology(next.methodology || "");
+    setEvidence(next.evidenceNotes || "");
+    setDone(next.status === "submitted" || next.status === "approved");
+  }, []);
+
   const load = useCallback(async () => {
     setWorking(true);
     setError(null);
     try {
       const res = await fetch(`/api/supplier-pcf/${encodeURIComponent(token)}`);
       const data = (await res.json()) as { portal?: SupplierPcfPortalView; error?: string };
-      if (!res.ok || !data.portal) {
-        setError(data.error || "Link is invalid or expired");
-        setPortal(null);
+      if (res.ok && data.portal) {
+        applyPortal(data.portal);
         return;
       }
-      setPortal(data.portal);
-      setUnit(data.portal.declaredUnit || "kg");
-      if (data.portal.declaredKgco2ePerUnit != null) {
-        setValue(String(data.portal.declaredKgco2ePerUnit));
+      // Local-store fallback (same browser as Products panel offline mode)
+      const local = localGetSupplierPcfByToken(token);
+      if (local) {
+        applyPortal(local.portal);
+        return;
       }
-      setMethodology(data.portal.methodology || "");
-      setEvidence(data.portal.evidenceNotes || "");
-      setDone(data.portal.status === "submitted" || data.portal.status === "approved");
+      setError(data.error || "Link is invalid or expired");
+      setPortal(null);
     } catch (e) {
+      const local = localGetSupplierPcfByToken(token);
+      if (local) {
+        applyPortal(local.portal);
+        return;
+      }
       setError(e instanceof Error ? e.message : "Failed to load request");
     } finally {
       setWorking(false);
     }
-  }, [token]);
+  }, [token, applyPortal]);
 
   useEffect(() => {
     void load();
@@ -53,26 +72,43 @@ export default function SupplierPcfPortalPage() {
     if (!portal?.canSubmit) return;
     setWorking(true);
     setError(null);
+    const payload = {
+      declaredKgco2ePerUnit: Number(value),
+      declaredUnit: unit.trim() || "kg",
+      methodology: methodology.trim() || null,
+      evidenceNotes: evidence.trim() || null,
+    };
     try {
       const res = await fetch(`/api/supplier-pcf/${encodeURIComponent(token)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          declaredKgco2ePerUnit: Number(value),
-          declaredUnit: unit.trim() || "kg",
-          methodology: methodology.trim() || null,
-          evidenceNotes: evidence.trim() || null,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = (await res.json()) as { portal?: SupplierPcfPortalView; error?: string };
-      if (!res.ok || !data.portal) {
-        setError(data.error || "Submit failed");
+      if (res.ok && data.portal) {
+        applyPortal(data.portal);
+        setDone(true);
         return;
       }
-      setPortal(data.portal);
-      setDone(true);
+      // Fall back to local store when server has no token (offline Products flow)
+      try {
+        const localPortal = localSubmitSupplierPcfByToken(token, payload);
+        applyPortal(localPortal);
+        setDone(true);
+      } catch (localErr) {
+        setError(
+          data.error ||
+            (localErr instanceof Error ? localErr.message : "Submit failed")
+        );
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Submit failed");
+      try {
+        const localPortal = localSubmitSupplierPcfByToken(token, payload);
+        applyPortal(localPortal);
+        setDone(true);
+      } catch {
+        setError(err instanceof Error ? err.message : "Submit failed");
+      }
     } finally {
       setWorking(false);
     }
