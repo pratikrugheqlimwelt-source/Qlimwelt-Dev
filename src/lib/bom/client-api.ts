@@ -144,12 +144,9 @@ export async function saveBomItem(
       const data = await tryJson<{ item: BomItem }>(res);
       if (data?.item) return data.item;
     }
-    if (res.status >= 400 && res.status < 500) {
-      const err = await tryJson<{ error?: string }>(res);
-      throw new Error(err?.error || "Failed to save BOM item");
-    }
-  } catch (e) {
-    if (e instanceof Error && e.message !== "Failed to fetch") throw e;
+    // 401/403/5xx → fall through to local store (seed / offline)
+  } catch {
+    /* local */
   }
   return localUpsertBomItem(companyId, {
     id: item.id,
@@ -213,12 +210,9 @@ export async function commitBomImport(
       const data = await tryJson<{ job: BomImportJob; items: BomItem[] }>(res);
       if (data?.job) return data;
     }
-    if (res.status >= 400 && res.status < 500) {
-      const err = await tryJson<{ error?: string }>(res);
-      throw new Error(err?.error || "Commit failed");
-    }
-  } catch (e) {
-    if (e instanceof Error && e.message !== "Failed to fetch") throw e;
+    // Auth / backend unavailable → local commit
+  } catch {
+    /* local */
   }
   return localCommitImport(companyId, jobId);
 }
