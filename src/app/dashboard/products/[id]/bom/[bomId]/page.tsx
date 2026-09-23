@@ -10,6 +10,7 @@ import { BomImportWizard } from "@/components/dashboard/products/bom-import-wiza
 import { BomCarbonPanel } from "@/components/dashboard/products/bom-carbon-panel";
 import { BomCarbonAnalytics } from "@/components/dashboard/products/bom-carbon-analytics";
 import { BomScenarioPanel } from "@/components/dashboard/products/bom-scenario-panel";
+import { BomSupplierPcfPanel } from "@/components/dashboard/products/bom-supplier-pcf-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
@@ -181,6 +182,13 @@ export default function BomEditorPage() {
             companyId={company.id}
             bomId={params.bomId}
             items={items}
+            refreshKey={analyticsKey}
+          />
+          <BomSupplierPcfPanel
+            companyId={company.id}
+            bomId={params.bomId}
+            items={items}
+            selectedItemId={selectedId}
             refreshKey={analyticsKey}
           />
           <BomImportWizard

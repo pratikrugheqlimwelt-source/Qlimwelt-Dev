@@ -30,7 +30,8 @@ export interface BomAuditEvent {
     | "calculation"
     | "emission_factor"
     | "dataset"
-    | "scenario";
+    | "scenario"
+    | "supplier_pcf_request";
   entityId: string;
   action: string;
   actorId?: string | null;
@@ -186,3 +187,38 @@ export type BomScenario = {
   updatedAt: string;
 };
 
+
+
+/** Phase 7 — supplier primary PCF request / response */
+export type SupplierPcfRequestStatus =
+  | "draft"
+  | "sent"
+  | "submitted"
+  | "approved"
+  | "rejected"
+  | "cancelled";
+
+export type SupplierPcfRequest = {
+  id: string;
+  companyId: string;
+  bomId: string;
+  bomItemId: string;
+  partNumber: string;
+  supplierName: string;
+  supplierEmail?: string | null;
+  status: SupplierPcfRequestStatus;
+  accessToken: string;
+  message?: string | null;
+  declaredKgco2ePerUnit?: number | null;
+  declaredUnit?: string | null;
+  methodology?: string | null;
+  evidenceNotes?: string | null;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
+  reviewNotes?: string | null;
+  resultingMappingId?: string | null;
+  resultingFactorId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
