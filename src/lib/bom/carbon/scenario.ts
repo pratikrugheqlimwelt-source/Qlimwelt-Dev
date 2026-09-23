@@ -1,36 +1,19 @@
 import type { BomItem } from "@/lib/bom/types";
-import type { CarbonMapping, EmissionFactor, PcfCalculation } from "./types";
+import type {
+  BomScenario,
+  CarbonMapping,
+  EmissionFactor,
+  PcfCalculation,
+  ScenarioOverride,
+} from "./types";
 import { calculateBomPcf } from "./calculate";
 import { compareCalculations, type VersionCompareResult } from "./analytics";
 
-export type ScenarioOverrideKind =
-  | "quantity"
-  | "scrap_rate"
-  | "yield_rate"
-  | "emission_factor";
-
-export type ScenarioOverride = {
-  id: string;
-  bomItemId: string;
-  kind: ScenarioOverrideKind;
-  /** Used for quantity / scrap_rate / yield_rate */
-  numericValue?: number | null;
-  /** Used for emission_factor */
-  emissionFactorId?: string | null;
-};
-
-export type BomScenario = {
-  id: string;
-  companyId: string;
-  bomId: string;
-  name: string;
-  description?: string | null;
-  baselineCalculationId: string | null;
-  overrides: ScenarioOverride[];
-  lastResultCalculationId: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+export type {
+  BomScenario,
+  ScenarioOverride,
+  ScenarioOverrideKind,
+} from "./types";
 
 export type ScenarioRunResult = {
   scenario: BomScenario;
@@ -45,7 +28,6 @@ export type ScenarioRunResult = {
   }>;
 };
 
-/** Clone items/mappings and apply overrides without mutating inputs. */
 export function applyScenarioOverrides(
   items: BomItem[],
   mappings: CarbonMapping[],

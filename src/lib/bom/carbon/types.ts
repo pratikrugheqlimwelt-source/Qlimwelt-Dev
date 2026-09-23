@@ -157,3 +157,32 @@ export interface CalculateBomInput {
   /** Default true: only approved mappings contribute */
   requireApproved?: boolean;
 }
+
+/** Phase 6 — what-if scenario overrides (do not mutate baseline BOM). */
+export type ScenarioOverrideKind =
+  | "quantity"
+  | "scrap_rate"
+  | "yield_rate"
+  | "emission_factor";
+
+export type ScenarioOverride = {
+  id: string;
+  bomItemId: string;
+  kind: ScenarioOverrideKind;
+  numericValue?: number | null;
+  emissionFactorId?: string | null;
+};
+
+export type BomScenario = {
+  id: string;
+  companyId: string;
+  bomId: string;
+  name: string;
+  description?: string | null;
+  baselineCalculationId: string | null;
+  overrides: ScenarioOverride[];
+  lastResultCalculationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+

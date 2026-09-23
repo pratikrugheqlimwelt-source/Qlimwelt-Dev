@@ -9,13 +9,13 @@ import type {
   ProductVersion,
 } from "./types";
 import type {
+  BomAuditEvent,
+  BomScenario,
   CarbonDataset,
   CarbonMapping,
   EmissionFactor,
-  BomAuditEvent,
   PcfCalculation,
 } from "./carbon/types";
-import type { BomScenario } from "./carbon/scenario";
 
 const PREFIX = "qlimwelt-bom-v1:";
 
