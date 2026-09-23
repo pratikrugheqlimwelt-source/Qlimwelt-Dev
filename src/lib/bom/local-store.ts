@@ -8,6 +8,12 @@ import type {
   Product,
   ProductVersion,
 } from "./types";
+import type {
+  CarbonDataset,
+  CarbonMapping,
+  EmissionFactor,
+  PcfCalculation,
+} from "./carbon/types";
 
 const PREFIX = "qlimwelt-bom-v1:";
 
@@ -21,6 +27,10 @@ export type BomLocalState = {
   items: BomItem[];
   materials: Material[];
   importJobs: BomImportJob[];
+  carbonDatasets: CarbonDataset[];
+  emissionFactors: EmissionFactor[];
+  carbonMappings: CarbonMapping[];
+  pcfCalculations: PcfCalculation[];
 };
 
 function key(companyId: string) {
@@ -35,6 +45,10 @@ function empty(): BomLocalState {
     items: [],
     materials: [],
     importJobs: [],
+    carbonDatasets: [],
+    emissionFactors: [],
+    carbonMappings: [],
+    pcfCalculations: [],
   };
 }
 

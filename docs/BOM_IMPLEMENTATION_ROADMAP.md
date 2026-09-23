@@ -2,7 +2,7 @@
 
 Permission-gated phases. **Stop and ask before starting the next phase.**
 
-## Phase 1A — Products & versioned BOM (current)
+## Phase 1A — Products & versioned BOM ✅
 
 - Docs (architecture + this roadmap)
 - Schema: products, product_versions, boms, bom_items, materials, bom_import_jobs
@@ -12,13 +12,15 @@ Permission-gated phases. **Stop and ask before starting the next phase.**
 
 **Gate:** Ask permission before 1B.
 
-## Phase 1B — Carbon mapping + calculation
+## Phase 1B — Carbon mapping + calculation (current)
 
 - Carbon datasets / emission factors registry
 - Mapping with confidence + human approve
 - Recursive BOM calculation, scrap/yield, unit normalize
 - Carbon ledger + provenance
 - Product assessment runs PCF against selected BOM version
+
+**Gate:** Ask permission before 1C.
 
 ## Phase 1C — Audit & data quality
 

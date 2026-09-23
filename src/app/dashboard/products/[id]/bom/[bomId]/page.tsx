@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { BomTree } from "@/components/dashboard/products/bom-tree";
 import { BomItemDetail } from "@/components/dashboard/products/bom-item-detail";
 import { BomImportWizard } from "@/components/dashboard/products/bom-import-wizard";
+import { BomCarbonPanel } from "@/components/dashboard/products/bom-carbon-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
@@ -149,6 +150,13 @@ export default function BomEditorPage() {
                 setBusy(false);
               }
             }}
+          />
+          <BomCarbonPanel
+            companyId={company.id}
+            productId={params.id}
+            bomId={params.bomId}
+            item={selected}
+            busy={busy}
           />
           <BomImportWizard
             busy={busy}

@@ -18,7 +18,18 @@ import {
   localPreviewImport,
   localUpsertBomItem,
 } from "./local-service";
-
+import {
+  ensureCarbonLibrary,
+  localApproveMapping,
+  localListCalculations,
+  localListFactors,
+  localListMappings,
+  localRejectMapping,
+  localRunCalculation,
+  localSuggestForItem,
+  localUpsertMapping,
+} from "./carbon/local-service";
+import type { CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "./carbon/types";
 async function tryJson<T>(res: Response): Promise<T | null> {
   try {
     return (await res.json()) as T;
@@ -216,4 +227,160 @@ export async function fetchImportJob(
     /* local */
   }
   return localGetImportJob(companyId, jobId) ?? null;
+}
+
+
+/* ---- Phase 1B carbon ---- */
+
+export async function fetchEmissionFactors(companyId: string): Promise<EmissionFactor[]> {
+  try {
+    const res = await fetch("/api/bom/carbon/factors");
+    if (res.ok) {
+      const data = await tryJson<{ factors: EmissionFactor[] }>(res);
+      if (data?.factors) return data.factors;
+    }
+  } catch {
+    /* local */
+  }
+  return localListFactors(companyId);
+}
+
+export async function fetchCarbonMappings(
+  companyId: string,
+  bomId: string
+): Promise<CarbonMapping[]> {
+  try {
+    const res = await fetch(`/api/bom/carbon/mappings?bomId=${encodeURIComponent(bomId)}`);
+    if (res.ok) {
+      const data = await tryJson<{ mappings: CarbonMapping[] }>(res);
+      if (data?.mappings) return data.mappings;
+    }
+  } catch {
+    /* local */
+  }
+  return localListMappings(companyId, bomId);
+}
+
+export async function suggestItemMappings(
+  companyId: string,
+  item: BomItem
+): Promise<MappingSuggestion[]> {
+  try {
+    const res = await fetch("/api/bom/carbon/mappings/suggest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ item }),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ suggestions: MappingSuggestion[] }>(res);
+      if (data?.suggestions) return data.suggestions;
+    }
+  } catch {
+    /* local */
+  }
+  ensureCarbonLibrary(companyId);
+  return localSuggestForItem(companyId, item);
+}
+
+export async function upsertCarbonMapping(
+  companyId: string,
+  input: {
+    bomItemId: string;
+    emissionFactorId: string;
+    confidence?: number;
+    matchReason?: string;
+    status?: CarbonMapping["status"];
+  }
+): Promise<CarbonMapping> {
+  try {
+    const res = await fetch("/api/bom/carbon/mappings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ mapping: CarbonMapping }>(res);
+      if (data?.mapping) return data.mapping;
+    }
+  } catch {
+    /* local */
+  }
+  return localUpsertMapping(companyId, input);
+}
+
+export async function approveCarbonMapping(
+  companyId: string,
+  mappingId: string
+): Promise<CarbonMapping> {
+  try {
+    const res = await fetch(`/api/bom/carbon/mappings/${mappingId}/approve`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      const data = await tryJson<{ mapping: CarbonMapping }>(res);
+      if (data?.mapping) return data.mapping;
+    }
+  } catch {
+    /* local */
+  }
+  return localApproveMapping(companyId, mappingId);
+}
+
+export async function rejectCarbonMapping(
+  companyId: string,
+  mappingId: string
+): Promise<CarbonMapping> {
+  try {
+    const res = await fetch(`/api/bom/carbon/mappings/${mappingId}/reject`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      const data = await tryJson<{ mapping: CarbonMapping }>(res);
+      if (data?.mapping) return data.mapping;
+    }
+  } catch {
+    /* local */
+  }
+  return localRejectMapping(companyId, mappingId);
+}
+
+export async function runBomCalculation(
+  companyId: string,
+  input: {
+    bomId: string;
+    productId?: string | null;
+    assessmentId?: string | null;
+    requireApproved?: boolean;
+  }
+): Promise<PcfCalculation> {
+  try {
+    const res = await fetch(`/api/bom/boms/${input.bomId}/calculate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ calculation: PcfCalculation }>(res);
+      if (data?.calculation) return data.calculation;
+    }
+  } catch {
+    /* local */
+  }
+  return localRunCalculation(companyId, input);
+}
+
+export async function fetchBomCalculations(
+  companyId: string,
+  bomId: string
+): Promise<PcfCalculation[]> {
+  try {
+    const res = await fetch(`/api/bom/boms/${bomId}/calculations`);
+    if (res.ok) {
+      const data = await tryJson<{ calculations: PcfCalculation[] }>(res);
+      if (data?.calculations) return data.calculations;
+    }
+  } catch {
+    /* local */
+  }
+  return localListCalculations(companyId, bomId);
 }
