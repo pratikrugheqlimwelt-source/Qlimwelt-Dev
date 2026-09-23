@@ -51,6 +51,8 @@ import {
   localListSupplierPcfRequests,
   localRejectSupplierPcfRequest,
   localSendSupplierPcfRequest,
+  localAssessExchangeReadiness,
+  localExportReadiness,
 } from "./carbon/local-service";
 import type {
   BomAnalytics,
@@ -58,6 +60,11 @@ import type {
 } from "./carbon/analytics";
 import type { BomScenario, ScenarioOverride, ScenarioRunResult } from "./carbon/scenario";
 import type { SupplierPcfRequest } from "./carbon/supplier-pcf";
+import type {
+  ExchangeReadinessReport,
+  ReadinessExportBundle,
+  ReadinessFormat,
+} from "./carbon/readiness";
 import type { BomAuditEvent, CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "./carbon/types";
 async function tryJson<T>(res: Response): Promise<T | null> {
   try {
@@ -759,4 +766,39 @@ export async function previewBomConnectorImport(
     /* local */
   }
   return localPreviewConnectorImport(companyId, bomId, kind, payload, fileName);
+}
+
+export async function fetchExchangeReadiness(
+  companyId: string,
+  calculationId: string
+): Promise<ExchangeReadinessReport> {
+  try {
+    const res = await fetch(`/api/bom/calculations/${calculationId}/readiness`);
+    if (res.ok) {
+      const data = await tryJson<{ readiness: ExchangeReadinessReport }>(res);
+      if (data?.readiness) return data.readiness;
+    }
+  } catch {
+    /* local */
+  }
+  return localAssessExchangeReadiness(companyId, calculationId);
+}
+
+export async function exportReadinessPayload(
+  companyId: string,
+  calculationId: string,
+  format: ReadinessFormat
+): Promise<ReadinessExportBundle> {
+  try {
+    const res = await fetch(
+      `/api/bom/calculations/${calculationId}/readiness?format=${encodeURIComponent(format)}`
+    );
+    if (res.ok) {
+      const data = await tryJson<ReadinessExportBundle>(res);
+      if (data?.payload && data.readiness) return data;
+    }
+  } catch {
+    /* local */
+  }
+  return localExportReadiness(companyId, calculationId, format);
 }
