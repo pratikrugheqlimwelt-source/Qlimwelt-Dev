@@ -48,15 +48,21 @@
     border-color: hsl(var(--border));
   }
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     scroll-padding-top: var(--marketing-nav-h);
     overflow-anchor: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:focus-within {
+      scroll-behavior: smooth;
+    }
   }
   body {
     @apply bg-background font-sans text-foreground antialiased;
     font-feature-settings: "ss01" 1, "cv11" 1;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
+    overflow-anchor: none;
   }
   /* Headings default to sans; marketing headlines opt into font-serif explicitly */
   ::selection {

@@ -73,14 +73,39 @@ export default function HomePage() {
   const [qlimAiOpen, setQlimAiOpen] = useState(false);
   const [demoSubmitting, setDemoSubmitting] = useState(false);
 
-  // Keep first paint on the hero — pricing layout animations previously jumped the viewport.
+  // Keep first paint on the hero — pricing cards / late layout used to yank the viewport down.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.location.hash) return;
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
+
+    // Deep-links (e.g. /#pricing) should still work; only lock the bare homepage.
+    if (window.location.hash) return;
+
+    const html = document.documentElement;
+    const prevBehavior = html.style.scrollBehavior;
+    html.style.scrollBehavior = "auto";
+
+    const lockTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      html.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    lockTop();
+    const raf1 = requestAnimationFrame(() => {
+      lockTop();
+      requestAnimationFrame(lockTop);
+    });
+    const timers = [0, 50, 150, 400, 800, 1200].map((ms) => window.setTimeout(lockTop, ms));
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      timers.forEach(clearTimeout);
+      html.style.scrollBehavior = prevBehavior;
+    };
   }, []);
 
   const handleDemoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -320,7 +345,7 @@ export default function HomePage() {
       </Section>
 
       {/* ── PRICING ── */}
-      <Section id="pricing" viewport viewportAlign="start" className="bg-[hsl(var(--siemens-surface))]">
+      <Section id="pricing" viewport viewportAlign="start" className="bg-[hsl(var(--siemens-surface))] [overflow-anchor:none]">
         <SectionContainer>
           <FadeUp>
             <MetaLabel className="text-brand">{t("marketing.pricingLabel")}</MetaLabel>

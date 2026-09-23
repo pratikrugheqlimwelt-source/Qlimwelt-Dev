@@ -101,12 +101,13 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
       {plans.map((plan, i) => {
         const isSelected = selected === i;
         return (
-          <motion.button
+          <motion.div
             key={`plan-${i}`}
-            type="button"
+            role="group"
+            aria-label={plan.name}
             onClick={() => setSelected(i)}
             className={cn(
-              "siemens-card relative flex h-full flex-col p-8 text-left outline-none sm:p-10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+              "siemens-card relative flex h-full cursor-pointer flex-col p-8 text-left sm:p-10",
               isSelected && "ring-2 ring-inset ring-primary"
             )}
             whileHover={reduced ? undefined : { y: -2 }}
@@ -140,13 +141,13 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
                   </li>
                 ))}
               </ul>
-              <div className="mt-8">
+              <div className="mt-8" onClick={(e) => e.stopPropagation()}>
                 <EditorialCta href="#contact" fullWidth>
                   {plan.cta}
                 </EditorialCta>
               </div>
             </motion.div>
-          </motion.button>
+          </motion.div>
         );
       })}
     </div>
