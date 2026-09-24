@@ -3,8 +3,8 @@
  * Hard gates: completed, approved, not stale, not scenario, confirmed URNs, mappable unit.
  */
 
-import { randomUUID } from "node:crypto";
 import type { Product } from "@/lib/bom/types";
+import { newEntityId } from "@/lib/bom/local-store";
 import type { PcfCalculation } from "../../types";
 import { listIdentityMappings } from "../identity/mapping-service";
 import type { PactValidationIssue, PactValidationResult } from "../types";
@@ -154,7 +154,7 @@ export function toProductFootprint(input: ExportMapperInput): ExportMapperResult
   const refEnd = c.referencePeriodEnd || `${year}-12-31`;
   const pcfValue = decimalString(c.totalKgco2e);
   const product = input.product;
-  const footprintId = c.pactFootprintId || randomUUID();
+  const footprintId = c.pactFootprintId || newEntityId("fp");
 
   const footprint: PactProductFootprintV3 = {
     id: footprintId,

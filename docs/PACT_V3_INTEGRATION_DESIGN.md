@@ -379,7 +379,8 @@ Fixtures: `src/lib/bom/carbon/pact/fixtures/` — prefer official examples from 
 | **4** | Import + semantic validation + review accept→Phase 7 EF path | Demo import |
 | **5** | Exchange history + identity mapping UI | Done (panel + list APIs) |
 | **6** | Peer host stubs: `/auth/token`, `GET /3/footprints`, `GET /3/footprints/{id}`, `POST /3/events` + local peer client | Done (no live external network) |
-| **7** | UI polish on product PCF summary | |
+| **7** | UI polish on product PCF summary | Done (BomPcfSummary + helpers) |
+| **8** | Persist PACT tables via db-service (API→DB→local fallback) | Done (migration 011 + persist helpers) |
 
 ---
 
@@ -412,7 +413,7 @@ Fixtures: `src/lib/bom/carbon/pact/fixtures/` — prefer official examples from 
 Read-only audit of the BOM/PCF stack confirmed the following; PACT work must not fight them:
 
 1. **Calc engine stays authoritative** — reuse `calculateBomPcf` / ledger / mapping; PACT is an export/import adapter only (Phases 3c–4 already follow this).
-2. **Dual persistence today** — product/BOM structure can live in Supabase (migrations 008+); carbon/PCF/scenarios/supplier-PCF/readiness runtime is largely **local-store**. PACT tables/APIs follow the same local-first pattern until a dedicated persistence phase lands carbon domain in Postgres.
+2. **Dual persistence today** — product/BOM structure can live in Supabase (migrations 008+); carbon/PCF/scenarios/supplier-PCF/readiness runtime is largely **local-store**. PACT adapter tables (migration 011) now use **API→DB→local fallback** (Phase 8); other carbon domain data remains local-first until a broader persistence phase.
 3. **Phase 9 readiness ≠ PACT V3** — readiness builders stamp `*-readiness` / Pathfinder-like stubs. Real V3 OpenAPI 3.0.3 payloads replace stub download paths; do not treat Phase 9 JSON as exchange-legal.
 4. **CCF stays separate** — corporate inventory (`calculations/engine`, dashboard activities) must not be merged into the BOM PCF engine; link by product/BOM ids only if needed.
 5. **Supplier accept path** — inbound PACT footprints become durable `supplier_pcf_records`, then explicit accept → synthetic EF + `supplier_pcf` mapping (same pattern as Phase 7 portal approval). No silent fuzzy bind.
