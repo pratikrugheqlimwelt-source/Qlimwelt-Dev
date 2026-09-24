@@ -89,7 +89,7 @@ assert.equal(record.pactSpecVersion, "3.0.0");
 
 const schema = validateProductFootprintSchema({});
 assert.equal(schema.ok, false);
-assert.equal(schema.issues[0]?.category, "NOT_IMPLEMENTED");
+assert.equal(schema.issues[0]?.category, "SCHEMA_INVALID");
 
 let mapperThrew = false;
 try {

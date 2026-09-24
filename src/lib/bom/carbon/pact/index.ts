@@ -1,11 +1,15 @@
-/** PACT V3 adapter — Phase 3a types + local stubs; mapper/validator in 3b+. */
+/** PACT V3 adapter — Phase 3a persistence + Phase 3b schema/URN. */
 
 export * from "./types";
+export * from "./wire-types";
 export * from "./store";
 export * from "./identity/urn";
 export * from "./identity/mapping-service";
 export * from "./exchange/service";
-export { validateProductFootprintSchema } from "./validator/schema";
+export {
+  validateProductFootprintSchema,
+  parseProductFootprint,
+} from "./validator/schema";
 export {
   validateExportSemantics,
   validateImportSemantics,
