@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  exportPactV3Footprint,
   exportReadinessPayload,
   fetchBomCalculations,
   fetchExchangeReadiness,
@@ -91,6 +92,23 @@ export function BomReadinessPanel({ companyId, bomId, refreshKey }: Props) {
     }
   }
 
+  async function onExportPactV3() {
+    if (!selectedId) return;
+    setWorking(true);
+    setError(null);
+    try {
+      const bundle = await exportPactV3Footprint(companyId, selectedId);
+      downloadJson(
+        `pact-v3-${selectedId.slice(0, 8)}.json`,
+        bundle.footprint
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "PACT V3 export failed");
+    } finally {
+      setWorking(false);
+    }
+  }
+
   const selected = calcs.find((c) => c.id === selectedId) ?? null;
 
   return (
@@ -98,8 +116,8 @@ export function BomReadinessPanel({ companyId, bomId, refreshKey }: Props) {
       <div>
         <h3 className="text-sm font-semibold">PACT / Catena-X / DPP readiness</h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          Adapter exports for exchange readiness. Does not mutate the calculation engine or
-          ship a full network DPP.
+          Phase 9 readiness stubs plus real PACT V3 ProductFootprint export (schema-validated).
+          Does not mutate the calculation engine.
         </p>
       </div>
 
@@ -156,11 +174,18 @@ export function BomReadinessPanel({ companyId, bomId, refreshKey }: Props) {
       <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
+          disabled={working || !selectedId}
+          onClick={() => void onExportPactV3()}
+        >
+          Export PACT V3 JSON
+        </Button>
+        <Button
+          size="sm"
           variant="outline"
           disabled={working || !selectedId}
           onClick={() => void onExport("pact")}
         >
-          Export PACT JSON
+          Export PACT readiness
         </Button>
         <Button
           size="sm"

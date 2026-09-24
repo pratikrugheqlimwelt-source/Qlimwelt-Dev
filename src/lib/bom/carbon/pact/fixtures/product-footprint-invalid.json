@@ -1,0 +1,25 @@
+{
+  "id": "not-a-uuid",
+  "specVersion": "3.0.3",
+  "created": "2024-10-31T00:00:00Z",
+  "status": "Active",
+  "companyName": "Example GmbH",
+  "companyIds": [],
+  "productDescription": "Invalid: empty companyIds and bad id",
+  "productIds": ["not-a-urn"],
+  "productNameCompany": "Bad PF",
+  "pcf": {
+    "declaredUnitOfMeasurement": "widgets",
+    "declaredUnitAmount": "0",
+    "productMassPerDeclaredUnit": "1",
+    "referencePeriodStart": "2024-01-01T00:00:00Z",
+    "referencePeriodEnd": "2024-12-31T23:59:59Z",
+    "pcfExcludingBiogenicUptake": "1",
+    "pcfIncludingBiogenicUptake": "1",
+    "fossilCarbonContent": "0",
+    "fossilGhgEmissions": "1",
+    "ipccCharacterizationFactors": [],
+    "crossSectoralStandards": [],
+    "exemptedEmissionsPercent": "0"
+  }
+}
