@@ -9,6 +9,39 @@ export type MappingMethod =
   | "spend"
   | "process";
 export type CalculationStatus = "draft" | "completed" | "failed" | "superseded";
+export type ApprovalStatus = "pending" | "approved" | "rejected";
+
+export interface DataQualityScore {
+  temporal: number;
+  geo: number;
+  tech: number;
+  overall: number;
+  notes: string[];
+}
+
+export interface BomAuditEvent {
+  id: string;
+  companyId: string;
+  entityType:
+    | "product"
+    | "bom"
+    | "bom_item"
+    | "mapping"
+    | "calculation"
+    | "emission_factor"
+    | "dataset"
+    | "scenario"
+    | "supplier_pcf_request";
+  entityId: string;
+  action: string;
+  actorId?: string | null;
+  actorLabel?: string | null;
+  summary: string;
+  beforeState?: Record<string, unknown> | null;
+  afterState?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
 
 export interface CarbonDataset {
   id: string;
@@ -94,6 +127,23 @@ export interface PcfCalculation {
   createdAt: string;
   completedAt?: string | null;
   ledger?: CarbonLedgerEntry[];
+  /** Phase 1C */
+  approvalStatus: ApprovalStatus;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  approvalNotes?: string | null;
+  isStale: boolean;
+  staleReason?: string | null;
+  staleAt?: string | null;
+  dq?: DataQualityScore | null;
+  bomFingerprint?: string | null;
+  mappingFingerprint?: string | null;
+  /** Phase 6 — set when calculation is a what-if run */
+  scenarioId?: string | null;
+  /** PACT V3 Phase 3a — stable footprint id + reference period for export */
+  pactFootprintId?: string | null;
+  referencePeriodStart?: string | null;
+  referencePeriodEnd?: string | null;
 }
 
 export interface MappingSuggestion {
@@ -112,3 +162,67 @@ export interface CalculateBomInput {
   /** Default true: only approved mappings contribute */
   requireApproved?: boolean;
 }
+
+/** Phase 6 — what-if scenario overrides (do not mutate baseline BOM). */
+export type ScenarioOverrideKind =
+  | "quantity"
+  | "scrap_rate"
+  | "yield_rate"
+  | "emission_factor";
+
+export type ScenarioOverride = {
+  id: string;
+  bomItemId: string;
+  kind: ScenarioOverrideKind;
+  numericValue?: number | null;
+  emissionFactorId?: string | null;
+};
+
+export type BomScenario = {
+  id: string;
+  companyId: string;
+  bomId: string;
+  name: string;
+  description?: string | null;
+  baselineCalculationId: string | null;
+  overrides: ScenarioOverride[];
+  lastResultCalculationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+
+
+/** Phase 7 — supplier primary PCF request / response */
+export type SupplierPcfRequestStatus =
+  | "draft"
+  | "sent"
+  | "submitted"
+  | "approved"
+  | "rejected"
+  | "cancelled";
+
+export type SupplierPcfRequest = {
+  id: string;
+  companyId: string;
+  bomId: string;
+  bomItemId: string;
+  partNumber: string;
+  supplierName: string;
+  supplierEmail?: string | null;
+  status: SupplierPcfRequestStatus;
+  accessToken: string;
+  message?: string | null;
+  declaredKgco2ePerUnit?: number | null;
+  declaredUnit?: string | null;
+  methodology?: string | null;
+  evidenceNotes?: string | null;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
+  reviewNotes?: string | null;
+  resultingMappingId?: string | null;
+  resultingFactorId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
