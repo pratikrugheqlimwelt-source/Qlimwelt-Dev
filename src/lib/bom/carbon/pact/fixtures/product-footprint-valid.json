@@ -1,0 +1,32 @@
+{
+  "id": "f4b1225a-bd44-4c8e-861d-079e4e1dfd69",
+  "specVersion": "3.0.3",
+  "created": "2024-10-31T00:00:00Z",
+  "status": "Active",
+  "companyName": "Example GmbH",
+  "companyIds": ["urn:pathfinder:company:custom:example-gmbh"],
+  "productDescription": "Demo steel bracket for PACT schema tests",
+  "productIds": ["urn:pathfinder:product:custom:qlimwelt:PN-100"],
+  "productNameCompany": "Steel Bracket PN-100",
+  "comment": "Derived fixture for Qlimwelt PACT V3 adapter tests (not an official WBCSD sample).",
+  "pcf": {
+    "declaredUnitOfMeasurement": "piece",
+    "declaredUnitAmount": "1",
+    "productMassPerDeclaredUnit": "0.25",
+    "referencePeriodStart": "2024-01-01T00:00:00Z",
+    "referencePeriodEnd": "2024-12-31T23:59:59Z",
+    "geographyCountry": "DE",
+    "boundaryProcessesDescription": "Cradle-to-gate BOM recursive PCF",
+    "pcfExcludingBiogenicUptake": "1.234",
+    "pcfIncludingBiogenicUptake": "1.234",
+    "fossilCarbonContent": "0",
+    "fossilGhgEmissions": "1.234",
+    "packagingEmissionsIncluded": false,
+    "ipccCharacterizationFactors": ["AR6"],
+    "crossSectoralStandards": ["ISO14067", "PACT-3.0"],
+    "exemptedEmissionsPercent": "0",
+    "secondaryEmissionFactorSources": [
+      { "name": "qlimwelt-demo", "version": "1.0.0" }
+    ]
+  }
+}

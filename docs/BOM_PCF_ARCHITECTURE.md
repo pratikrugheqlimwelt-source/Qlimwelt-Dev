@@ -30,10 +30,10 @@ Never overwrite historical BOMs, datasets, methodologies, or approved calculatio
 ## Hybrid product model (locked)
 
 - **Products / BOM versions** are master data under `/dashboard/products`.
-- A **Product assessment** later selects a BOM version and runs calculation against it (Phase 1B+).
+- A **Product assessment** selects a BOM version and runs calculation against approved mappings (Phase 1B).
 - Do not fold the BOM editor into the corporate assessment wizard.
 
-## Calculation engine (future phases)
+## Calculation engine (Phase 1B+)
 
 Deterministic graph calculation in application memory after bulk fetch:
 

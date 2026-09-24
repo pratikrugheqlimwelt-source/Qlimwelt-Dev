@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -9,14 +9,37 @@ import { Label } from "@/components/ui/label";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
 import { useT } from "@/components/i18n/locale-provider";
 import type { AssessmentType } from "@/types/assessment";
+import { fetchProductBundle, fetchProducts } from "@/lib/bom/client-api";
+import type { Bom, Product } from "@/lib/bom/types";
 import { cn } from "@/lib/utils";
 
 export default function NewAssessmentPage() {
-  const { createAssessment, saving } = useDashboard();
+  const { company, createAssessment, saving } = useDashboard();
   const router = useRouter();
   const t = useT();
   const [name, setName] = useState("2026 Corporate Carbon Footprint");
   const [type, setType] = useState<AssessmentType>("corporate");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [boms, setBoms] = useState<Bom[]>([]);
+  const [selectedBomId, setSelectedBomId] = useState("");
+
+  useEffect(() => {
+    if (type !== "product") return;
+    void fetchProducts(company.id).then(setProducts);
+  }, [type, company.id]);
+
+  useEffect(() => {
+    if (!selectedProductId) {
+      setBoms([]);
+      setSelectedBomId("");
+      return;
+    }
+    void fetchProductBundle(company.id, selectedProductId).then((bundle) => {
+      setBoms(bundle?.boms ?? []);
+      setSelectedBomId(bundle?.boms[0]?.id ?? "");
+    });
+  }, [company.id, selectedProductId]);
 
   const types: {
     type: AssessmentType;
@@ -32,7 +55,12 @@ export default function NewAssessmentPage() {
 
   const handleCreate = async () => {
     if (!name.trim()) return;
-    const a = await createAssessment({ name: name.trim(), type });
+    const a = await createAssessment({
+      name: name.trim(),
+      type,
+      productId: type === "product" ? selectedProductId || null : null,
+      bomId: type === "product" ? selectedBomId || null : null,
+    });
     router.push(`/dashboard/assessments/${a.id}`);
   };
 
@@ -99,9 +127,39 @@ export default function NewAssessmentPage() {
               >
                 {t("pages.products.title")}
               </Button>
-              <span className="rounded-md border border-dashed border-amber-300 px-2 py-1 text-[11px] text-amber-800/80">
-                Select BOM version (required for calculation in Phase 1B) — coming next
-              </span>
+              <div className="grid w-full gap-2 sm:grid-cols-2">
+                <label className="block text-[11px]">
+                  Product
+                  <select
+                    className="mt-1 flex h-9 w-full rounded-md border border-amber-300 bg-white px-2 text-xs"
+                    value={selectedProductId}
+                    onChange={(e) => setSelectedProductId(e.target.value)}
+                  >
+                    <option value="">Select product…</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.productNumber})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-[11px]">
+                  BOM version
+                  <select
+                    className="mt-1 flex h-9 w-full rounded-md border border-amber-300 bg-white px-2 text-xs"
+                    value={selectedBomId}
+                    onChange={(e) => setSelectedBomId(e.target.value)}
+                    disabled={!selectedProductId}
+                  >
+                    <option value="">Select BOM…</option>
+                    {boms.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.bomType} · v{b.versionLabel}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
           </div>
         )}
