@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireCompanyAuth } from "@/lib/export/auth";
 import { localAcceptSupplierPcfRecord } from "@/lib/bom/carbon/pact/import";
+import { mirrorSupplierPcfRecordToDb } from "@/lib/bom/carbon/pact/persist";
 
 export async function POST(
   request: Request,
@@ -29,6 +30,7 @@ export async function POST(
       acceptedBy: auth.ctx.userId,
       notes: body.notes ?? null,
     });
+    await mirrorSupplierPcfRecordToDb(auth.ctx, record);
     return NextResponse.json({ record });
   } catch (e) {
     return NextResponse.json(

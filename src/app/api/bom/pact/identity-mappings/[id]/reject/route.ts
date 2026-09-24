@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireCompanyAuth } from "@/lib/export/auth";
-import { rejectIdentityMapping } from "@/lib/bom/carbon/pact/identity/mapping-service";
+import { rejectIdentityMappingPersisted } from "@/lib/bom/carbon/pact/identity/mapping-service";
 
 export async function POST(
   _request: Request,
@@ -11,7 +11,7 @@ export async function POST(
   const { id } = await context.params;
 
   try {
-    const mapping = rejectIdentityMapping(auth.ctx.companyId, id);
+    const mapping = await rejectIdentityMappingPersisted(auth.ctx, id);
     return NextResponse.json({ mapping });
   } catch (e) {
     return NextResponse.json(
