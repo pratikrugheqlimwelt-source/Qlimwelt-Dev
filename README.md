@@ -3,7 +3,8 @@
 Carbon intelligence platform — emissions dashboard, CSRD-ready reporting, and Google OAuth onboarding.
 
 **Dashboard capabilities & who can use it:** see [DASHBOARD_README.md](./DASHBOARD_README.md).  
-**Step-by-step usage:** see [docs/DASHBOARD_USER_MANUAL.md](./docs/DASHBOARD_USER_MANUAL.md).
+**Step-by-step usage:** see [docs/DASHBOARD_USER_MANUAL.md](./docs/DASHBOARD_USER_MANUAL.md).  
+**BOM / Product Carbon (Phase 1A):** see [docs/BOM_PCF_ARCHITECTURE.md](./docs/BOM_PCF_ARCHITECTURE.md) and [docs/BOM_IMPLEMENTATION_ROADMAP.md](./docs/BOM_IMPLEMENTATION_ROADMAP.md).
 
 ## Stack
 

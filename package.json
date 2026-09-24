@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:calc": "npx tsx src/lib/calculations/engine.test.ts",
+    "test:bom": "npx tsx src/lib/bom/bom.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "seed:user": "npx tsx scripts/seed-user-demo.ts"
@@ -44,6 +45,7 @@
     "simple-icons": "^16.28.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "xlsx": "^0.18.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {

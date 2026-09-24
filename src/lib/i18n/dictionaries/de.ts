@@ -75,6 +75,7 @@ const de: Dict = {
     assessments: "Bewertungen",
     dataCollection: "Datenerfassung",
     connectedSystems: "Verbundene Systeme",
+    products: "Produkte",
     resources: "Ressourcen",
     climateIntelligence: "Klima-Intelligenz",
     reductionPlanner: "Reduktionsplaner",
@@ -127,10 +128,11 @@ const de: Dict = {
       supplierHint: "Lieferantenfragebögen und Datenanfragen",
       comingSoon: "Demnächst",
       productNote:
-        "Product CCF ist in diesem MVP als Gerüst verfügbar. Vollständige BOM-/PACT-Workflows folgen in Phase 2.",
+        "Product-CCF nutzt weiter das geführte Gerüst. Produktstammdaten und BOMs legen Sie unter Produkte an; die Verknüpfung einer BOM-Version zur Berechnung folgt in Phase 1B.",
     },
     assessmentWizard: {
-      productDesc: "Product-CCF-Gerüst — Profil & Grenzen definieren; vollständige BOM-Flows in Phase 2.",
+      productDesc:
+        "Product-CCF-Gerüst — Profil & Grenzen. BOM-Struktur unter Produkte (Phase 1A). PCF-Berechnung gegen eine BOM-Version ist Phase 1B.",
       corporateDesc: "Geführte Unternehmensbewertung: Struktur → Screening → Mengen.",
       tip: "Mengen nur für Module erfassen, die durch das operative Screening aktiviert wurden.",
       stepProfile: "Unternehmensprofil",
@@ -261,6 +263,24 @@ const de: Dict = {
     settings: {
       title: "Einstellungen",
       description: "Unternehmensprofil, CO₂-Preis, GWP-Werte und eigene Emissionsfaktoren.",
+    },
+    products: {
+      title: "Produkte",
+      description: "Produktstammdaten und versionierte mehrstufige Stücklisten (BOM Phase 1A).",
+      tip: "Legen Sie ein Produkt an, um die Engineering-BOM zu öffnen. CSV-Import mit part_number und optional parent_part_number. Carbon-Mapping und PCF-Berechnung folgen in Phase 1B.",
+      new: "Neues Produkt",
+      emptyTitle: "Noch keine Produkte",
+      emptyBody: "Erstellen Sie ein Produkt für versionierte BOMs. Produktbewertungen können in Phase 1B eine BOM-Version verknüpfen.",
+      notFound: "Produkt nicht gefunden.",
+      versions: "Versionen",
+      boms: "Stücklisten",
+      openBom: "BOM öffnen",
+      bomTitle: "Stückliste",
+      bomLoading: "BOM wird geladen…",
+      addPart: "Teilenummer",
+      addItem: "Position hinzufügen",
+      itemSaved: "BOM-Position gespeichert",
+      importCommitted: "BOM-Import übernommen",
     },
   },
   status: {
