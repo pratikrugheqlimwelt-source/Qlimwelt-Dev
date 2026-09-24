@@ -404,3 +404,18 @@ Fixtures: `src/lib/bom/carbon/pact/fixtures/` — prefer official examples from 
 - [x] Clear handoff to Phase 3a without rebuilding BOM/PCF  
 
 **Next step (Phase 3a):** implement additive schema + TypeScript types + empty service stubs (no mapper / no peer host yet).
+
+---
+
+## 19. Architecture audit constraints (locked for later phases)
+
+Read-only audit of the BOM/PCF stack confirmed the following; PACT work must not fight them:
+
+1. **Calc engine stays authoritative** — reuse `calculateBomPcf` / ledger / mapping; PACT is an export/import adapter only (Phases 3c–4 already follow this).
+2. **Dual persistence today** — product/BOM structure can live in Supabase (migrations 008+); carbon/PCF/scenarios/supplier-PCF/readiness runtime is largely **local-store**. PACT tables/APIs follow the same local-first pattern until a dedicated persistence phase lands carbon domain in Postgres.
+3. **Phase 9 readiness ≠ PACT V3** — readiness builders stamp `*-readiness` / Pathfinder-like stubs. Real V3 OpenAPI 3.0.3 payloads replace stub download paths; do not treat Phase 9 JSON as exchange-legal.
+4. **CCF stays separate** — corporate inventory (`calculations/engine`, dashboard activities) must not be merged into the BOM PCF engine; link by product/BOM ids only if needed.
+5. **Supplier accept path** — inbound PACT footprints become durable `supplier_pcf_records`, then explicit accept → synthetic EF + `supplier_pcf` mapping (same pattern as Phase 7 portal approval). No silent fuzzy bind.
+6. **Still out of scope here** — live ERP OAuth sync, certified Pathfinder network exchange hosting, Monte Carlo uncertainty, spend/transport method engines, full DPP.
+
+**Phase 5+ should prioritize:** exchange history + identity mapping UI, then optional peer `/3` host stubs — not a calc rewrite or CCF merge.
