@@ -23,7 +23,11 @@
     "test:bom:pact": "npx tsx src/lib/bom/carbon/pact/pact-3a.test.ts",
     "test:bom:pact:3b": "npx tsx src/lib/bom/carbon/pact/pact-3b.test.ts",
     "test:bom:pact:3c": "npx tsx src/lib/bom/carbon/pact/pact-3c.test.ts",
-    "test:bom:pact:4": "npx tsx src/lib/bom/carbon/pact/pact-4.test.ts"
+    "test:bom:pact:4": "npx tsx src/lib/bom/carbon/pact/pact-4.test.ts",
+    "test:bom:pact:5": "npx tsx src/lib/bom/carbon/pact/pact-5.test.ts",
+    "test:bom:pact:6": "npx tsx src/lib/bom/carbon/pact/pact-6.test.ts",
+    "test:bom:pact:7": "npx tsx src/lib/bom/carbon/pact/pact-7.test.ts",
+    "test:bom:pact:8": "npx tsx src/lib/bom/carbon/pact/pact-8.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

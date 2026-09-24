@@ -1,7 +1,13 @@
 /**
- * Phase 3a exchange service — idempotent create/list over local store.
+ * Phase 3a/8 exchange service — idempotent create/list over local store + DB persist.
  */
 
+import type { ExportAuthContext } from "@/lib/export/auth";
+import {
+  persistCreatePactExchange,
+  persistListPactExchanges,
+  persistUpdatePactExchange,
+} from "../persist";
 import {
   localCreatePactExchange,
   localGetPactExchange,
@@ -17,6 +23,13 @@ export function listExchanges(
   return localListPactExchanges(companyId, filter);
 }
 
+export async function listExchangesPersisted(
+  ctx: ExportAuthContext,
+  filter?: { direction?: PactExchange["direction"]; kind?: PactExchange["kind"] }
+): Promise<PactExchange[]> {
+  return persistListPactExchanges(ctx, filter);
+}
+
 export function getExchange(companyId: string, exchangeId: string): PactExchange | null {
   return localGetPactExchange(companyId, exchangeId);
 }
@@ -26,6 +39,13 @@ export function beginExchange(
   input: Parameters<typeof localCreatePactExchange>[1]
 ): PactExchange {
   return localCreatePactExchange(companyId, input);
+}
+
+export async function beginExchangePersisted(
+  ctx: ExportAuthContext,
+  input: Parameters<typeof localCreatePactExchange>[1]
+): Promise<PactExchange> {
+  return persistCreatePactExchange(ctx, input);
 }
 
 export function completeExchange(
@@ -42,6 +62,25 @@ export function completeExchange(
   }
 ): PactExchange {
   return localUpdatePactExchange(companyId, exchangeId, {
+    ...patch,
+    completedAt: new Date().toISOString(),
+  });
+}
+
+export async function completeExchangePersisted(
+  ctx: ExportAuthContext,
+  exchangeId: string,
+  patch: {
+    status: PactExchange["status"];
+    httpStatus?: number | null;
+    errorCode?: string | null;
+    errorDetail?: string | null;
+    footprintId?: string | null;
+    supplierPcfRecordId?: string | null;
+    responsePayload?: Record<string, unknown> | null;
+  }
+): Promise<PactExchange> {
+  return persistUpdatePactExchange(ctx, exchangeId, {
     ...patch,
     completedAt: new Date().toISOString(),
   });

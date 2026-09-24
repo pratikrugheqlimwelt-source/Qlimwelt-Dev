@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireCompanyAuth } from "@/lib/export/auth";
-import { localRejectSupplierPcfRecord } from "@/lib/bom/carbon/pact/import";
-import { mirrorSupplierPcfRecordToDb } from "@/lib/bom/carbon/pact/persist";
+import { rejectIdentityMappingPersisted } from "@/lib/bom/carbon/pact/identity/mapping-service";
 
 export async function POST(
   _request: Request,
@@ -10,10 +9,10 @@ export async function POST(
   const auth = await requireCompanyAuth();
   if (!auth.ok) return auth.response;
   const { id } = await context.params;
+
   try {
-    const record = localRejectSupplierPcfRecord(auth.ctx.companyId, id);
-    await mirrorSupplierPcfRecordToDb(auth.ctx, record);
-    return NextResponse.json({ record });
+    const mapping = await rejectIdentityMappingPersisted(auth.ctx, id);
+    return NextResponse.json({ mapping });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Reject failed" },

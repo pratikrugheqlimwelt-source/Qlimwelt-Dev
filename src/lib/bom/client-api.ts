@@ -55,7 +55,33 @@ import {
   localExportReadiness,
 } from "./carbon/local-service";
 import { localExportPactV3 } from "./carbon/pact/export";
+import {
+  localImportPactV3,
+  localAcceptSupplierPcfRecord,
+  localRejectSupplierPcfRecord,
+} from "./carbon/pact/import";
+import {
+  confirmIdentityMapping,
+  createManualIdentityMapping,
+  listIdentityMappings,
+  rejectIdentityMapping,
+} from "./carbon/pact/identity/mapping-service";
+import {
+  localListPactExchanges,
+  localListSupplierPcfRecords,
+} from "./carbon/pact/store";
+import type {
+  PactExchange,
+  ProductIdentityMapping,
+  SupplierPcfRecord,
+} from "./carbon/pact/types";
 import type { PactProductFootprintV3 } from "./carbon/pact/wire-types";
+import type { ImportMappingCandidate } from "./carbon/pact/mapper/from-product-footprint";
+import {
+  assertUrn,
+  buildCustomProductUrn,
+  buildGtinProductUrn,
+} from "./carbon/pact/identity/urn";
 import type {
   BomAnalytics,
   VersionCompareResult,
@@ -854,4 +880,256 @@ export async function exportPactV3Footprint(
     schemaOk: bundle.schema.ok,
     semanticsOk: bundle.semantics.ok,
   };
+}
+
+/* ---- PACT V3 Phase 5: exchanges, identity, import review ---- */
+
+export async function fetchPactExchanges(
+  companyId: string,
+  filter?: { direction?: PactExchange["direction"]; kind?: PactExchange["kind"] }
+): Promise<PactExchange[]> {
+  try {
+    const params = new URLSearchParams();
+    if (filter?.direction) params.set("direction", filter.direction);
+    if (filter?.kind) params.set("kind", filter.kind);
+    const qs = params.toString();
+    const res = await fetch(`/api/bom/pact/exchanges${qs ? `?${qs}` : ""}`);
+    if (res.ok) {
+      const data = await tryJson<{ exchanges: PactExchange[] }>(res);
+      if (data?.exchanges) return data.exchanges;
+    }
+  } catch {
+    /* local */
+  }
+  return localListPactExchanges(companyId, filter);
+}
+
+export async function fetchProductIdentityMappings(
+  companyId: string,
+  filter?: { productId?: string; bomItemId?: string }
+): Promise<ProductIdentityMapping[]> {
+  try {
+    const params = new URLSearchParams();
+    if (filter?.productId) params.set("productId", filter.productId);
+    if (filter?.bomItemId) params.set("bomItemId", filter.bomItemId);
+    const qs = params.toString();
+    const res = await fetch(`/api/bom/pact/identity-mappings${qs ? `?${qs}` : ""}`);
+    if (res.ok) {
+      const data = await tryJson<{ mappings: ProductIdentityMapping[] }>(res);
+      if (data?.mappings) return data.mappings;
+    }
+  } catch {
+    /* local */
+  }
+  return listIdentityMappings(companyId, filter);
+}
+
+export async function createProductIdentityMapping(
+  companyId: string,
+  input: {
+    productId?: string | null;
+    bomItemId?: string | null;
+    scheme: ProductIdentityMapping["scheme"];
+    value: string;
+    urn?: string;
+    namespace?: string;
+    status?: ProductIdentityMapping["status"];
+  }
+): Promise<ProductIdentityMapping> {
+  try {
+    const res = await fetch("/api/bom/pact/identity-mappings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ mapping: ProductIdentityMapping }>(res);
+      if (data?.mapping) return data.mapping;
+    } else {
+      const err = await tryJson<{ error?: string }>(res);
+      if (err?.error) throw new Error(err.error);
+    }
+  } catch (e) {
+    if (e instanceof Error && !/fetch|network|supabase/i.test(e.message)) throw e;
+  }
+
+  let urn = input.urn?.trim();
+  if (!urn) {
+    if (input.scheme === "gtin") urn = buildGtinProductUrn(input.value);
+    else urn = buildCustomProductUrn(input.namespace || companyId, input.value);
+  }
+  assertUrn(urn);
+  return createManualIdentityMapping(companyId, {
+    productId: input.productId ?? null,
+    bomItemId: input.bomItemId ?? null,
+    scheme: input.scheme,
+    value: input.value,
+    urn,
+    status: input.status ?? "confirmed",
+  });
+}
+
+export async function confirmProductIdentityMapping(
+  companyId: string,
+  mappingId: string,
+  patch?: { productId?: string | null; bomItemId?: string | null }
+): Promise<ProductIdentityMapping> {
+  try {
+    const res = await fetch(`/api/bom/pact/identity-mappings/${mappingId}/confirm`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch ?? {}),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ mapping: ProductIdentityMapping }>(res);
+      if (data?.mapping) return data.mapping;
+    } else {
+      const err = await tryJson<{ error?: string }>(res);
+      if (err?.error) throw new Error(err.error);
+    }
+  } catch (e) {
+    if (e instanceof Error && !/fetch|network|supabase/i.test(e.message)) throw e;
+  }
+  return confirmIdentityMapping(companyId, mappingId, patch);
+}
+
+export async function rejectProductIdentityMapping(
+  companyId: string,
+  mappingId: string
+): Promise<ProductIdentityMapping> {
+  try {
+    const res = await fetch(`/api/bom/pact/identity-mappings/${mappingId}/reject`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      const data = await tryJson<{ mapping: ProductIdentityMapping }>(res);
+      if (data?.mapping) return data.mapping;
+    } else {
+      const err = await tryJson<{ error?: string }>(res);
+      if (err?.error) throw new Error(err.error);
+    }
+  } catch (e) {
+    if (e instanceof Error && !/fetch|network|supabase/i.test(e.message)) throw e;
+  }
+  return rejectIdentityMapping(companyId, mappingId);
+}
+
+export async function fetchSupplierPcfRecords(
+  companyId: string,
+  filter?: { status?: SupplierPcfRecord["status"] }
+): Promise<SupplierPcfRecord[]> {
+  try {
+    const params = new URLSearchParams();
+    if (filter?.status) params.set("status", filter.status);
+    const qs = params.toString();
+    const res = await fetch(`/api/bom/pact/records${qs ? `?${qs}` : ""}`);
+    if (res.ok) {
+      const data = await tryJson<{ records: SupplierPcfRecord[] }>(res);
+      if (data?.records) return data.records;
+    }
+  } catch {
+    /* local */
+  }
+  return localListSupplierPcfRecords(companyId, filter).sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
+}
+
+export async function importPactV3Footprint(
+  companyId: string,
+  footprint: unknown,
+  options?: { idempotencyKey?: string; supplierId?: string | null }
+): Promise<{
+  record: SupplierPcfRecord;
+  candidates: ImportMappingCandidate[];
+  exchangeId: string;
+  schemaOk: boolean;
+  semanticsOk: boolean;
+  semanticIssues: Array<{ path: string; message: string; category: string }>;
+}> {
+  try {
+    const res = await fetch("/api/bom/pact/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        footprint,
+        idempotencyKey: options?.idempotencyKey,
+        supplierId: options?.supplierId ?? undefined,
+      }),
+    });
+    if (res.ok) {
+      const data = await tryJson<{
+        record: SupplierPcfRecord;
+        candidates: ImportMappingCandidate[];
+        exchangeId: string;
+        schemaOk: boolean;
+        semanticsOk: boolean;
+        semanticIssues: Array<{ path: string; message: string; category: string }>;
+      }>(res);
+      if (data?.record) return data;
+    } else {
+      const err = await tryJson<{ error?: string; issues?: unknown }>(res);
+      if (err?.error) throw new Error(err.error);
+    }
+  } catch (e) {
+    if (e instanceof Error && !/fetch|network|supabase/i.test(e.message)) throw e;
+  }
+  const bundle = localImportPactV3(companyId, footprint, options);
+  return {
+    record: bundle.record,
+    candidates: bundle.candidates,
+    exchangeId: bundle.exchangeId,
+    schemaOk: bundle.schema.ok,
+    semanticsOk: bundle.semantics.ok,
+    semanticIssues: bundle.semantics.issues,
+  };
+}
+
+export async function acceptSupplierPcfRecord(
+  companyId: string,
+  recordId: string,
+  input: { bomItemId: string; notes?: string | null }
+): Promise<SupplierPcfRecord> {
+  try {
+    const res = await fetch(`/api/bom/pact/records/${recordId}/accept`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ record: SupplierPcfRecord }>(res);
+      if (data?.record) return data.record;
+    } else {
+      const err = await tryJson<{ error?: string }>(res);
+      if (err?.error) throw new Error(err.error);
+    }
+  } catch (e) {
+    if (e instanceof Error && !/fetch|network|supabase/i.test(e.message)) throw e;
+  }
+  return localAcceptSupplierPcfRecord(companyId, recordId, {
+    bomItemId: input.bomItemId,
+    acceptedBy: "local-user",
+    notes: input.notes ?? null,
+  });
+}
+
+export async function rejectSupplierPcfRecord(
+  companyId: string,
+  recordId: string
+): Promise<SupplierPcfRecord> {
+  try {
+    const res = await fetch(`/api/bom/pact/records/${recordId}/reject`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      const data = await tryJson<{ record: SupplierPcfRecord }>(res);
+      if (data?.record) return data.record;
+    } else {
+      const err = await tryJson<{ error?: string }>(res);
+      if (err?.error) throw new Error(err.error);
+    }
+  } catch (e) {
+    if (e instanceof Error && !/fetch|network|supabase/i.test(e.message)) throw e;
+  }
+  return localRejectSupplierPcfRecord(companyId, recordId);
 }
