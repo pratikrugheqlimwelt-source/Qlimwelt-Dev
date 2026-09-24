@@ -85,12 +85,12 @@ const mappings: CarbonMapping[] = [
     companyId: "co",
     bomItemId: "steel",
     emissionFactorId: "ef-1",
-    method: "factor",
+    method: "qty_x_ef",
     confidence: 0.9,
     status: "approved",
     createdAt: now,
     updatedAt: now,
-  } as CarbonMapping,
+  },
 ];
 
 const calcs: PcfCalculation[] = [
