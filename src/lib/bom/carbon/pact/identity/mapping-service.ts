@@ -5,6 +5,7 @@
 import {
   localCreateProductIdentityMapping,
   localListProductIdentityMappings,
+  localUpdateProductIdentityMapping,
 } from "../store";
 import type { ProductIdentityMapping } from "../types";
 import { parsePactUrn } from "./urn";
@@ -54,5 +55,35 @@ export function createManualIdentityMapping(
   return localCreateProductIdentityMapping(companyId, {
     ...input,
     source: "manual",
+  });
+}
+
+export function confirmIdentityMapping(
+  companyId: string,
+  mappingId: string,
+  patch?: { productId?: string | null; bomItemId?: string | null }
+): ProductIdentityMapping {
+  const existing = localListProductIdentityMappings(companyId).find(
+    (m) => m.id === mappingId
+  );
+  if (!existing) throw new Error(`identity mapping not found: ${mappingId}`);
+  const productId = patch?.productId !== undefined ? patch.productId : existing.productId;
+  const bomItemId = patch?.bomItemId !== undefined ? patch.bomItemId : existing.bomItemId;
+  if (!productId && !bomItemId && existing.scheme !== "company") {
+    throw new Error("confirm requires productId or bomItemId");
+  }
+  return localUpdateProductIdentityMapping(companyId, mappingId, {
+    status: "confirmed",
+    productId,
+    bomItemId,
+  });
+}
+
+export function rejectIdentityMapping(
+  companyId: string,
+  mappingId: string
+): ProductIdentityMapping {
+  return localUpdateProductIdentityMapping(companyId, mappingId, {
+    status: "rejected",
   });
 }

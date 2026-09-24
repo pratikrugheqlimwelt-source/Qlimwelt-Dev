@@ -377,7 +377,7 @@ Fixtures: `src/lib/bom/carbon/pact/fixtures/` — prefer official examples from 
 | **3b** | Pin OpenAPI + schema validator + URN helpers | |
 | **3c** | Export mapper + `/api/bom/pact/export` + UI wire (replace stub download) | Demo export |
 | **4** | Import + semantic validation + review accept→Phase 7 EF path | Demo import |
-| **5** | Exchange history + identity mapping UI | |
+| **5** | Exchange history + identity mapping UI | Done (panel + list APIs) |
 | **6** | OAuth client + List/Get against peer (optional host later) | Ask before network |
 | **7** | UI polish on product PCF summary | |
 

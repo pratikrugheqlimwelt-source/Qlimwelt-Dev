@@ -13,6 +13,7 @@ import { BomScenarioPanel } from "@/components/dashboard/products/bom-scenario-p
 import { BomSupplierPcfPanel } from "@/components/dashboard/products/bom-supplier-pcf-panel";
 import { BomConnectorPanel } from "@/components/dashboard/products/bom-connector-panel";
 import { BomReadinessPanel } from "@/components/dashboard/products/bom-readiness-panel";
+import { BomPactPanel } from "@/components/dashboard/products/bom-pact-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
@@ -192,6 +193,15 @@ export default function BomEditorPage() {
             items={items}
             selectedItemId={selectedId}
             refreshKey={analyticsKey}
+          />
+          <BomPactPanel
+            companyId={company.id}
+            productId={params.id}
+            bomId={params.bomId}
+            items={items}
+            selectedItemId={selectedId}
+            refreshKey={analyticsKey}
+            onChanged={() => setAnalyticsKey((k) => k + 1)}
           />
           <BomConnectorPanel
             companyId={company.id}

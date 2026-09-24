@@ -128,6 +128,60 @@ export function localCreateProductIdentityMapping(
   return mapping;
 }
 
+export function localGetProductIdentityMapping(
+  companyId: string,
+  mappingId: string
+): ProductIdentityMapping | null {
+  return (
+    localListProductIdentityMappings(companyId).find((m) => m.id === mappingId) ??
+    null
+  );
+}
+
+export function localUpdateProductIdentityMapping(
+  companyId: string,
+  mappingId: string,
+  patch: Partial<
+    Pick<
+      ProductIdentityMapping,
+      | "status"
+      | "productId"
+      | "bomItemId"
+      | "confidence"
+      | "scheme"
+      | "value"
+      | "urn"
+    >
+  >
+): ProductIdentityMapping {
+  const existing = localGetProductIdentityMapping(companyId, mappingId);
+  if (!existing) throw new Error(`identity mapping not found: ${mappingId}`);
+  if (patch.urn && patch.urn !== existing.urn) {
+    const urn = patch.urn.trim();
+    if (
+      localListProductIdentityMappings(companyId).some(
+        (m) => m.urn === urn && m.id !== mappingId
+      )
+    ) {
+      throw new Error(`identity URN already mapped: ${urn}`);
+    }
+  }
+  const updated: ProductIdentityMapping = {
+    ...existing,
+    ...patch,
+    urn: patch.urn?.trim() ?? existing.urn,
+    value: patch.value?.trim() ?? existing.value,
+    updatedAt: nowIso(),
+  };
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    productIdentityMappings: (s.productIdentityMappings ?? []).map((m) =>
+      m.id === mappingId ? updated : m
+    ),
+  }));
+  return updated;
+}
+
 // ─── Supplier PCF records ──────────────────────────────────────────────────
 
 export function localListSupplierPcfRecords(
