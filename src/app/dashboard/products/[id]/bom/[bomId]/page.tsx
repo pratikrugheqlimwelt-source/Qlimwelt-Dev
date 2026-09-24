@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/shared/page-header";
@@ -13,6 +13,8 @@ import { BomScenarioPanel } from "@/components/dashboard/products/bom-scenario-p
 import { BomSupplierPcfPanel } from "@/components/dashboard/products/bom-supplier-pcf-panel";
 import { BomConnectorPanel } from "@/components/dashboard/products/bom-connector-panel";
 import { BomReadinessPanel } from "@/components/dashboard/products/bom-readiness-panel";
+import { BomPactPanel } from "@/components/dashboard/products/bom-pact-panel";
+import { BomPcfSummary } from "@/components/dashboard/products/bom-pcf-summary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
@@ -40,6 +42,8 @@ export default function BomEditorPage() {
   const [newQty, setNewQty] = useState("1");
   const [newUnit, setNewUnit] = useState("kg");
   const [analyticsKey, setAnalyticsKey] = useState(0);
+  const pactPanelRef = useRef<HTMLDivElement | null>(null);
+  const readinessPanelRef = useRef<HTMLDivElement | null>(null);
 
   const reload = useCallback(async () => {
     const [b, list] = await Promise.all([
@@ -138,6 +142,19 @@ export default function BomEditorPage() {
           onSelect={(item) => setSelectedId(item.id)}
         />
         <div className="space-y-4">
+          <BomPcfSummary
+            companyId={company.id}
+            productId={params.id}
+            bomId={params.bomId}
+            items={items}
+            refreshKey={analyticsKey}
+            onJumpToPact={() =>
+              pactPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            onJumpToReadiness={() =>
+              readinessPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          />
           <BomItemDetail
             item={selected}
             saving={busy}
@@ -193,6 +210,17 @@ export default function BomEditorPage() {
             selectedItemId={selectedId}
             refreshKey={analyticsKey}
           />
+          <div ref={pactPanelRef}>
+          <BomPactPanel
+            companyId={company.id}
+            productId={params.id}
+            bomId={params.bomId}
+            items={items}
+            selectedItemId={selectedId}
+            refreshKey={analyticsKey}
+            onChanged={() => setAnalyticsKey((k) => k + 1)}
+          />
+          </div>
           <BomConnectorPanel
             companyId={company.id}
             bomId={params.bomId}
@@ -203,11 +231,13 @@ export default function BomEditorPage() {
               toast({ title: "Connector import committed" });
             }}
           />
+          <div ref={readinessPanelRef}>
           <BomReadinessPanel
             companyId={company.id}
             bomId={params.bomId}
             refreshKey={analyticsKey}
           />
+          </div>
           <BomImportWizard
             busy={busy}
             onPreview={async (fileName, csvText, mapping) => {

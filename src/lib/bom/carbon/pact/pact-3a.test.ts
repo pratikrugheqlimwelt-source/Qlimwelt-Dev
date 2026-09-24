@@ -91,20 +91,35 @@ const schema = validateProductFootprintSchema({});
 assert.equal(schema.ok, false);
 assert.equal(schema.issues[0]?.category, "SCHEMA_INVALID");
 
-let mapperThrew = false;
-try {
-  toProductFootprint({ companyId, calculationId: "calc-1" });
-} catch {
-  mapperThrew = true;
-}
-assert.equal(mapperThrew, true, "export mapper stub throws");
+// Phase 3c mapper returns structured gate failures (no throw) for incomplete input.
+const gated = toProductFootprint({
+  companyId,
+  calculation: {
+    id: "calc-1",
+    companyId,
+    productId: null,
+    bomId: "bom-1",
+    assessmentId: null,
+    status: "draft",
+    totalKgco2e: 0,
+    declaredUnit: "piece",
+    methodology: "bom_recursive_v1",
+    warnings: [],
+    createdAt: new Date().toISOString(),
+    approvalStatus: "pending",
+    isStale: false,
+  },
+  product: null,
+});
+assert.equal(gated.ok, false, "incomplete calc is rejected by export gates");
 
 let importThrew = false;
 try {
-  fromProductFootprint({ companyId, payload: {} });
+  // Invalid footprint shape — mapper must fail closed (no silent empty import).
+  fromProductFootprint({ companyId, footprint: {} as never });
 } catch {
   importThrew = true;
 }
-assert.equal(importThrew, true, "import mapper stub throws");
+assert.equal(importThrew, true, "import mapper rejects invalid footprint");
 
 console.log("pact-3a.test.ts: all assertions passed");
