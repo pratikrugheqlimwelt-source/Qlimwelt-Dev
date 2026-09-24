@@ -29,7 +29,9 @@ export interface BomAuditEvent {
     | "mapping"
     | "calculation"
     | "emission_factor"
-    | "dataset";
+    | "dataset"
+    | "scenario"
+    | "supplier_pcf_request";
   entityId: string;
   action: string;
   actorId?: string | null;
@@ -136,6 +138,12 @@ export interface PcfCalculation {
   dq?: DataQualityScore | null;
   bomFingerprint?: string | null;
   mappingFingerprint?: string | null;
+  /** Phase 6 — set when calculation is a what-if run */
+  scenarioId?: string | null;
+  /** PACT V3 Phase 3a — stable footprint id + reference period for export */
+  pactFootprintId?: string | null;
+  referencePeriodStart?: string | null;
+  referencePeriodEnd?: string | null;
 }
 
 export interface MappingSuggestion {
@@ -154,3 +162,67 @@ export interface CalculateBomInput {
   /** Default true: only approved mappings contribute */
   requireApproved?: boolean;
 }
+
+/** Phase 6 — what-if scenario overrides (do not mutate baseline BOM). */
+export type ScenarioOverrideKind =
+  | "quantity"
+  | "scrap_rate"
+  | "yield_rate"
+  | "emission_factor";
+
+export type ScenarioOverride = {
+  id: string;
+  bomItemId: string;
+  kind: ScenarioOverrideKind;
+  numericValue?: number | null;
+  emissionFactorId?: string | null;
+};
+
+export type BomScenario = {
+  id: string;
+  companyId: string;
+  bomId: string;
+  name: string;
+  description?: string | null;
+  baselineCalculationId: string | null;
+  overrides: ScenarioOverride[];
+  lastResultCalculationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+
+
+/** Phase 7 — supplier primary PCF request / response */
+export type SupplierPcfRequestStatus =
+  | "draft"
+  | "sent"
+  | "submitted"
+  | "approved"
+  | "rejected"
+  | "cancelled";
+
+export type SupplierPcfRequest = {
+  id: string;
+  companyId: string;
+  bomId: string;
+  bomItemId: string;
+  partNumber: string;
+  supplierName: string;
+  supplierEmail?: string | null;
+  status: SupplierPcfRequestStatus;
+  accessToken: string;
+  message?: string | null;
+  declaredKgco2ePerUnit?: number | null;
+  declaredUnit?: string | null;
+  methodology?: string | null;
+  evidenceNotes?: string | null;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
+  reviewNotes?: string | null;
+  resultingMappingId?: string | null;
+  resultingFactorId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};

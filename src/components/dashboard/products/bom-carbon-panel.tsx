@@ -24,9 +24,10 @@ type Props = {
   bomId: string;
   item: BomItem | null;
   busy?: boolean;
+  onCalculated?: () => void;
 };
 
-export function BomCarbonPanel({ companyId, productId, bomId, item, busy }: Props) {
+export function BomCarbonPanel({ companyId, productId, bomId, item, busy, onCalculated }: Props) {
   const [factors, setFactors] = useState<EmissionFactor[]>([]);
   const [mappings, setMappings] = useState<CarbonMapping[]>([]);
   const [suggestions, setSuggestions] = useState<MappingSuggestion[]>([]);
@@ -72,7 +73,7 @@ export function BomCarbonPanel({ companyId, productId, bomId, item, busy }: Prop
       <div>
         <h3 className="text-sm font-semibold">Carbon mapping & PCF</h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          Map factors, run PCF, review DQ scores, approve calculations, and inspect the audit trail (Phase 1C).
+          Map factors, run PCF, review DQ scores, approve calculations, and inspect the audit trail.
         </p>
       </div>
 
@@ -187,6 +188,7 @@ export function BomCarbonPanel({ companyId, productId, bomId, item, busy }: Prop
                 requireApproved: true,
               });
               setCalc(result);
+              onCalculated?.();
             } catch (e) {
               setError(e instanceof Error ? e.message : "Calculation failed");
             } finally {

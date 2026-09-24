@@ -168,6 +168,10 @@ export interface BomImportJob {
   errorMessage?: string | null;
   createdAt: string;
   committedAt?: string | null;
+  /** Phase 8 — set when preview came from an ERP/PLM/PDM connector */
+  connectorKind?: string | null;
+  sourceSystem?: string | null;
+  connectorWarnings?: string[];
 }
 
 export interface ProductBundle {
