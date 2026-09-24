@@ -201,16 +201,16 @@ Follow existing `/api/bom/...` + `requireCompanyAuth` + local fallback.
 | POST | `/api/bom/pact/exchanges/{id}/accept` | Accept mapped supplier PCF → existing approve→EF path |
 | POST | `/api/bom/pact/exchanges/{id}/reject` | Reject |
 
-**PACT peer-facing host surface (Phase 6 of plan — later):**
+**PACT peer-facing host surface (Phase 6 — stubs landed):**
 
 | PACT action | Path |
 |-------------|------|
 | ListFootprints | `GET /3/footprints` |
 | GetFootprint | `GET /3/footprints/{id}` |
 | Events | `POST /3/events` |
-| Token | OAuth2 token endpoint (existing or dedicated) |
+| Token | `POST /auth/token` (client_credentials stub) |
 
-Do **not** implement peer host until export/import file flows are proven.
+Local/demo only: bearer tokens are signed stubs; catalog serves completed outbound export footprints from local-store. No live external peer calls.
 
 ---
 
