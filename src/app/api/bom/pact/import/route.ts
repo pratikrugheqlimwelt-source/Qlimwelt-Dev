@@ -1,45 +1,54 @@
 import { NextResponse } from "next/server";
 import { requireCompanyAuth } from "@/lib/export/auth";
-import { localExportPactV3 } from "@/lib/bom/carbon/pact/export";
+import { localImportPactV3 } from "@/lib/bom/carbon/pact/import";
 import { getExchange } from "@/lib/bom/carbon/pact/exchange/service";
-import { mirrorPactExchangeToDb } from "@/lib/bom/carbon/pact/persist";
+import {
+  mirrorPactExchangeToDb,
+  mirrorSupplierPcfRecordToDb,
+} from "@/lib/bom/carbon/pact/persist";
 
 export async function POST(request: Request) {
   const auth = await requireCompanyAuth();
   if (!auth.ok) return auth.response;
 
-  let body: { calculationId?: string; companyName?: string } = {};
+  let body: { footprint?: unknown; idempotencyKey?: string; supplierId?: string } =
+    {};
   try {
     body = (await request.json()) as typeof body;
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const calculationId = body.calculationId?.trim();
-  if (!calculationId) {
-    return NextResponse.json(
-      { error: "calculationId is required" },
-      { status: 400 }
-    );
-  }
-
+  const footprint = body.footprint ?? body;
   try {
-    const bundle = localExportPactV3(auth.ctx.companyId, calculationId, {
-      companyName: body.companyName ?? null,
+    const bundle = localImportPactV3(auth.ctx.companyId, footprint, {
+      idempotencyKey: body.idempotencyKey,
+      supplierId: body.supplierId ?? null,
     });
+    // Circular FK: exchange → record → exchange. Write exchange first
+    // without supplier_pcf_record_id, then record, then patch exchange.
     const exchange = getExchange(auth.ctx.companyId, bundle.exchangeId);
+    if (exchange) {
+      await mirrorPactExchangeToDb(auth.ctx, {
+        ...exchange,
+        supplierPcfRecordId: null,
+      });
+    }
+    await mirrorSupplierPcfRecordToDb(auth.ctx, bundle.record);
     if (exchange) {
       await mirrorPactExchangeToDb(auth.ctx, exchange);
     }
     return NextResponse.json({
-      footprint: bundle.footprint,
+      record: bundle.record,
+      candidates: bundle.candidates,
       exchangeId: bundle.exchangeId,
       schemaOk: bundle.schema.ok,
       semanticsOk: bundle.semantics.ok,
+      semanticIssues: bundle.semantics.issues,
     });
   } catch (e) {
     const err = e as Error & {
-      issues?: Array<{ path: string; message: string; category: string }>;
+      issues?: unknown[];
       exchangeId?: string;
     };
     if (err.exchangeId) {
@@ -48,19 +57,13 @@ export async function POST(request: Request) {
         await mirrorPactExchangeToDb(auth.ctx, exchange);
       }
     }
-    const status =
-      err.message === "Calculation not found"
-        ? 404
-        : Array.isArray(err.issues)
-          ? 422
-          : 400;
     return NextResponse.json(
       {
-        error: err.message || "PACT export failed",
+        error: err.message || "PACT import failed",
         issues: err.issues ?? [],
         exchangeId: err.exchangeId,
       },
-      { status }
+      { status: Array.isArray(err.issues) ? 422 : 400 }
     );
   }
 }
