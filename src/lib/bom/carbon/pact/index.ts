@@ -18,3 +18,7 @@ export { toProductFootprint } from "./mapper/to-product-footprint";
 export { fromProductFootprint, resolveImportIdentityCandidates } from "./mapper/from-product-footprint";
 export { localExportPactV3 } from "./export";
 export { localImportPactV3, localAcceptSupplierPcfRecord, localRejectSupplierPcfRecord } from "./import";
+export * from "./host/auth";
+export * from "./host/catalog";
+export * from "./host/events";
+export * from "./host/client";

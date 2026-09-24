@@ -378,7 +378,7 @@ Fixtures: `src/lib/bom/carbon/pact/fixtures/` — prefer official examples from 
 | **3c** | Export mapper + `/api/bom/pact/export` + UI wire (replace stub download) | Demo export |
 | **4** | Import + semantic validation + review accept→Phase 7 EF path | Demo import |
 | **5** | Exchange history + identity mapping UI | Done (panel + list APIs) |
-| **6** | OAuth client + List/Get against peer (optional host later) | Ask before network |
+| **6** | Peer host stubs: `/auth/token`, `GET /3/footprints`, `GET /3/footprints/{id}`, `POST /3/events` + local peer client | Done (no live external network) |
 | **7** | UI polish on product PCF summary | |
 
 ---
