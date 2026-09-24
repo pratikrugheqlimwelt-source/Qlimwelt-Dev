@@ -299,3 +299,35 @@ export function localUpdatePactExchange(
   }));
   return updated;
 }
+
+
+export function localUpdateSupplierPcfRecord(
+  companyId: string,
+  recordId: string,
+  patch: Partial<
+    Pick<
+      SupplierPcfRecord,
+      | "status"
+      | "mappedBomItemId"
+      | "resultingFactorId"
+      | "resultingMappingId"
+      | "pactExchangeId"
+      | "supplierId"
+    >
+  >
+): SupplierPcfRecord {
+  const existing = localGetSupplierPcfRecord(companyId, recordId);
+  if (!existing) throw new Error(`supplier PCF record not found: ${recordId}`);
+  const updated: SupplierPcfRecord = {
+    ...existing,
+    ...patch,
+    updatedAt: nowIso(),
+  };
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    supplierPcfRecords: (s.supplierPcfRecords ?? []).map((r) =>
+      r.id === recordId ? updated : r
+    ),
+  }));
+  return updated;
+}

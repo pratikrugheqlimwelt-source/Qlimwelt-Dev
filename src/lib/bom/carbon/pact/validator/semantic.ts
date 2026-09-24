@@ -1,5 +1,5 @@
 /**
- * Export semantic / business rules (Layer 2) for PACT ProductFootprint.
+ * Layer 2 semantic / business rules for PACT export and import.
  */
 
 import { isUrn } from "../identity/urn";
@@ -73,19 +73,45 @@ export function validateExportSemantics(
   return { ok: issues.length === 0, issues };
 }
 
-/** Kept for Phase 4 import path. */
-export function validateImportSemantics(_ctx: {
+export function validateImportSemantics(ctx: {
   productIds: string[];
   declaredUnit?: string | null;
+  validityPeriodEnd?: string | null;
 }): PactValidationResult {
-  return {
-    ok: false,
-    issues: [
-      {
-        path: "",
-        message: "Semantic import validator not implemented (Phase 4)",
-        category: "NOT_IMPLEMENTED",
-      },
-    ],
-  };
+  const issues: PactValidationIssue[] = [];
+
+  if (!ctx.productIds?.length) {
+    issues.push(
+      issue(
+        "productIds",
+        "Inbound footprint must include at least one productId URN"
+      )
+    );
+  } else {
+    for (const [i, id] of ctx.productIds.entries()) {
+      if (!isUrn(id)) {
+        issues.push(
+          issue(`productIds[${i}]`, "productIds entries must be URNs")
+        );
+      }
+    }
+  }
+
+  if (ctx.validityPeriodEnd) {
+    const end = Date.parse(ctx.validityPeriodEnd);
+    if (Number.isFinite(end) && end < Date.now()) {
+      issues.push(
+        issue(
+          "validityPeriodEnd",
+          "Footprint validityPeriodEnd is in the past"
+        )
+      );
+    }
+  }
+
+  if (ctx.declaredUnit != null && String(ctx.declaredUnit).trim() === "") {
+    issues.push(issue("declaredUnit", "declaredUnit must not be empty"));
+  }
+
+  return { ok: issues.length === 0, issues };
 }
