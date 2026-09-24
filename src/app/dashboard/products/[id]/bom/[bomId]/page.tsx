@@ -7,6 +7,12 @@ import { PageHeader } from "@/components/dashboard/shared/page-header";
 import { BomTree } from "@/components/dashboard/products/bom-tree";
 import { BomItemDetail } from "@/components/dashboard/products/bom-item-detail";
 import { BomImportWizard } from "@/components/dashboard/products/bom-import-wizard";
+import { BomCarbonPanel } from "@/components/dashboard/products/bom-carbon-panel";
+import { BomCarbonAnalytics } from "@/components/dashboard/products/bom-carbon-analytics";
+import { BomScenarioPanel } from "@/components/dashboard/products/bom-scenario-panel";
+import { BomSupplierPcfPanel } from "@/components/dashboard/products/bom-supplier-pcf-panel";
+import { BomConnectorPanel } from "@/components/dashboard/products/bom-connector-panel";
+import { BomReadinessPanel } from "@/components/dashboard/products/bom-readiness-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDashboard } from "@/components/dashboard/providers/dashboard-provider";
@@ -32,6 +38,8 @@ export default function BomEditorPage() {
   const [busy, setBusy] = useState(false);
   const [newPart, setNewPart] = useState("");
   const [newQty, setNewQty] = useState("1");
+  const [newUnit, setNewUnit] = useState("kg");
+  const [analyticsKey, setAnalyticsKey] = useState(0);
 
   const reload = useCallback(async () => {
     const [b, list] = await Promise.all([
@@ -83,6 +91,15 @@ export default function BomEditorPage() {
             type="number"
           />
         </div>
+        <div>
+          <p className="mb-1 text-xs text-muted-foreground">Unit</p>
+          <Input
+            value={newUnit}
+            onChange={(e) => setNewUnit(e.target.value)}
+            className="w-20"
+            placeholder="kg"
+          />
+        </div>
         <Button
           disabled={busy || !newPart.trim()}
           onClick={async () => {
@@ -92,9 +109,9 @@ export default function BomEditorPage() {
                 partNumber: newPart.trim(),
                 description: newPart.trim(),
                 quantity: Number(newQty) || 1,
-                unit: "piece",
+                unit: newUnit.trim() || "kg",
                 parentItemId: selectedId,
-                itemType: "component",
+                itemType: "material",
                 sequenceNo: items.length,
               });
               setNewPart("");
@@ -149,6 +166,47 @@ export default function BomEditorPage() {
                 setBusy(false);
               }
             }}
+          />
+          <BomCarbonPanel
+            companyId={company.id}
+            productId={params.id}
+            bomId={params.bomId}
+            item={selected}
+            busy={busy}
+            onCalculated={() => setAnalyticsKey((k) => k + 1)}
+          />
+          <BomCarbonAnalytics
+            companyId={company.id}
+            bomId={params.bomId}
+            refreshKey={analyticsKey}
+          />
+          <BomScenarioPanel
+            companyId={company.id}
+            bomId={params.bomId}
+            items={items}
+            refreshKey={analyticsKey}
+          />
+          <BomSupplierPcfPanel
+            companyId={company.id}
+            bomId={params.bomId}
+            items={items}
+            selectedItemId={selectedId}
+            refreshKey={analyticsKey}
+          />
+          <BomConnectorPanel
+            companyId={company.id}
+            bomId={params.bomId}
+            busy={busy}
+            onCommitted={async () => {
+              await reload();
+              setAnalyticsKey((k) => k + 1);
+              toast({ title: "Connector import committed" });
+            }}
+          />
+          <BomReadinessPanel
+            companyId={company.id}
+            bomId={params.bomId}
+            refreshKey={analyticsKey}
           />
           <BomImportWizard
             busy={busy}

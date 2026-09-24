@@ -2,6 +2,9 @@
   "name": "qlimwelt",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "dev:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && next dev",
@@ -10,9 +13,17 @@
     "lint": "next lint",
     "test:calc": "npx tsx src/lib/calculations/engine.test.ts",
     "test:bom": "npx tsx src/lib/bom/bom.test.ts",
+    "test:bom:carbon": "npx tsx src/lib/bom/carbon/carbon.test.ts",
+    "test:bom:quality": "npx tsx src/lib/bom/carbon/quality.test.ts",
+    "test:bom:analytics": "npx tsx src/lib/bom/carbon/analytics.test.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "seed:user": "npx tsx scripts/seed-user-demo.ts"
+    "seed:user": "npx tsx scripts/seed-user-demo.ts",
+    "test:bom:scenario": "npx tsx src/lib/bom/carbon/scenario.test.ts",
+    "test:bom:supplier-pcf": "npx tsx src/lib/bom/carbon/supplier-pcf.test.ts",
+    "test:bom:connectors": "npx tsx src/lib/bom/connectors/connectors.test.ts",
+    "test:bom:readiness": "npx tsx src/lib/bom/carbon/readiness/readiness.test.ts",
+    "test:bom:pact": "npx tsx src/lib/bom/carbon/pact/pact-3a.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

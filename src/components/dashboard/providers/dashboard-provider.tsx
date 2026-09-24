@@ -144,7 +144,7 @@ interface DashboardContextValue {
   isEmpty: boolean;
   gwpValues: Record<string, number>;
   assessments: Assessment[];
-  createAssessment: (input: { name: string; type: Assessment["type"] }) => Promise<Assessment>;
+  createAssessment: (input: { name: string; type: Assessment["type"]; productId?: string | null; bomId?: string | null }) => Promise<Assessment>;
   saveAssessment: (assessment: Assessment) => Promise<Assessment>;
   removeAssessment: (id: string) => Promise<void>;
   getAssessment: (id: string) => Assessment | undefined;
@@ -744,8 +744,10 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   );
 
   const createAssessment = useCallback(
-    async (input: { name: string; type: Assessment["type"] }) => {
+    async (input: { name: string; type: Assessment["type"]; productId?: string | null; bomId?: string | null }) => {
       const assessment = createBlankAssessment(companyId, input, activeCompany.reportingYear);
+      if (input.productId) assessment.profile.productId = input.productId;
+      if (input.bomId) assessment.profile.bomId = input.bomId;
       assessment.profile.legalName = activeCompany.name;
       assessment.profile.tradingName = activeCompany.name;
       assessment.profile.industry = activeCompany.industry;
