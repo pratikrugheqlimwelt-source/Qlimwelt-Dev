@@ -266,8 +266,8 @@ const en: Dict = {
     },
     products: {
       title: "Products",
-      description: "Product master data and versioned multi-level bills of materials (BOM Phase 1D).",
-      tip: "Create a product to open its engineering BOM. Import CSV with part_number and optional parent_part_number. Map emission factors, run PCF, then explore hotspots and version compare (Phase 1D).",
+      description: "Product master data and versioned multi-level bills of materials (BOM Phase 6).",
+      tip: "Create a product to open its engineering BOM. Map factors, run PCF, explore hotspots, then model what-if scenarios without mutating the baseline (Phase 6).",
       new: "New product",
       emptyTitle: "No products yet",
       emptyBody: "Create a product to manage versioned BOMs. Product assessments can select a BOM version and run PCF against approved mappings.",
@@ -283,6 +283,7 @@ const en: Dict = {
       runPcf: "Run PCF calculation",
       carbonMapping: "Carbon mapping",
       carbonAnalytics: "Carbon analytics",
+      carbonScenarios: "What-if scenarios",
       importCommitted: "BOM import committed",
     },
   },

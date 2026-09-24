@@ -14,3 +14,4 @@ export {
   previewFromSpreadsheet,
   autoMappingForFile,
 } from "./import/spreadsheet";
+export * from "./connectors";
