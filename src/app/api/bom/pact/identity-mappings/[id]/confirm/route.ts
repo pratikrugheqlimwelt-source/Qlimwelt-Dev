@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireCompanyAuth } from "@/lib/export/auth";
-import { confirmIdentityMapping } from "@/lib/bom/carbon/pact/identity/mapping-service";
+import { confirmIdentityMappingPersisted } from "@/lib/bom/carbon/pact/identity/mapping-service";
 
 export async function POST(
   request: Request,
@@ -18,7 +18,7 @@ export async function POST(
   }
 
   try {
-    const mapping = confirmIdentityMapping(auth.ctx.companyId, id, {
+    const mapping = await confirmIdentityMappingPersisted(auth.ctx, id, {
       productId: body.productId,
       bomItemId: body.bomItemId,
     });

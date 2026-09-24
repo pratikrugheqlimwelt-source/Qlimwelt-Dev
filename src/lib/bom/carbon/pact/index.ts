@@ -1,8 +1,10 @@
-/** PACT V3 adapter — Phase 3a persistence + Phase 3b schema/URN. */
+/** PACT V3 adapter — Phase 3a persistence + Phase 3b schema/URN + Phase 8 DB. */
 
 export * from "./types";
 export * from "./wire-types";
 export * from "./store";
+export * from "./db-service";
+export * from "./persist";
 export * from "./identity/urn";
 export * from "./identity/mapping-service";
 export * from "./exchange/service";
