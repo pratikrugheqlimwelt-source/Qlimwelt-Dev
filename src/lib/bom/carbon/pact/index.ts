@@ -16,3 +16,4 @@ export {
 } from "./validator/semantic";
 export { toProductFootprint } from "./mapper/to-product-footprint";
 export { fromProductFootprint } from "./mapper/from-product-footprint";
+export { localExportPactV3 } from "./export";

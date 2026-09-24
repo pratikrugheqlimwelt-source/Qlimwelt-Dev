@@ -54,6 +54,8 @@ import {
   localAssessExchangeReadiness,
   localExportReadiness,
 } from "./carbon/local-service";
+import { localExportPactV3 } from "./carbon/pact/export";
+import type { PactProductFootprintV3 } from "./carbon/pact/wire-types";
 import type {
   BomAnalytics,
   VersionCompareResult,
@@ -801,4 +803,55 @@ export async function exportReadinessPayload(
     /* local */
   }
   return localExportReadiness(companyId, calculationId, format);
+}
+
+export async function exportPactV3Footprint(
+  companyId: string,
+  calculationId: string,
+  options?: { companyName?: string | null }
+): Promise<{
+  footprint: PactProductFootprintV3;
+  exchangeId: string;
+  schemaOk: boolean;
+  semanticsOk: boolean;
+}> {
+  try {
+    const res = await fetch("/api/bom/pact/export", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        calculationId,
+        companyName: options?.companyName ?? undefined,
+      }),
+    });
+    if (res.ok) {
+      const data = await tryJson<{
+        footprint: PactProductFootprintV3;
+        exchangeId: string;
+        schemaOk: boolean;
+        semanticsOk: boolean;
+      }>(res);
+      if (data?.footprint) return data;
+    } else {
+      const err = await tryJson<{ error?: string; issues?: unknown }>(res);
+      if (err?.error) {
+        throw new Error(err.error);
+      }
+    }
+  } catch (e) {
+    if (e instanceof Error && e.message !== "Failed to fetch") {
+      // Prefer surfacing validation errors from API when present;
+      // fall through to local for network/auth gaps.
+      if (!/fetch|network|supabase/i.test(e.message)) throw e;
+    }
+  }
+  const bundle = localExportPactV3(companyId, calculationId, {
+    companyName: options?.companyName ?? null,
+  });
+  return {
+    footprint: bundle.footprint,
+    exchangeId: bundle.exchangeId,
+    schemaOk: bundle.schema.ok,
+    semanticsOk: bundle.semantics.ok,
+  };
 }
