@@ -403,4 +403,4 @@ Fixtures: `src/lib/bom/carbon/pact/fixtures/` — prefer official examples from 
 - [x] API / UI / security / test / migration plans  
 - [x] Clear handoff to Phase 3a without rebuilding BOM/PCF  
 
-**Next step (Phase 3a):** implement additive schema + TypeScript types + empty service stubs — **only after you confirm this design.**
+**Next step (Phase 3a):** implement additive schema + TypeScript types + empty service stubs (no mapper / no peer host yet).
