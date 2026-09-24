@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireCompanyAuth } from "@/lib/export/auth";
 import {
-  createManualIdentityMapping,
-  listIdentityMappings,
+  createManualIdentityMappingPersisted,
+  listIdentityMappingsPersisted,
 } from "@/lib/bom/carbon/pact/identity/mapping-service";
 import type { ProductIdentityMapping } from "@/lib/bom/carbon/pact/types";
 import { assertUrn, buildCustomProductUrn, buildGtinProductUrn } from "@/lib/bom/carbon/pact/identity/urn";
@@ -15,7 +15,10 @@ export async function GET(request: Request) {
   const productId = searchParams.get("productId") || undefined;
   const bomItemId = searchParams.get("bomItemId") || undefined;
 
-  const mappings = listIdentityMappings(auth.ctx.companyId, { productId, bomItemId });
+  const mappings = await listIdentityMappingsPersisted(auth.ctx, {
+    productId,
+    bomItemId,
+  });
   return NextResponse.json({ mappings });
 }
 
@@ -68,7 +71,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const mapping = createManualIdentityMapping(auth.ctx.companyId, {
+    const mapping = await createManualIdentityMappingPersisted(auth.ctx, {
       productId: body.productId ?? null,
       bomItemId: body.bomItemId ?? null,
       scheme,

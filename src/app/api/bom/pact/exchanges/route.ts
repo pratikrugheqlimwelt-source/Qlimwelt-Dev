@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireCompanyAuth } from "@/lib/export/auth";
-import { localListPactExchanges } from "@/lib/bom/carbon/pact/store";
+import { persistListPactExchanges } from "@/lib/bom/carbon/pact/persist";
 import type { PactExchange } from "@/lib/bom/carbon/pact/types";
 
 export async function GET(request: Request) {
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const direction = searchParams.get("direction") as PactExchange["direction"] | null;
   const kind = searchParams.get("kind") as PactExchange["kind"] | null;
 
-  const exchanges = localListPactExchanges(auth.ctx.companyId, {
+  const exchanges = await persistListPactExchanges(auth.ctx, {
     direction: direction || undefined,
     kind: kind || undefined,
   });

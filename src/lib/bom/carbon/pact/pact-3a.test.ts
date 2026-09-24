@@ -115,10 +115,11 @@ assert.equal(gated.ok, false, "incomplete calc is rejected by export gates");
 
 let importThrew = false;
 try {
-  fromProductFootprint({ companyId, payload: {} });
+  // Invalid footprint shape — mapper must fail closed (no silent empty import).
+  fromProductFootprint({ companyId, footprint: {} as never });
 } catch {
   importThrew = true;
 }
-assert.equal(importThrew, true, "import mapper stub throws");
+assert.equal(importThrew, true, "import mapper rejects invalid footprint");
 
 console.log("pact-3a.test.ts: all assertions passed");
