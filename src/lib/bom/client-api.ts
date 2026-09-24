@@ -16,8 +16,14 @@ import {
   localListBomItems,
   localListProducts,
   localPreviewImport,
+  localPreviewConnectorImport,
   localUpsertBomItem,
 } from "./local-service";
+import {
+  BOM_CONNECTOR_PROFILES,
+  type BomConnectorKind,
+  type ConnectorNormalizeResult,
+} from "./connectors";
 import {
   ensureCarbonLibrary,
   localApproveMapping,
@@ -39,12 +45,26 @@ import {
   localListScenarios,
   localRunScenario,
   localUpdateScenario,
+  localApproveSupplierPcfRequest,
+  localCancelSupplierPcfRequest,
+  localCreateSupplierPcfRequest,
+  localListSupplierPcfRequests,
+  localRejectSupplierPcfRequest,
+  localSendSupplierPcfRequest,
+  localAssessExchangeReadiness,
+  localExportReadiness,
 } from "./carbon/local-service";
 import type {
   BomAnalytics,
   VersionCompareResult,
 } from "./carbon/analytics";
 import type { BomScenario, ScenarioOverride, ScenarioRunResult } from "./carbon/scenario";
+import type { SupplierPcfRequest } from "./carbon/supplier-pcf";
+import type {
+  ExchangeReadinessReport,
+  ReadinessExportBundle,
+  ReadinessFormat,
+} from "./carbon/readiness";
 import type { BomAuditEvent, CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "./carbon/types";
 async function tryJson<T>(res: Response): Promise<T | null> {
   try {
@@ -618,4 +638,167 @@ export async function runBomScenario(
     /* local */
   }
   return localRunScenario(companyId, scenarioId, input);
+}
+
+export async function fetchSupplierPcfRequests(
+  companyId: string,
+  bomId: string
+): Promise<SupplierPcfRequest[]> {
+  try {
+    const res = await fetch(`/api/bom/boms/${bomId}/supplier-pcf-requests`);
+    if (res.ok) {
+      const data = await tryJson<{ requests: SupplierPcfRequest[] }>(res);
+      if (data?.requests) return data.requests;
+    }
+  } catch {
+    /* local */
+  }
+  return localListSupplierPcfRequests(companyId, bomId);
+}
+
+export async function createSupplierPcfRequest(
+  companyId: string,
+  input: {
+    bomId: string;
+    bomItemId: string;
+    supplierName: string;
+    supplierEmail?: string | null;
+    message?: string | null;
+    send?: boolean;
+  }
+): Promise<SupplierPcfRequest> {
+  try {
+    const res = await fetch(`/api/bom/boms/${input.bomId}/supplier-pcf-requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ request: SupplierPcfRequest }>(res);
+      if (data?.request) return data.request;
+    }
+  } catch {
+    /* local */
+  }
+  let created = localCreateSupplierPcfRequest(companyId, input);
+  if (input.send) {
+    created = localSendSupplierPcfRequest(companyId, created.id);
+  }
+  return created;
+}
+
+async function patchSupplierPcfRequest(
+  companyId: string,
+  requestId: string,
+  action: "send" | "cancel" | "approve" | "reject",
+  reviewNotes?: string | null
+): Promise<SupplierPcfRequest> {
+  try {
+    const res = await fetch(`/api/bom/supplier-pcf-requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, reviewNotes }),
+    });
+    if (res.ok) {
+      const data = await tryJson<{ request: SupplierPcfRequest }>(res);
+      if (data?.request) return data.request;
+    }
+  } catch {
+    /* local */
+  }
+  if (action === "send") return localSendSupplierPcfRequest(companyId, requestId);
+  if (action === "cancel") return localCancelSupplierPcfRequest(companyId, requestId);
+  if (action === "approve") {
+    return localApproveSupplierPcfRequest(companyId, requestId, { reviewNotes });
+  }
+  return localRejectSupplierPcfRequest(companyId, requestId, { reviewNotes });
+}
+
+export function sendSupplierPcfRequest(companyId: string, requestId: string) {
+  return patchSupplierPcfRequest(companyId, requestId, "send");
+}
+
+export function cancelSupplierPcfRequest(companyId: string, requestId: string) {
+  return patchSupplierPcfRequest(companyId, requestId, "cancel");
+}
+
+export function approveSupplierPcfRequest(
+  companyId: string,
+  requestId: string,
+  reviewNotes?: string | null
+) {
+  return patchSupplierPcfRequest(companyId, requestId, "approve", reviewNotes);
+}
+
+export function rejectSupplierPcfRequest(
+  companyId: string,
+  requestId: string,
+  reviewNotes?: string | null
+) {
+  return patchSupplierPcfRequest(companyId, requestId, "reject", reviewNotes);
+}
+
+export function listBomConnectorProfiles() {
+  return BOM_CONNECTOR_PROFILES;
+}
+
+export async function previewBomConnectorImport(
+  companyId: string,
+  bomId: string,
+  kind: BomConnectorKind,
+  payload: string,
+  fileName?: string
+): Promise<{ job: BomImportJob; normalized: ConnectorNormalizeResult }> {
+  try {
+    const res = await fetch(`/api/bom/boms/${bomId}/connectors`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind, payload, fileName }),
+    });
+    if (res.ok) {
+      const data = await tryJson<{
+        job: BomImportJob;
+        normalized: ConnectorNormalizeResult;
+      }>(res);
+      if (data?.job && data.normalized) return data;
+    }
+  } catch {
+    /* local */
+  }
+  return localPreviewConnectorImport(companyId, bomId, kind, payload, fileName);
+}
+
+export async function fetchExchangeReadiness(
+  companyId: string,
+  calculationId: string
+): Promise<ExchangeReadinessReport> {
+  try {
+    const res = await fetch(`/api/bom/calculations/${calculationId}/readiness`);
+    if (res.ok) {
+      const data = await tryJson<{ readiness: ExchangeReadinessReport }>(res);
+      if (data?.readiness) return data.readiness;
+    }
+  } catch {
+    /* local */
+  }
+  return localAssessExchangeReadiness(companyId, calculationId);
+}
+
+export async function exportReadinessPayload(
+  companyId: string,
+  calculationId: string,
+  format: ReadinessFormat
+): Promise<ReadinessExportBundle> {
+  try {
+    const res = await fetch(
+      `/api/bom/calculations/${calculationId}/readiness?format=${encodeURIComponent(format)}`
+    );
+    if (res.ok) {
+      const data = await tryJson<ReadinessExportBundle>(res);
+      if (data?.payload && data.readiness) return data;
+    }
+  } catch {
+    /* local */
+  }
+  return localExportReadiness(companyId, calculationId, format);
 }

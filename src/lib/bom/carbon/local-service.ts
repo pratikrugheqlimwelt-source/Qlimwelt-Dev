@@ -1,10 +1,11 @@
 import {
   clearBomLocal,
+  findSupplierPcfRequestByToken,
   loadBomLocal,
   newEntityId,
   updateBomLocal,
 } from "@/lib/bom/local-store";
-import type { BomItem } from "@/lib/bom/types";
+import type { BomItem, Product } from "@/lib/bom/types";
 import { appendAuditEvent, listAuditEvents } from "./audit";
 import { calculateBomPcf } from "./calculate";
 import { suggestMappings } from "./mapping";
@@ -23,6 +24,21 @@ import {
   type ScenarioOverride,
   type ScenarioRunResult,
 } from "./scenario";
+import {
+  assertValidSupplierDeclaration,
+  canTransitionSupplierPcf,
+  newSupplierAccessToken,
+  toSupplierPcfPortalView,
+  type SupplierPcfPortalView,
+  type SupplierPcfRequest,
+} from "./supplier-pcf";
+import {
+  assessExchangeReadiness,
+  buildReadinessExport,
+  type ExchangeReadinessReport,
+  type ReadinessExportBundle,
+  type ReadinessFormat,
+} from "./readiness";
 import type {
   CarbonDataset,
   CarbonMapping,
@@ -616,8 +632,415 @@ export function localRunScenario(
   };
 }
 
-export function resetCarbonLocal(companyId: string) {
+// ─── Phase 7 — Supplier PCF requests ───────────────────────────────────────
 
+export function localListSupplierPcfRequests(
+  companyId: string,
+  bomId?: string
+): SupplierPcfRequest[] {
+  return loadBomLocal(companyId)
+    .supplierPcfRequests.filter((r) => (bomId ? r.bomId === bomId : true))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export function localGetSupplierPcfRequest(
+  companyId: string,
+  requestId: string
+): SupplierPcfRequest | null {
+  return loadBomLocal(companyId).supplierPcfRequests.find((r) => r.id === requestId) ?? null;
+}
+
+export function localCreateSupplierPcfRequest(
+  companyId: string,
+  input: {
+    bomId: string;
+    bomItemId: string;
+    supplierName: string;
+    supplierEmail?: string | null;
+    message?: string | null;
+  }
+): SupplierPcfRequest {
+  const state = loadBomLocal(companyId);
+  const item = state.items.find((i) => i.id === input.bomItemId && i.bomId === input.bomId);
+  if (!item) throw new Error("BOM item not found for supplier PCF request");
+  const name = input.supplierName.trim();
+  if (!name) throw new Error("supplierName is required");
+
+  const now = new Date().toISOString();
+  const request: SupplierPcfRequest = {
+    id: newEntityId("spc"),
+    companyId,
+    bomId: input.bomId,
+    bomItemId: input.bomItemId,
+    partNumber: item.partNumber,
+    supplierName: name,
+    supplierEmail: input.supplierEmail?.trim() || null,
+    status: "draft",
+    accessToken: newSupplierAccessToken(),
+    message: input.message?.trim() || null,
+    declaredKgco2ePerUnit: null,
+    declaredUnit: item.unit || "kg",
+    methodology: null,
+    evidenceNotes: null,
+    submittedAt: null,
+    reviewedAt: null,
+    reviewedBy: null,
+    reviewNotes: null,
+    resultingMappingId: null,
+    resultingFactorId: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    supplierPcfRequests: [...s.supplierPcfRequests, request],
+  }));
+  appendAuditEvent({
+    companyId,
+    entityType: "supplier_pcf_request",
+    entityId: request.id,
+    action: "supplier_pcf_request_created",
+    summary: `Created supplier PCF request for ${request.partNumber} → ${request.supplierName}`,
+    afterState: { status: request.status, bomItemId: request.bomItemId },
+  });
+  return request;
+}
+
+export function localSendSupplierPcfRequest(
+  companyId: string,
+  requestId: string
+): SupplierPcfRequest {
+  const existing = localGetSupplierPcfRequest(companyId, requestId);
+  if (!existing) throw new Error("Supplier PCF request not found");
+  if (!canTransitionSupplierPcf(existing.status, "sent")) {
+    throw new Error(`Cannot send request in status ${existing.status}`);
+  }
+  const now = new Date().toISOString();
+  const updated: SupplierPcfRequest = { ...existing, status: "sent", updatedAt: now };
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    supplierPcfRequests: s.supplierPcfRequests.map((r) => (r.id === requestId ? updated : r)),
+  }));
+  appendAuditEvent({
+    companyId,
+    entityType: "supplier_pcf_request",
+    entityId: requestId,
+    action: "supplier_pcf_request_sent",
+    summary: `Sent supplier PCF request ${requestId} (token portal)`,
+    afterState: { status: "sent", accessToken: updated.accessToken },
+  });
+  return updated;
+}
+
+export function localCancelSupplierPcfRequest(
+  companyId: string,
+  requestId: string
+): SupplierPcfRequest {
+  const existing = localGetSupplierPcfRequest(companyId, requestId);
+  if (!existing) throw new Error("Supplier PCF request not found");
+  if (!canTransitionSupplierPcf(existing.status, "cancelled")) {
+    throw new Error(`Cannot cancel request in status ${existing.status}`);
+  }
+  const now = new Date().toISOString();
+  const updated: SupplierPcfRequest = { ...existing, status: "cancelled", updatedAt: now };
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    supplierPcfRequests: s.supplierPcfRequests.map((r) => (r.id === requestId ? updated : r)),
+  }));
+  appendAuditEvent({
+    companyId,
+    entityType: "supplier_pcf_request",
+    entityId: requestId,
+    action: "supplier_pcf_request_cancelled",
+    summary: `Cancelled supplier PCF request ${requestId}`,
+    afterState: { status: "cancelled" },
+  });
+  return updated;
+}
+
+export function localGetSupplierPcfByToken(token: string): {
+  companyId: string;
+  request: SupplierPcfRequest;
+  portal: SupplierPcfPortalView;
+} | null {
+  const found = findSupplierPcfRequestByToken(token);
+  if (!found) return null;
+  return {
+    companyId: found.companyId,
+    request: found.request,
+    portal: toSupplierPcfPortalView(found.request),
+  };
+}
+
+export function localSubmitSupplierPcfByToken(
+  token: string,
+  input: {
+    declaredKgco2ePerUnit: number;
+    declaredUnit?: string | null;
+    methodology?: string | null;
+    evidenceNotes?: string | null;
+  }
+): SupplierPcfPortalView {
+  const found = findSupplierPcfRequestByToken(token);
+  if (!found) throw new Error("Invalid or expired supplier portal token");
+  const { companyId, request } = found;
+  if (!canTransitionSupplierPcf(request.status, "submitted") && request.status !== "submitted") {
+    throw new Error(`Cannot submit while request is ${request.status}`);
+  }
+  if (request.status !== "sent" && request.status !== "submitted") {
+    throw new Error(`Cannot submit while request is ${request.status}`);
+  }
+
+  const declared = assertValidSupplierDeclaration(input);
+  const now = new Date().toISOString();
+  const updated: SupplierPcfRequest = {
+    ...request,
+    status: "submitted",
+    declaredKgco2ePerUnit: declared.declaredKgco2ePerUnit,
+    declaredUnit: declared.declaredUnit,
+    methodology: input.methodology?.trim() || null,
+    evidenceNotes: input.evidenceNotes?.trim() || null,
+    submittedAt: now,
+    updatedAt: now,
+  };
+
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    supplierPcfRequests: s.supplierPcfRequests.map((r) => (r.id === request.id ? updated : r)),
+  }));
+  appendAuditEvent({
+    companyId,
+    entityType: "supplier_pcf_request",
+    entityId: request.id,
+    action: "supplier_pcf_request_submitted",
+    summary: `Supplier submitted PCF for ${updated.partNumber}: ${declared.declaredKgco2ePerUnit} kgCO2e/${declared.declaredUnit}`,
+    afterState: {
+      declaredKgco2ePerUnit: declared.declaredKgco2ePerUnit,
+      declaredUnit: declared.declaredUnit,
+    },
+  });
+  return toSupplierPcfPortalView(updated);
+}
+
+function ensureSupplierPcfDataset(companyId: string): CarbonDataset {
+  const state = loadBomLocal(companyId);
+  const existing = state.carbonDatasets.find((d) => d.code === "SUPPLIER_PCF");
+  if (existing) return existing;
+  const now = new Date().toISOString();
+  const dataset: CarbonDataset = {
+    id: newEntityId("cds"),
+    companyId,
+    code: "SUPPLIER_PCF",
+    name: "Supplier primary PCF factors",
+    source: "supplier_portal",
+    geography: "GLO",
+    methodology: "supplier_declared",
+    versionLabel: "1",
+    status: "active",
+    notes: "Synthetic factors created from approved supplier PCF submissions",
+    createdAt: now,
+    updatedAt: now,
+  };
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    carbonDatasets: [...s.carbonDatasets, dataset],
+  }));
+  return dataset;
+}
+
+/** Approve submitted primary data → synthetic EF + approved supplier_pcf mapping. */
+export function localApproveSupplierPcfRequest(
+  companyId: string,
+  requestId: string,
+  input?: { reviewedBy?: string | null; reviewNotes?: string | null }
+): SupplierPcfRequest {
+  ensureCarbonLibrary(companyId);
+  const existing = localGetSupplierPcfRequest(companyId, requestId);
+  if (!existing) throw new Error("Supplier PCF request not found");
+  if (!canTransitionSupplierPcf(existing.status, "approved")) {
+    throw new Error(`Cannot approve request in status ${existing.status}`);
+  }
+  if (existing.declaredKgco2ePerUnit == null || !Number.isFinite(existing.declaredKgco2ePerUnit)) {
+    throw new Error("Submitted declaration is missing declaredKgco2ePerUnit");
+  }
+
+  const dataset = ensureSupplierPcfDataset(companyId);
+  const now = new Date().toISOString();
+  const unit = existing.declaredUnit || "kg";
+  const factor: EmissionFactor = {
+    id: newEntityId("ef"),
+    companyId,
+    datasetId: dataset.id,
+    factorCode: `SPC_${existing.partNumber}_${requestId.slice(-6)}`.toUpperCase().replace(/\s+/g, "_"),
+    name: `Supplier PCF · ${existing.supplierName} · ${existing.partNumber}`,
+    category: "supplier_pcf",
+    activityUnit: unit,
+    valueKgco2e: existing.declaredKgco2ePerUnit,
+    uncertainty: null,
+    geography: "GLO",
+    validFrom: now.slice(0, 10),
+    validTo: null,
+    metadata: {
+      source: "supplier_pcf",
+      requestId: existing.id,
+      supplierName: existing.supplierName,
+      methodology: existing.methodology,
+      evidenceNotes: existing.evidenceNotes,
+    },
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  // Upsert mapping with method supplier_pcf (approved) — calc still uses qty × EF
+  const prior = loadBomLocal(companyId).carbonMappings.find((m) => m.bomItemId === existing.bomItemId);
+  const mapping: CarbonMapping = {
+    id: prior?.id ?? newEntityId("map"),
+    companyId,
+    bomItemId: existing.bomItemId,
+    emissionFactorId: factor.id,
+    method: "supplier_pcf",
+    confidence: 0.95,
+    status: "approved",
+    matchReason: "supplier_primary_pcf",
+    approvedBy: input?.reviewedBy ?? "local-user",
+    approvedAt: now,
+    notes: `Approved supplier PCF from ${existing.supplierName}`,
+    createdAt: prior?.createdAt ?? now,
+    updatedAt: now,
+  };
+
+  const updated: SupplierPcfRequest = {
+    ...existing,
+    status: "approved",
+    reviewedAt: now,
+    reviewedBy: input?.reviewedBy ?? "local-user",
+    reviewNotes: input?.reviewNotes ?? null,
+    resultingFactorId: factor.id,
+    resultingMappingId: mapping.id,
+    updatedAt: now,
+  };
+
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    emissionFactors: [...s.emissionFactors, factor],
+    carbonMappings: [
+      ...s.carbonMappings.filter((m) => m.bomItemId !== mapping.bomItemId),
+      mapping,
+    ],
+    supplierPcfRequests: s.supplierPcfRequests.map((r) => (r.id === requestId ? updated : r)),
+  }));
+
+  appendAuditEvent({
+    companyId,
+    entityType: "supplier_pcf_request",
+    entityId: requestId,
+    action: "supplier_pcf_request_approved",
+    summary: `Approved supplier PCF for ${existing.partNumber} → factor ${factor.factorCode}`,
+    actorId: input?.reviewedBy ?? null,
+    afterState: {
+      resultingFactorId: factor.id,
+      resultingMappingId: mapping.id,
+      valueKgco2e: factor.valueKgco2e,
+    },
+  });
+  return updated;
+}
+
+export function localRejectSupplierPcfRequest(
+  companyId: string,
+  requestId: string,
+  input?: { reviewedBy?: string | null; reviewNotes?: string | null }
+): SupplierPcfRequest {
+  const existing = localGetSupplierPcfRequest(companyId, requestId);
+  if (!existing) throw new Error("Supplier PCF request not found");
+  if (!canTransitionSupplierPcf(existing.status, "rejected")) {
+    throw new Error(`Cannot reject request in status ${existing.status}`);
+  }
+  const now = new Date().toISOString();
+  const updated: SupplierPcfRequest = {
+    ...existing,
+    status: "rejected",
+    reviewedAt: now,
+    reviewedBy: input?.reviewedBy ?? "local-user",
+    reviewNotes: input?.reviewNotes ?? null,
+    updatedAt: now,
+  };
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    supplierPcfRequests: s.supplierPcfRequests.map((r) => (r.id === requestId ? updated : r)),
+  }));
+  appendAuditEvent({
+    companyId,
+    entityType: "supplier_pcf_request",
+    entityId: requestId,
+    action: "supplier_pcf_request_rejected",
+    summary: `Rejected supplier PCF request ${requestId}`,
+    actorId: input?.reviewedBy ?? null,
+    afterState: { status: "rejected", reviewNotes: updated.reviewNotes },
+  });
+  return updated;
+}
+
+// ─── Phase 9 — PACT / Catena-X / DPP readiness adapters ────────────────────
+
+function readinessContextForCalculation(
+  companyId: string,
+  calculationId: string
+): {
+  companyId: string;
+  companyName: string | null;
+  product: Product | null;
+  calculation: PcfCalculation;
+  ledger: NonNullable<PcfCalculation["ledger"]>;
+} {
+  const state = loadBomLocal(companyId);
+  const calculation = state.pcfCalculations.find((c) => c.id === calculationId);
+  if (!calculation) throw new Error("Calculation not found");
+  const product =
+    (calculation.productId
+      ? state.products.find((p) => p.id === calculation.productId)
+      : null) ?? null;
+  const ledger = calculation.ledger ?? [];
+  return {
+    companyId,
+    companyName: null,
+    product,
+    calculation,
+    ledger,
+  };
+}
+
+export function localAssessExchangeReadiness(
+  companyId: string,
+  calculationId: string
+): ExchangeReadinessReport {
+  return assessExchangeReadiness(readinessContextForCalculation(companyId, calculationId));
+}
+
+export function localExportReadiness(
+  companyId: string,
+  calculationId: string,
+  format: ReadinessFormat
+): ReadinessExportBundle {
+  const ctx = readinessContextForCalculation(companyId, calculationId);
+  const bundle = buildReadinessExport(ctx, format);
+  appendAuditEvent({
+    companyId,
+    entityType: "calculation",
+    entityId: calculationId,
+    action: "readiness_export",
+    summary: `Built ${format} readiness export for calculation ${calculationId}`,
+    afterState: {
+      format,
+      overall: bundle.readiness.overall,
+      totalKgco2e: ctx.calculation.totalKgco2e,
+    },
+  });
+  return bundle;
+}
+
+export function resetCarbonLocal(companyId: string) {
   clearBomLocal(companyId);
 }
 

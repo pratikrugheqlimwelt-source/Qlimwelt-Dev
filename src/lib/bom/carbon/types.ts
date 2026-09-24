@@ -30,7 +30,8 @@ export interface BomAuditEvent {
     | "calculation"
     | "emission_factor"
     | "dataset"
-    | "scenario";
+    | "scenario"
+    | "supplier_pcf_request";
   entityId: string;
   action: string;
   actorId?: string | null;
@@ -139,6 +140,10 @@ export interface PcfCalculation {
   mappingFingerprint?: string | null;
   /** Phase 6 — set when calculation is a what-if run */
   scenarioId?: string | null;
+  /** PACT V3 Phase 3a — stable footprint id + reference period for export */
+  pactFootprintId?: string | null;
+  referencePeriodStart?: string | null;
+  referencePeriodEnd?: string | null;
 }
 
 export interface MappingSuggestion {
@@ -186,3 +191,38 @@ export type BomScenario = {
   updatedAt: string;
 };
 
+
+
+/** Phase 7 — supplier primary PCF request / response */
+export type SupplierPcfRequestStatus =
+  | "draft"
+  | "sent"
+  | "submitted"
+  | "approved"
+  | "rejected"
+  | "cancelled";
+
+export type SupplierPcfRequest = {
+  id: string;
+  companyId: string;
+  bomId: string;
+  bomItemId: string;
+  partNumber: string;
+  supplierName: string;
+  supplierEmail?: string | null;
+  status: SupplierPcfRequestStatus;
+  accessToken: string;
+  message?: string | null;
+  declaredKgco2ePerUnit?: number | null;
+  declaredUnit?: string | null;
+  methodology?: string | null;
+  evidenceNotes?: string | null;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: string | null;
+  reviewNotes?: string | null;
+  resultingMappingId?: string | null;
+  resultingFactorId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
