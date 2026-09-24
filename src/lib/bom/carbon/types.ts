@@ -140,6 +140,10 @@ export interface PcfCalculation {
   mappingFingerprint?: string | null;
   /** Phase 6 — set when calculation is a what-if run */
   scenarioId?: string | null;
+  /** PACT V3 Phase 3a — stable footprint id + reference period for export */
+  pactFootprintId?: string | null;
+  referencePeriodStart?: string | null;
+  referencePeriodEnd?: string | null;
 }
 
 export interface MappingSuggestion {

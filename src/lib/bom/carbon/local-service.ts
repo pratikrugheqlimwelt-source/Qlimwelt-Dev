@@ -5,7 +5,7 @@ import {
   newEntityId,
   updateBomLocal,
 } from "@/lib/bom/local-store";
-import type { BomItem } from "@/lib/bom/types";
+import type { BomItem, Product } from "@/lib/bom/types";
 import { appendAuditEvent, listAuditEvents } from "./audit";
 import { calculateBomPcf } from "./calculate";
 import { suggestMappings } from "./mapping";
@@ -32,6 +32,13 @@ import {
   type SupplierPcfPortalView,
   type SupplierPcfRequest,
 } from "./supplier-pcf";
+import {
+  assessExchangeReadiness,
+  buildReadinessExport,
+  type ExchangeReadinessReport,
+  type ReadinessExportBundle,
+  type ReadinessFormat,
+} from "./readiness";
 import type {
   CarbonDataset,
   CarbonMapping,
@@ -973,6 +980,64 @@ export function localRejectSupplierPcfRequest(
     afterState: { status: "rejected", reviewNotes: updated.reviewNotes },
   });
   return updated;
+}
+
+// ─── Phase 9 — PACT / Catena-X / DPP readiness adapters ────────────────────
+
+function readinessContextForCalculation(
+  companyId: string,
+  calculationId: string
+): {
+  companyId: string;
+  companyName: string | null;
+  product: Product | null;
+  calculation: PcfCalculation;
+  ledger: NonNullable<PcfCalculation["ledger"]>;
+} {
+  const state = loadBomLocal(companyId);
+  const calculation = state.pcfCalculations.find((c) => c.id === calculationId);
+  if (!calculation) throw new Error("Calculation not found");
+  const product =
+    (calculation.productId
+      ? state.products.find((p) => p.id === calculation.productId)
+      : null) ?? null;
+  const ledger = calculation.ledger ?? [];
+  return {
+    companyId,
+    companyName: null,
+    product,
+    calculation,
+    ledger,
+  };
+}
+
+export function localAssessExchangeReadiness(
+  companyId: string,
+  calculationId: string
+): ExchangeReadinessReport {
+  return assessExchangeReadiness(readinessContextForCalculation(companyId, calculationId));
+}
+
+export function localExportReadiness(
+  companyId: string,
+  calculationId: string,
+  format: ReadinessFormat
+): ReadinessExportBundle {
+  const ctx = readinessContextForCalculation(companyId, calculationId);
+  const bundle = buildReadinessExport(ctx, format);
+  appendAuditEvent({
+    companyId,
+    entityType: "calculation",
+    entityId: calculationId,
+    action: "readiness_export",
+    summary: `Built ${format} readiness export for calculation ${calculationId}`,
+    afterState: {
+      format,
+      overall: bundle.readiness.overall,
+      totalKgco2e: ctx.calculation.totalKgco2e,
+    },
+  });
+  return bundle;
 }
 
 export function resetCarbonLocal(companyId: string) {

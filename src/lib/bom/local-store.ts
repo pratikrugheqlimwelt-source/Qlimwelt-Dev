@@ -17,6 +17,12 @@ import type {
   EmissionFactor,
   PcfCalculation,
 } from "./carbon/types";
+import type {
+  PactEndpoint,
+  PactExchange,
+  ProductIdentityMapping,
+  SupplierPcfRecord,
+} from "./carbon/pact/types";
 
 const PREFIX = "qlimwelt-bom-v1:";
 
@@ -37,6 +43,11 @@ export type BomLocalState = {
   auditEvents: BomAuditEvent[];
   scenarios: BomScenario[];
   supplierPcfRequests: SupplierPcfRequest[];
+  /** PACT V3 Phase 3a */
+  pactEndpoints: PactEndpoint[];
+  productIdentityMappings: ProductIdentityMapping[];
+  supplierPcfRecords: SupplierPcfRecord[];
+  pactExchanges: PactExchange[];
 };
 
 function key(companyId: string) {
@@ -58,6 +69,10 @@ function empty(): BomLocalState {
     auditEvents: [],
     scenarios: [],
     supplierPcfRequests: [],
+    pactEndpoints: [],
+    productIdentityMappings: [],
+    supplierPcfRecords: [],
+    pactExchanges: [],
   };
 }
 
