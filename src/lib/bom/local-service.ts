@@ -9,6 +9,11 @@ import type {
 } from "./types";
 import { previewRowsToBomItems } from "./import/commit";
 import { previewFromCsvText } from "./import/parse";
+import {
+  normalizeConnectorPayload,
+  type BomConnectorKind,
+  type ConnectorNormalizeResult,
+} from "./connectors";
 import { loadBomLocal, newEntityId, updateBomLocal, type BomLocalState } from "./local-store";
 import { hasBlockingErrors, validateBomStructure } from "./validate";
 
@@ -238,6 +243,35 @@ export function localCommitImport(
 
 export function localGetImportJob(companyId: string, jobId: string): BomImportJob | undefined {
   return loadBomLocal(companyId).importJobs.find((j) => j.id === jobId);
+}
+
+/** Phase 8 — normalize ERP/PLM/PDM payload → canonical CSV → same import job path. */
+export function localPreviewConnectorImport(
+  companyId: string,
+  bomId: string,
+  kind: BomConnectorKind,
+  payload: string,
+  fileName?: string
+): { job: BomImportJob; normalized: ConnectorNormalizeResult } {
+  const normalized = normalizeConnectorPayload(kind, payload);
+  const job = localPreviewImport(
+    companyId,
+    bomId,
+    fileName?.trim() || `${kind}-import.json`,
+    normalized.csvText
+  );
+  const stamped: BomImportJob = {
+    ...job,
+    connectorKind: kind,
+    sourceSystem: normalized.sourceSystem,
+    connectorWarnings: normalized.warnings,
+    warningCount: job.warningCount + normalized.warnings.length,
+  };
+  updateBomLocal(companyId, (s) => ({
+    ...s,
+    importJobs: s.importJobs.map((j) => (j.id === stamped.id ? stamped : j)),
+  }));
+  return { job: stamped, normalized };
 }
 
 export function localSnapshot(companyId: string): BomLocalState {

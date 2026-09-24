@@ -16,8 +16,14 @@ import {
   localListBomItems,
   localListProducts,
   localPreviewImport,
+  localPreviewConnectorImport,
   localUpsertBomItem,
 } from "./local-service";
+import {
+  BOM_CONNECTOR_PROFILES,
+  type BomConnectorKind,
+  type ConnectorNormalizeResult,
+} from "./connectors";
 import {
   ensureCarbonLibrary,
   localApproveMapping,
@@ -45,6 +51,8 @@ import {
   localListSupplierPcfRequests,
   localRejectSupplierPcfRequest,
   localSendSupplierPcfRequest,
+  localAssessExchangeReadiness,
+  localExportReadiness,
 } from "./carbon/local-service";
 import type {
   BomAnalytics,
@@ -52,6 +60,11 @@ import type {
 } from "./carbon/analytics";
 import type { BomScenario, ScenarioOverride, ScenarioRunResult } from "./carbon/scenario";
 import type { SupplierPcfRequest } from "./carbon/supplier-pcf";
+import type {
+  ExchangeReadinessReport,
+  ReadinessExportBundle,
+  ReadinessFormat,
+} from "./carbon/readiness";
 import type { BomAuditEvent, CarbonMapping, EmissionFactor, MappingSuggestion, PcfCalculation } from "./carbon/types";
 async function tryJson<T>(res: Response): Promise<T | null> {
   try {
@@ -723,4 +736,69 @@ export function rejectSupplierPcfRequest(
   reviewNotes?: string | null
 ) {
   return patchSupplierPcfRequest(companyId, requestId, "reject", reviewNotes);
+}
+
+export function listBomConnectorProfiles() {
+  return BOM_CONNECTOR_PROFILES;
+}
+
+export async function previewBomConnectorImport(
+  companyId: string,
+  bomId: string,
+  kind: BomConnectorKind,
+  payload: string,
+  fileName?: string
+): Promise<{ job: BomImportJob; normalized: ConnectorNormalizeResult }> {
+  try {
+    const res = await fetch(`/api/bom/boms/${bomId}/connectors`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind, payload, fileName }),
+    });
+    if (res.ok) {
+      const data = await tryJson<{
+        job: BomImportJob;
+        normalized: ConnectorNormalizeResult;
+      }>(res);
+      if (data?.job && data.normalized) return data;
+    }
+  } catch {
+    /* local */
+  }
+  return localPreviewConnectorImport(companyId, bomId, kind, payload, fileName);
+}
+
+export async function fetchExchangeReadiness(
+  companyId: string,
+  calculationId: string
+): Promise<ExchangeReadinessReport> {
+  try {
+    const res = await fetch(`/api/bom/calculations/${calculationId}/readiness`);
+    if (res.ok) {
+      const data = await tryJson<{ readiness: ExchangeReadinessReport }>(res);
+      if (data?.readiness) return data.readiness;
+    }
+  } catch {
+    /* local */
+  }
+  return localAssessExchangeReadiness(companyId, calculationId);
+}
+
+export async function exportReadinessPayload(
+  companyId: string,
+  calculationId: string,
+  format: ReadinessFormat
+): Promise<ReadinessExportBundle> {
+  try {
+    const res = await fetch(
+      `/api/bom/calculations/${calculationId}/readiness?format=${encodeURIComponent(format)}`
+    );
+    if (res.ok) {
+      const data = await tryJson<ReadinessExportBundle>(res);
+      if (data?.payload && data.readiness) return data;
+    }
+  } catch {
+    /* local */
+  }
+  return localExportReadiness(companyId, calculationId, format);
 }
