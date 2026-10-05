@@ -4,6 +4,16 @@ This guide covers pushing the app to GitHub and deploying on **Vercel** with you
 
 Replace `yourdomain.com` with your actual domain (e.g. `qlimwelt.com` or `app.qlimwelt.com`).
 
+### Live production (current)
+
+| URL | Status |
+|-----|--------|
+| **https://qlimwelt-dev.vercel.app** | **Production** — Vercel project `qlimwelt/qlimwelt-dev` |
+| `https://qlimwelt.vercel.app` | Dead (`DEPLOYMENT_NOT_FOUND`) — old/unused project name; do not share |
+| Custom domains (`qlimwelt.com`, etc.) | Only work after DNS is pointed at this Vercel project |
+
+To restore a short alias: Vercel → Project `qlimwelt-dev` → **Settings → Domains** → add `qlimwelt.vercel.app` (or your custom domain).
+
 ---
 
 ## Part 1 — Push to GitHub
@@ -58,8 +68,8 @@ Before deploying, add these under **Environment Variables**:
 |------|-------|--------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://yijbhapdgndraxqxeryv.supabase.co` | Production, Preview, Development |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon key | Production, Preview, Development |
-| `NEXT_PUBLIC_APP_URL` | `https://yourdomain.com` | **Production only** |
-| `NEXT_PUBLIC_APP_URL` | `https://your-vercel-url.vercel.app` | Preview (optional) |
+| `NEXT_PUBLIC_APP_URL` | `https://qlimwelt-dev.vercel.app` (or your custom domain) | **Production only** |
+| `NEXT_PUBLIC_APP_URL` | `https://your-preview.vercel.app` | Preview (optional) |
 
 For Preview deployments, you can use the Vercel preview URL as `NEXT_PUBLIC_APP_URL` or leave preview auth disabled.
 

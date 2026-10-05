@@ -30,6 +30,9 @@ See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for auth and database setup.
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for GitHub + Vercel + custom domain instructions.
 
+**Production:** https://qlimwelt-dev.vercel.app  
+(`qlimwelt.vercel.app` is not the live project — use the URL above.)
+
 ## Scripts
 
 | Command | Description |
