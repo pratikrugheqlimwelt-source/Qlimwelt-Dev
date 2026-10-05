@@ -19,7 +19,6 @@ export async function middleware(request: NextRequest) {
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ) {
-    // Fail closed for protected routes when auth is not configured
     if (needsAuth) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -33,6 +32,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // Keep matcher narrow — every hit pays Edge middleware cost.
   matcher: [
     "/",
     "/dashboard/:path*",
