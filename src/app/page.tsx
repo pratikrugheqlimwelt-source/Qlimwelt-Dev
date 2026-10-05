@@ -19,7 +19,6 @@ import {
   MetaLabel,
   FadeUp,
 } from "@/components/marketing/editorial";
-import { PricingSelector } from "@/components/marketing/motion-ui";
 import {
   SiemensPrimaryCta,
   SiemensSecondaryCta,
@@ -28,7 +27,6 @@ import {
   HeroVisualPanel,
   PipelineActionCard,
   ValueMediaCard,
-  PricingBanner,
   MediaPanel,
   MARKETING_IMAGES,
 } from "@/components/marketing/siemens-ui";
@@ -39,7 +37,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { qlimAiDemo } from "@/data/marketing-data";
 import { useT } from "@/components/i18n/locale-provider";
-import { useLocalizedMarketing } from "@/lib/i18n/use-localized-marketing";
 import { useLocalizedBrand } from "@/lib/i18n/use-localized-brand";
 
 const CAPABILITIES = [
@@ -69,11 +66,10 @@ const VALUE_ITEMS = [
 export default function HomePage() {
   const t = useT();
   const brand = useLocalizedBrand();
-  const { pricingPlans } = useLocalizedMarketing();
   const [qlimAiOpen, setQlimAiOpen] = useState(false);
   const [demoSubmitting, setDemoSubmitting] = useState(false);
 
-  // Keep first paint on the hero — pricing cards / late layout used to yank the viewport down.
+  // Keep first paint on the hero — late layout used to yank the viewport down.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -81,7 +77,7 @@ export default function HomePage() {
       history.scrollRestoration = "manual";
     }
 
-    // Deep-links (e.g. /#pricing) should still work; only lock the bare homepage.
+    // Deep-links (e.g. /#contact) should still work; only lock the bare homepage.
     if (window.location.hash) return;
 
     const html = document.documentElement;
@@ -329,25 +325,6 @@ export default function HomePage() {
             </div>
           </FadeUp>
         </div>
-      </Section>
-
-      {/* ── PRICING ── */}
-      <Section id="pricing" viewport viewportAlign="start" className="bg-[hsl(var(--siemens-surface))] [overflow-anchor:none]">
-        <SectionContainer>
-          <FadeUp>
-            <MetaLabel className="text-brand">{t("marketing.pricingLabel")}</MetaLabel>
-            <h2 className="siemens-display mt-3 max-w-2xl">
-              <span className="block">{t("marketing.noSurprises")}</span>
-              <span className="block">{t("marketing.justProgress")}</span>
-            </h2>
-          </FadeUp>
-          <FadeUp delay={0.06}>
-            <PricingBanner className="section-content-gap" caption={t("marketing.pricingBanner")} />
-          </FadeUp>
-          <div className="mt-2">
-            <PricingSelector plans={pricingPlans} />
-          </div>
-        </SectionContainer>
       </Section>
 
       {/* ── TEAM ── */}

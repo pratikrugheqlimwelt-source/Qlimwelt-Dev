@@ -25,7 +25,6 @@ export function MarketingFooter() {
               <li><Link href="/#how-it-works" className="siemens-link">{t("marketing.footerFootprintGuide")}</Link></li>
               <li><Link href="/#integrations" className="siemens-link">{t("marketing.footerIntegrations")}</Link></li>
               <li><Link href="/#intelligence" className="siemens-link">{t("marketing.footerInsights")}</Link></li>
-              <li><Link href="/#pricing" className="siemens-link">{t("marketing.footerPricing")}</Link></li>
               <li><Link href="/dashboard" className="siemens-link">{t("marketing.footerDashboard")}</Link></li>
             </ul>
           </div>
