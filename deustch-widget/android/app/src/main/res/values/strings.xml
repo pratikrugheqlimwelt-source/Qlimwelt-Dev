@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Deutsch Widget</string>
+    <string name="home_kicker">deustch widget</string>
+    <string name="home_title">Deutsch Widget</string>
+    <string name="home_body">A small translator for German. It opens from a bubble you can drag, and it snaps to the side of the screen.</string>
+    <string name="overlay_card_title">Float over other apps</string>
+    <string name="overlay_off">The system bubble is off. The De button on this screen still translates.</string>
+    <string name="overlay_on">The system bubble is on. It stays up while you use other apps.</string>
+    <string name="overlay_needs_permission">Android needs permission before a bubble can draw over other apps. Until you allow it, use the De button on this screen.</string>
+    <string name="allow_overlay">Allow display over other apps</string>
+    <string name="show_bubble">Show the system bubble</string>
+    <string name="hide_bubble">Hide the system bubble</string>
+    <string name="permission_title">Display over other apps</string>
+    <string name="permission_body">Deutsch Widget adds a small bubble that stays on screen while you use other apps. Android will open a setting where you allow display over other apps. You can turn the bubble off here at any time. Translation inside this app does not need that permission.</string>
+    <string name="permission_continue">Continue</string>
+    <string name="permission_not_now">Not now</string>
+    <string name="hint_drag">Drag the De button. It snaps to the left or right edge. Tap to translate. Close, or tap the bubble again, to collapse it.</string>
+    <string name="cd_bubble">Open translator</string>
+    <string name="cd_close">Close translator</string>
+    <string name="cd_swap">Swap languages</string>
+    <string name="cd_copy">Copy translation</string>
+    <string name="translate">Translate</string>
+    <string name="translating">Translating…</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Copied</string>
+    <string name="close">Close</string>
+    <string name="source_hint">Text to translate</string>
+    <string name="result_placeholder">Translation appears here</string>
+    <string name="engine_caption">MyMemory · no account</string>
+    <string name="enter_text">Enter something to translate.</string>
+    <string name="notif_channel">Translator bubble</string>
+    <string name="notif_title">Deutsch Widget is on screen</string>
+    <string name="notif_text">Drag the bubble to snap it to an edge. Tap to translate.</string>
+    <string name="notif_stop">Hide bubble</string>
+</resources>

@@ -1,0 +1,17 @@
+[
+  {"text": "Hello, how are you today?", "lang": "en"},
+  {"text": "The weather is nice and I have time", "lang": "en"},
+  {"text": "Guten Tag, wie geht es Ihnen?", "lang": "de"},
+  {"text": "Ich habe einen Termin und ich bin müde", "lang": "de"},
+  {"text": "Bonjour, comment allez-vous?", "lang": "fr"},
+  {"text": "Hola, ¿cómo estás?", "lang": "es"},
+  {"text": "Ciao, come stai oggi?", "lang": "it"},
+  {"text": "Olá, como você está?", "lang": "pt"},
+  {"text": "Hallo, hoe gaat het met je?", "lang": "nl"},
+  {"text": "Cześć, jak się masz dzisiaj?", "lang": "pl"},
+  {"text": "Merhaba, nasılsın bugün?", "lang": "tr"},
+  {"text": "Привет, как дела?", "lang": "ru"},
+  {"text": "こんにちは、お元気ですか", "lang": "ja"},
+  {"text": "你好，今天怎么样", "lang": "zh"},
+  {"text": "مرحبا كيف حالك", "lang": "ar"}
+]

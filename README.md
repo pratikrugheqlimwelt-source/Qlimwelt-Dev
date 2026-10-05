@@ -33,6 +33,10 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for GitHub + Vercel + custom domain instruc
 **Production:** https://qlimwelt-dev.vercel.app  
 (`qlimwelt.vercel.app` is not the live project — use the URL above.)
 
+## Deutsch Widget
+
+Floating German quick translator for Android and iOS. Android can draw a real overlay bubble. iOS cannot float over other apps; it ships an in-app bubble and a Share extension. See [deustch-widget/README.md](deustch-widget/README.md).
+
 ## Scripts
 
 | Command | Description |
