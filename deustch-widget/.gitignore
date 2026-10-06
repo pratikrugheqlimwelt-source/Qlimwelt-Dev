@@ -1,0 +1,11 @@
+.DS_Store
+android/.gradle/
+android/**/build/
+android/local.properties
+android/.idea/
+*.iml
+ios/DerivedData/
+ios/build/
+**/*.xcuserstate
+**/xcuserdata/
+shared/DeutschTranslateCore/.build/

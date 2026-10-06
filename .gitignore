@@ -34,3 +34,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# deustch-widget native builds
+/deustch-widget/android/.gradle/
+/deustch-widget/android/**/build/
+/deustch-widget/android/local.properties
+/deustch-widget/shared/DeutschTranslateCore/.build/
