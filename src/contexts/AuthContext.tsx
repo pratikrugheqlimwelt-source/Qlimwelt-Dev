@@ -81,7 +81,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const loadUserData = async (currentUser: User) => {
       try {
-        let profileData = await fetchProfile(currentUser.id);
+        let profileData: Awaited<ReturnType<typeof fetchProfile>> = null;
+        try {
+          profileData = await fetchProfile(currentUser.id);
+        } catch (profileErr) {
+          // First-load / grant issues: try create-own-row then re-read
+          console.error("[AuthProvider] fetchProfile failed, trying upsert", profileErr);
+          profileData = await upsertProfileFromAuth(currentUser);
+        }
         if (!profileData) {
           profileData = await upsertProfileFromAuth(currentUser);
         }
@@ -89,13 +96,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(profileData);
 
         if (profileData?.onboarding_completed) {
-          const companyData = await fetchUserCompany(currentUser.id);
-          if (!mounted) return;
-          setCompany(companyData.company);
-          setMembership(companyData.membership);
+          try {
+            const companyData = await fetchUserCompany(currentUser.id);
+            if (!mounted) return;
+            setCompany(companyData.company);
+            setMembership(companyData.membership);
+          } catch (companyErr) {
+            console.error("[AuthProvider] company load failed", companyErr);
+          }
         }
       } catch (err) {
-        if (process.env.NODE_ENV === "development") console.error("[AuthProvider]", err);
+        console.error("[AuthProvider]", err);
       }
     };
 
