@@ -71,7 +71,8 @@ create table if not exists public.pcf_calculations (
   company_id uuid not null references public.companies(id) on delete cascade,
   product_id uuid references public.products(id) on delete set null,
   bom_id uuid not null references public.boms(id) on delete cascade,
-  assessment_id uuid references public.assessments(id) on delete set null,
+  -- assessments.id is text (see 006_assessments.sql) — must match for the FK
+  assessment_id text references public.assessments(id) on delete set null,
   status text not null default 'completed'
     check (status in ('draft', 'completed', 'failed', 'superseded')),
   total_kgco2e numeric not null default 0,
