@@ -66,12 +66,14 @@ Before deploying, add these under **Environment Variables**:
 
 | Name | Value | Environments |
 |------|-------|--------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://yijbhapdgndraxqxeryv.supabase.co` | Production, Preview, Development |
+| `NEXT_PUBLIC_SUPABASE_URL` | Your **active** project URL (`https://xxxx.supabase.co`) | Production, Preview, Development |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anon key | Production, Preview, Development |
-| `NEXT_PUBLIC_APP_URL` | `https://qlimwelt-dev.vercel.app` (or your custom domain) | **Production only** |
-| `NEXT_PUBLIC_APP_URL` | `https://your-preview.vercel.app` | Preview (optional) |
+| `NEXT_PUBLIC_APP_URL` | `https://www.qlimwelt.de` | **Production only** |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Development only — never set this on Production |
 
-For Preview deployments, you can use the Vercel preview URL as `NEXT_PUBLIC_APP_URL` or leave preview auth disabled.
+> **Auth outage check:** if Safari says it can’t find `….supabase.co`, the project is paused/deleted (DNS NXDOMAIN). Restore or recreate it in the [Supabase dashboard](https://supabase.com/dashboard), then update the two `NEXT_PUBLIC_SUPABASE_*` vars and **Redeploy**.
+
+For Preview deployments, prefer leaving `NEXT_PUBLIC_APP_URL` unset (the app uses `window.location.origin` for Google OAuth).
 
 Click **Deploy**.
 
