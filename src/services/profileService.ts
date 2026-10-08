@@ -10,8 +10,13 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
     .maybeSingle();
 
   if (error) {
-    if (process.env.NODE_ENV === "development") console.error("[profile]", error);
-    throw new Error("We couldn't load your profile. Please refresh the page.");
+    // Surface real PostgREST hint in the UI (grants/RLS are the usual cause after a schema reset)
+    console.error("[profile]", error.message, error.code, error.details);
+    throw new Error(
+      error.message?.includes("permission denied")
+        ? "Profile access blocked (database grants). Run supabase/fix_profile_access.sql in Supabase SQL Editor."
+        : "We couldn't load your profile. Please refresh the page."
+    );
   }
 
   return data as Profile | null;

@@ -151,3 +151,80 @@ export async function findCompanyIdByEmail(email: string): Promise<string | null
   if (memberErr) throw new Error(memberErr.message);
   return membership?.company_id ?? null;
 }
+
+/**
+ * Ensure the user has a company + completed onboarding, then seed FY demo inventory.
+ * Creates company/membership if the user signed in but never finished onboarding.
+ */
+export async function ensureDemoWorkspaceForEmail(email: string) {
+  const admin = createServiceClient();
+  const normalized = email.trim().toLowerCase();
+
+  const { data: list, error: listErr } = await admin.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+  if (listErr) throw new Error(listErr.message);
+
+  const authUser = list.users.find((u) => (u.email || "").toLowerCase() === normalized);
+  if (!authUser) {
+    throw new Error(
+      `No auth user for ${normalized}. Sign in once with Google on the live site, then re-run.`
+    );
+  }
+
+  const fullName =
+    (authUser.user_metadata?.full_name as string | undefined) ||
+    (authUser.user_metadata?.name as string | undefined) ||
+    "Pratik Rughe";
+
+  const { error: profileErr } = await admin.from("profiles").upsert(
+    {
+      id: authUser.id,
+      email: normalized,
+      full_name: fullName,
+      job_title: "Founder & CEO",
+      onboarding_completed: true,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "id" }
+  );
+  if (profileErr) throw new Error(profileErr.message);
+
+  let companyId = await findCompanyIdByEmail(normalized);
+
+  if (!companyId) {
+    const { data: company, error: companyErr } = await admin
+      .from("companies")
+      .insert({
+        name: demoCompany.name,
+        website: "https://www.qlimwelt.de",
+        industry: demoCompany.industry,
+        company_size: "501-1000",
+        headquarters_country: "Germany",
+        countries_of_operation: ["Germany", "Netherlands"],
+        employee_count: demoCompany.employeeCount,
+        annual_revenue: demoCompany.revenueEUR,
+        currency: "EUR",
+        facility_count: 3,
+      })
+      .select("id")
+      .single();
+    if (companyErr) throw new Error(companyErr.message);
+    companyId = company.id;
+
+    const { error: memberErr } = await admin.from("company_members").upsert(
+      { company_id: companyId, user_id: authUser.id, role: "admin" },
+      { onConflict: "company_id,user_id" }
+    );
+    if (memberErr) throw new Error(memberErr.message);
+  } else {
+    await admin
+      .from("profiles")
+      .update({ onboarding_completed: true, updated_at: new Date().toISOString() })
+      .eq("id", authUser.id);
+  }
+
+  const seeded = await seedCompanyDemoAdmin(companyId);
+  return { email: normalized, onboardingCompleted: true, ...seeded };
+}
