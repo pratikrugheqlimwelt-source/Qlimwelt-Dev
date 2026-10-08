@@ -5,8 +5,18 @@ This guide covers Google OAuth authentication, onboarding, and database setup fo
 ## 1. Create a Supabase project
 
 1. Go to [https://supabase.com/dashboard](https://supabase.com/dashboard)
-2. Create a new project
+2. Create a new project (or **Restore** a paused project)
 3. Note your **Project URL** and **anon public key** (Settings → API)
+
+### If login fails with “Safari Can’t Find the Server” / NXDOMAIN
+
+The hostname in `NEXT_PUBLIC_SUPABASE_URL` no longer resolves (project paused or deleted).
+
+1. Open Supabase → select the project → **Restore** if paused, or create a new project
+2. Copy the new Project URL + anon key into Vercel **and** `.env.local`
+3. Re-run migrations under `supabase/migrations/`
+4. Re-enable Google provider + redirect URLs (step 4–5 below)
+5. Redeploy Vercel Production
 
 ## 2. Environment variables
 

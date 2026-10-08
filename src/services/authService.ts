@@ -1,10 +1,16 @@
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
 
+/**
+ * OAuth callback origin must match the page the user is on.
+ * Prefer `window.location.origin` in the browser so a mis-set
+ * NEXT_PUBLIC_APP_URL (e.g. http://localhost:3000 baked into Production)
+ * cannot break Google sign-in on qlimwelt.de / Vercel previews.
+ */
 function getOAuthRedirectOrigin(): string {
-  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
-  if (configured) return configured;
-  if (typeof window !== "undefined") return window.location.origin;
-  return "";
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
 }
 
 export async function signInWithGoogle(redirectPath?: string) {
@@ -14,6 +20,10 @@ export async function signInWithGoogle(redirectPath?: string) {
 
   const supabase = createClient();
   const origin = getOAuthRedirectOrigin();
+  if (!origin) {
+    throw new Error("Missing app URL for OAuth redirect.");
+  }
+
   const redirectTo = `${origin}/auth/callback${
     redirectPath ? `?redirect=${encodeURIComponent(redirectPath)}` : ""
   }`;
@@ -44,8 +54,12 @@ export function getAuthErrorMessage(error: unknown): string {
     if (error.message.includes("popup")) {
       return "Sign in was cancelled. Please try again when you're ready.";
     }
-    if (error.message.includes("network")) {
-      return "We couldn't reach the authentication service. Check your connection and try again.";
+    if (
+      /network|fetch|Failed to fetch|ENOTFOUND|DNS|can't find the server/i.test(
+        error.message
+      )
+    ) {
+      return "We couldn't reach Supabase Auth. Check that your project is active (not paused) and NEXT_PUBLIC_SUPABASE_URL is correct.";
     }
     if (process.env.NODE_ENV === "development") {
       console.error("[auth]", error);
